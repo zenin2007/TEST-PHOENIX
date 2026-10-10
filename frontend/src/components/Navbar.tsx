@@ -73,7 +73,18 @@ export const Navbar: React.FC<NavbarProps> = ({
             className={`badge ${backendHealthy ? 'badge-done' : 'badge-todo'}`}
             title="Backend API status"
           >
-            {backendHealthy ? 'API Online' : 'API Connecting...'}
+            <span
+              style={{
+                width: 7,
+                height: 7,
+                borderRadius: '50%',
+                background: backendHealthy ? '#10B981' : '#F59E0B',
+                display: 'inline-block',
+                marginRight: 6,
+                boxShadow: backendHealthy ? '0 0 8px #10B981' : 'none',
+              }}
+            />
+            {backendHealthy ? 'API ONLINE' : 'CONNECTING...'}
           </span>
           <a
             id="results-dashboard-link"

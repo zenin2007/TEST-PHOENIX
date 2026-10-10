@@ -3,29 +3,60 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TestPhoenix — Automated Self-Healing QA Platform</title>
+  <title>TestPhoenix — Mission Control & Self-Healing QA Telemetry</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-primary: #FFFFFF;
-      --bg-secondary: #F5F5F7;
-      --bg-card: #FFFFFF;
-      --text-primary: #1D1D1F;
-      --text-secondary: #6E6E73;
-      --border-color: #D2D2D7;
-      
-      --accent-blue: #0071E3;
-      --accent-blue-hover: #0077ED;
-      
-      --status-pass: #34C759;
-      --status-healed: #0071E3;
-      --status-review: #FF9F0A;
-      --status-fail: #FF3B30;
-      
-      --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.06);
-      --shadow-hover: 0 6px 24px rgba(0, 0, 0, 0.09);
+      /* Apple Pro Dark + NASA Deep Space Palette */
+      --bg-space: #030712;
+      --bg-card: rgba(15, 23, 42, 0.65);
+      --bg-card-hover: rgba(30, 41, 59, 0.75);
+      --bg-surface: #0B1120;
+      --bg-inset: rgba(3, 7, 18, 0.85);
+
+      --text-primary: #F8FAFC;
+      --text-secondary: #94A3B8;
+      --text-muted: #64748B;
+
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-medium: rgba(255, 255, 255, 0.15);
+      --border-accent: rgba(56, 189, 248, 0.35);
+
+      /* NASA & Apple Electric Accents */
+      --nasa-blue: #0284C7;
+      --nasa-blue-glow: rgba(2, 132, 199, 0.3);
+      --nasa-cyan: #38BDF8;
+      --nasa-red: #FC3D21;
+      --apple-blue: #0071E3;
+      --apple-blue-hover: #0077ED;
+
+      /* Flight Status Nominal / Anomaly Colors */
+      --status-pass: #10B981;
+      --status-pass-bg: rgba(16, 185, 129, 0.12);
+      --status-pass-border: rgba(16, 185, 129, 0.35);
+
+      --status-healed: #38BDF8;
+      --status-healed-bg: rgba(56, 189, 248, 0.12);
+      --status-healed-border: rgba(56, 189, 248, 0.35);
+
+      --status-review: #F59E0B;
+      --status-review-bg: rgba(245, 158, 11, 0.12);
+      --status-review-border: rgba(245, 158, 11, 0.35);
+
+      --status-fail: #EF4444;
+      --status-fail-bg: rgba(239, 68, 68, 0.12);
+      --status-fail-border: rgba(239, 68, 68, 0.35);
+
       --radius-sm: 8px;
-      --radius-md: 12px;
-      --radius-lg: 18px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-pill: 9999px;
+
+      --glass-blur: blur(20px);
+      --shadow-cosmic: 0 16px 40px -10px rgba(0, 0, 0, 0.6);
+      --shadow-glow: 0 0 25px rgba(56, 189, 248, 0.18);
     }
 
     * {
@@ -35,350 +66,385 @@
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", "Segoe UI", sans-serif;
-      background-color: var(--bg-secondary);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+      background-color: var(--bg-space);
+      background-image: 
+        radial-gradient(ellipse 90% 60% at 50% -20%, rgba(2, 132, 199, 0.18), transparent 75%),
+        radial-gradient(ellipse 60% 40% at 90% 50%, rgba(56, 189, 248, 0.08), transparent 60%),
+        radial-gradient(ellipse 50% 30% at 10% 80%, rgba(14, 116, 244, 0.06), transparent 50%);
+      background-attachment: fixed;
       color: var(--text-primary);
       line-height: 1.5;
       -webkit-font-smoothing: antialiased;
       padding: 2.5rem 1.5rem;
+      min-height: 100vh;
     }
 
     .container {
-      max-width: 1140px;
+      max-width: 1240px;
       margin: 0 auto;
     }
 
-    /* Top Header Bar */
+    /* Top Aerospace Navigation Bar */
     header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding-bottom: 1.75rem;
-      border-bottom: 1px solid var(--border-color);
-      margin-bottom: 2rem;
+      padding: 1.25rem 1.75rem;
+      background: var(--bg-card);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      margin-bottom: 2.5rem;
+      box-shadow: var(--shadow-cosmic);
       flex-wrap: wrap;
-      gap: 1rem;
+      gap: 1.25rem;
     }
 
     .brand-section {
       display: flex;
       align-items: center;
-      gap: 0.85rem;
+      gap: 1rem;
     }
 
     .brand-logo {
-      width: 40px;
-      height: 40px;
-      background: var(--accent-blue);
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, #0071E3, #38BDF8);
       color: #FFFFFF;
-      border-radius: 10px;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.25rem;
-      font-weight: 700;
-      box-shadow: 0 2px 8px rgba(0, 113, 227, 0.25);
+      font-size: 1.35rem;
+      font-weight: 800;
+      box-shadow: 0 4px 16px rgba(56, 189, 248, 0.35);
     }
 
     .brand-title {
-      font-size: 1.6rem;
+      font-size: 1.55rem;
       font-weight: 700;
-      letter-spacing: -0.02em;
-      color: var(--text-primary);
+      letter-spacing: -0.03em;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
     }
 
     .brand-tagline {
-      font-size: 0.875rem;
+      font-size: 0.8rem;
       color: var(--text-secondary);
       font-weight: 400;
+      letter-spacing: 0.02em;
+    }
+
+    /* NASA Telemetry Beacon */
+    .telemetry-beacon {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 0.3rem 0.75rem;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34D399;
+      border-radius: var(--radius-pill);
+    }
+
+    .beacon-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10B981;
+      box-shadow: 0 0 8px #10B981;
+      animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
     }
 
     .header-links {
       display: flex;
       align-items: center;
       gap: 0.75rem;
+      flex-wrap: wrap;
     }
 
-    /* Buttons */
+    /* Apple Pro Buttons */
     .btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
       font-family: inherit;
-      font-size: 0.875rem;
-      font-weight: 500;
-      padding: 0.65rem 1.15rem;
-      border-radius: var(--radius-md);
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 0.65rem 1.25rem;
+      border-radius: var(--radius-pill);
       border: 1px solid transparent;
       cursor: pointer;
       text-decoration: none;
-      transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
       user-select: none;
     }
 
     .btn:active:not(:disabled) {
-      transform: scale(0.98);
+      transform: scale(0.97);
     }
 
     .btn:disabled {
-      opacity: 0.55;
+      opacity: 0.45;
       cursor: not-allowed;
       transform: none !important;
     }
 
     .btn-primary {
-      background-color: var(--accent-blue);
+      background: linear-gradient(135deg, #0071E3, #0284C7);
       color: #FFFFFF;
-      border: 1px solid var(--accent-blue);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      box-shadow: 0 4px 16px rgba(0, 113, 227, 0.35);
     }
 
     .btn-primary:hover:not(:disabled) {
-      background-color: var(--accent-blue-hover);
-      border-color: var(--accent-blue-hover);
-      box-shadow: 0 4px 12px rgba(0, 113, 227, 0.2);
+      background: linear-gradient(135deg, #0077ED, #0369A1);
+      border-color: #38BDF8;
+      box-shadow: 0 6px 20px rgba(56, 189, 248, 0.45);
     }
 
     .btn-secondary {
-      background-color: var(--bg-card);
+      background: rgba(30, 41, 59, 0.5);
       color: var(--text-primary);
-      border: 1px solid var(--border-color);
+      border: 1px solid var(--border-subtle);
+      backdrop-filter: blur(10px);
     }
 
     .btn-secondary:hover:not(:disabled) {
-      background-color: #EBEBED;
-      border-color: #C7C7CC;
+      background: rgba(51, 65, 85, 0.7);
+      border-color: var(--border-medium);
+      color: #FFFFFF;
     }
 
-    .btn-danger {
-      background-color: #FFFFFF;
-      color: var(--status-fail);
-      border: 1px solid #FFD0CE;
+    /* Alert Banner */
+    .alert-banner {
+      display: none;
+      padding: 1rem 1.5rem;
+      border-radius: var(--radius-md);
+      margin-bottom: 2rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(16px);
+      animation: fadeIn 0.3s ease;
     }
 
-    .btn-danger:hover:not(:disabled) {
-      background-color: #FFF2F1;
-      border-color: var(--status-fail);
-    }
+    .alert-banner.active { display: flex; }
+    .alert-success { background: rgba(16, 185, 129, 0.15); color: #34D399; border: 1px solid rgba(16, 185, 129, 0.35); }
+    .alert-error { background: rgba(239, 68, 68, 0.15); color: #F87171; border: 1px solid rgba(239, 68, 68, 0.35); }
+    .alert-info { background: rgba(56, 189, 248, 0.15); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.35); }
 
-    /* Hero / Action Section */
+    /* Action Panel - Mission Control Center */
     .action-panel {
       background: var(--bg-card);
-      border: 1px solid var(--border-color);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border-subtle);
       border-radius: var(--radius-lg);
-      padding: 1.75rem;
-      margin-bottom: 2rem;
-      box-shadow: var(--shadow-subtle);
+      padding: 2.25rem;
+      margin-bottom: 2.5rem;
+      box-shadow: var(--shadow-cosmic);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .action-panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #38BDF8, #0071E3, transparent);
     }
 
     .section-eyebrow {
-      font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.725rem;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--text-secondary);
+      letter-spacing: 0.14em;
+      color: var(--nasa-cyan);
       font-weight: 600;
       margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
 
     .section-heading {
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin-bottom: 1.25rem;
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      color: #FFFFFF;
+      margin-bottom: 1.5rem;
     }
 
-    /* Main CTA Control Bar */
-    .cta-control-bar {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 1rem 1.25rem;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
+    .action-grid-layout {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 2rem;
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      .action-grid-layout { grid-template-columns: 1fr; }
+    }
+
+    /* Main CTA Box */
+    .cta-control-box {
+      background: var(--bg-inset);
+      border: 1px solid var(--border-subtle);
       border-radius: var(--radius-md);
-      margin-bottom: 1.5rem;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
     }
 
     .cta-select {
       font-family: inherit;
       font-size: 0.875rem;
       color: var(--text-primary);
-      background: #FFFFFF;
-      border: 1px solid var(--border-color);
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid var(--border-medium);
       border-radius: var(--radius-sm);
-      padding: 0.6rem 0.85rem;
-      min-width: 260px;
+      padding: 0.75rem 1rem;
       outline: none;
       cursor: pointer;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      width: 100%;
+      transition: all 0.2s ease;
     }
 
     .cta-select:focus {
-      border-color: var(--accent-blue);
-      box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15);
+      border-color: var(--nasa-cyan);
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
     }
 
-    /* Scenario Quick Buttons */
+    /* Quick Scenario Selector Grid */
     .scenario-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-      gap: 0.85rem;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
     }
 
     .scenario-btn {
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      padding: 1rem 1.15rem;
-      background: #FFFFFF;
-      border: 1px solid var(--border-color);
+      padding: 1.15rem;
+      background: var(--bg-inset);
+      border: 1px solid var(--border-subtle);
       border-radius: var(--radius-md);
       cursor: pointer;
       text-align: left;
       font-family: inherit;
-      transition: all 0.2s ease;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .scenario-btn:hover:not(:disabled) {
-      border-color: var(--accent-blue);
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
-      transform: translateY(-1px);
+      border-color: var(--nasa-cyan);
+      background: var(--bg-card-hover);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), var(--shadow-glow);
+      transform: translateY(-2px);
     }
 
     .scenario-btn:disabled {
-      opacity: 0.6;
+      opacity: 0.5;
       cursor: not-allowed;
       transform: none;
     }
 
     .scenario-btn-title {
-      font-size: 0.9rem;
+      font-size: 0.925rem;
       font-weight: 600;
-      color: var(--text-primary);
+      color: #FFFFFF;
       display: flex;
       align-items: center;
-      gap: 0.4rem;
-      margin-bottom: 0.25rem;
+      gap: 0.5rem;
+      margin-bottom: 0.35rem;
     }
 
     .scenario-btn-desc {
       font-size: 0.775rem;
       color: var(--text-secondary);
-      line-height: 1.35;
+      line-height: 1.45;
     }
 
-    /* Status Notifications */
-    .alert-banner {
-      display: none;
-      padding: 1rem 1.25rem;
-      border-radius: var(--radius-md);
-      margin-bottom: 1.5rem;
-      font-size: 0.9rem;
-      font-weight: 500;
-      align-items: center;
-      justify-content: space-between;
-      animation: fadeIn 0.3s ease;
-    }
-
-    .alert-banner.active {
-      display: flex;
-    }
-
-    .alert-success {
-      background: #E8F8EE;
-      color: #1B7A37;
-      border: 1px solid #C1E8CE;
-    }
-
-    .alert-error {
-      background: #FFF0EF;
-      color: #D32F2F;
-      border: 1px solid #FFCDD2;
-    }
-
-    .alert-info {
-      background: #EBF4FD;
-      color: #0058B6;
-      border: 1px solid #CCE4FC;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-4px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Result Card */
+    /* Live Execution Telemetry Card */
     .result-card {
       background: var(--bg-card);
-      border: 1px solid var(--border-color);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border-subtle);
       border-radius: var(--radius-lg);
-      padding: 2rem;
+      padding: 2.25rem;
       margin-bottom: 2.5rem;
-      box-shadow: var(--shadow-subtle);
+      box-shadow: var(--shadow-cosmic);
+      display: none;
+      animation: fadeIn 0.35s ease;
     }
+
+    .result-card.active { display: block; }
 
     .result-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      padding-bottom: 1.25rem;
-      margin-bottom: 1.5rem;
-      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 1.5rem;
+      margin-bottom: 1.75rem;
+      border-bottom: 1px solid var(--border-subtle);
       flex-wrap: wrap;
       gap: 1rem;
     }
 
     .result-title-group h2 {
-      font-size: 1.35rem;
+      font-size: 1.4rem;
       font-weight: 700;
-      letter-spacing: -0.015em;
-      color: var(--text-primary);
+      letter-spacing: -0.02em;
+      color: #FFFFFF;
     }
 
     .result-meta {
-      font-size: 0.825rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.775rem;
       color: var(--text-secondary);
-      margin-top: 0.25rem;
+      margin-top: 0.35rem;
     }
 
-    /* Status Badges */
+    /* Apple & NASA Badges */
     .badge {
       display: inline-flex;
       align-items: center;
-      padding: 0.35rem 0.85rem;
-      border-radius: 9999px;
-      font-size: 0.775rem;
+      gap: 0.35rem;
+      padding: 0.4rem 0.95rem;
+      border-radius: var(--radius-pill);
+      font-size: 0.75rem;
       font-weight: 700;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
-      border: 1px solid transparent;
       white-space: nowrap;
+      font-family: 'JetBrains Mono', monospace;
     }
 
-    .badge-PASS {
-      background-color: rgba(52, 199, 89, 0.12);
-      color: var(--status-pass);
-      border-color: rgba(52, 199, 89, 0.35);
-    }
-
-    .badge-SELF-HEALED {
-      background-color: rgba(0, 113, 227, 0.12);
-      color: var(--status-healed);
-      border-color: rgba(0, 113, 227, 0.35);
-    }
-
-    .badge-HUMAN-REVIEW-REQUIRED {
-      background-color: rgba(255, 159, 10, 0.12);
-      color: var(--status-review);
-      border-color: rgba(255, 159, 10, 0.35);
-    }
-
-    .badge-FAIL {
-      background-color: rgba(255, 59, 48, 0.12);
-      color: var(--status-fail);
-      border-color: rgba(255, 59, 48, 0.35);
-    }
+    .badge-PASS { background: var(--status-pass-bg); color: var(--status-pass); border: 1px solid var(--status-pass-border); }
+    .badge-SELF-HEALED { background: var(--status-healed-bg); color: var(--status-healed); border: 1px solid var(--status-healed-border); }
+    .badge-HUMAN-REVIEW-REQUIRED { background: var(--status-review-bg); color: var(--status-review); border: 1px solid var(--status-review-border); }
+    .badge-FAIL { background: var(--status-fail-bg); color: var(--status-fail); border: 1px solid var(--status-fail-border); }
 
     /* Grid Details */
     .grid-details {
@@ -389,19 +455,25 @@
     }
 
     .detail-card {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
+      background: var(--bg-inset);
+      border: 1px solid var(--border-subtle);
       border-radius: var(--radius-md);
-      padding: 1rem 1.15rem;
+      padding: 1.15rem 1.25rem;
+      transition: border-color 0.2s ease;
+    }
+
+    .detail-card:hover {
+      border-color: var(--border-medium);
     }
 
     .detail-label {
-      font-size: 0.725rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
       text-transform: uppercase;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.08em;
       font-weight: 600;
-      color: var(--text-secondary);
-      margin-bottom: 0.4rem;
+      color: var(--text-muted);
+      margin-bottom: 0.45rem;
     }
 
     .detail-val {
@@ -412,123 +484,108 @@
     }
 
     .detail-code {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 0.85rem;
-      padding: 0.2rem 0.4rem;
-      background: #EBEBED;
-      border-radius: 4px;
-      color: #1D1D1F;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.825rem;
+      padding: 0.25rem 0.5rem;
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      color: var(--nasa-cyan);
     }
 
-    /* History Table Section */
+    /* History & Evaluation Matrix Section */
     .history-card {
       background: var(--bg-card);
-      border: 1px solid var(--border-color);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border-subtle);
       border-radius: var(--radius-lg);
-      padding: 2rem;
-      box-shadow: var(--shadow-subtle);
+      padding: 2.25rem;
+      box-shadow: var(--shadow-cosmic);
+      margin-bottom: 2.5rem;
     }
 
     .history-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.25rem;
+      align-items: flex-start;
+      margin-bottom: 1.75rem;
       flex-wrap: wrap;
-      gap: 1rem;
+      gap: 1.25rem;
     }
 
     .table-container {
       overflow-x: auto;
-      border: 1px solid var(--border-color);
+      border: 1px solid var(--border-subtle);
       border-radius: var(--radius-md);
-      background: #FFFFFF;
+      background: var(--bg-inset);
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.875rem;
       text-align: left;
+      font-size: 0.85rem;
     }
 
     th {
-      padding: 0.85rem 1rem;
-      background: var(--bg-secondary);
-      color: var(--text-secondary);
-      font-weight: 600;
-      font-size: 0.775rem;
+      background: rgba(15, 23, 42, 0.95);
+      padding: 0.9rem 1.15rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.725rem;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      border-bottom: 1px solid var(--border-color);
+      letter-spacing: 0.08em;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border-subtle);
+      font-weight: 600;
       white-space: nowrap;
     }
 
     td {
-      padding: 0.85rem 1rem;
-      border-bottom: 1px solid var(--border-color);
+      padding: 0.95rem 1.15rem;
+      border-bottom: 1px solid var(--border-subtle);
       color: var(--text-primary);
       vertical-align: middle;
     }
 
-    tr:last-child td {
-      border-bottom: none;
-    }
+    tr:last-child td { border-bottom: none; }
 
     tr:hover td {
-      background-color: #FAFAFC;
+      background-color: rgba(30, 41, 59, 0.4);
     }
 
-    .table-btn {
-      font-family: inherit;
-      font-size: 0.8rem;
-      font-weight: 500;
-      padding: 0.4rem 0.8rem;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border-color);
-      background: #FFFFFF;
-      color: var(--accent-blue);
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .table-btn:hover {
-      background: #EBF4FD;
-      border-color: var(--accent-blue);
-    }
-
-    /* Modal */
+    /* Modal Sheet */
     .modal-backdrop {
+      display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.4);
-      backdrop-filter: blur(8px);
-      z-index: 100;
-      display: none;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      z-index: 1000;
       align-items: center;
       justify-content: center;
       padding: 1.5rem;
     }
 
-    .modal-backdrop.open {
-      display: flex;
-    }
+    .modal-backdrop.open { display: flex; }
 
     .modal-window {
-      background: #FFFFFF;
-      border: 1px solid var(--border-color);
-      border-radius: 20px;
-      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.16);
-      width: 100%;
+      background: #0B1120;
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-lg);
       max-width: 820px;
-      max-height: 88vh;
+      width: 100%;
+      max-height: 85vh;
       display: flex;
       flex-direction: column;
-      animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), var(--shadow-glow);
+      animation: modalSlide 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow: hidden;
     }
 
-    @keyframes modalPop {
-      from { opacity: 0; transform: scale(0.96) translateY(8px); }
+    @keyframes modalSlide {
+      from { opacity: 0; transform: scale(0.97) translateY(10px); }
       to { opacity: 1; transform: scale(1) translateY(0); }
     }
 
@@ -537,13 +594,14 @@
       justify-content: space-between;
       align-items: center;
       padding: 1.5rem 1.75rem;
-      border-bottom: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-subtle);
+      background: rgba(15, 23, 42, 0.8);
     }
 
     .modal-body {
       padding: 1.75rem;
       overflow-y: auto;
-      flex: 1;
+      flex-grow: 1;
     }
 
     .modal-foot {
@@ -551,30 +609,31 @@
       justify-content: flex-end;
       gap: 0.75rem;
       padding: 1.25rem 1.75rem;
-      border-top: 1px solid var(--border-color);
-      background: var(--bg-secondary);
-      border-radius: 0 0 20px 20px;
+      border-top: 1px solid var(--border-subtle);
+      background: rgba(15, 23, 42, 0.8);
     }
 
     .log-terminal {
-      background: #1D1D1F;
-      color: #F5F5F7;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 0.8rem;
-      line-height: 1.55;
+      background: #030712;
+      color: #38BDF8;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.775rem;
+      line-height: 1.6;
       padding: 1.25rem;
-      border-radius: var(--radius-md);
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(56, 189, 248, 0.2);
       overflow-x: auto;
-      max-height: 300px;
+      max-height: 280px;
       margin-top: 0.75rem;
     }
 
     .step-log-item {
-      padding: 0.6rem 0.85rem;
+      padding: 0.75rem 1rem;
       border-radius: var(--radius-sm);
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.6rem;
       border-left: 3px solid transparent;
-      background: var(--bg-secondary);
+      background: var(--bg-inset);
+      border: 1px solid var(--border-subtle);
     }
 
     .step-log-item.status-PASS { border-left-color: var(--status-pass); }
@@ -584,41 +643,47 @@
 
     .spinner {
       display: inline-block;
-      width: 16px;
-      height: 16px;
-      border: 2px solid rgba(255, 255, 255, 0.4);
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
       border-top-color: #FFFFFF;
       border-radius: 50%;
       animation: spin 0.7s linear infinite;
     }
 
-    .spinner-dark {
-      border-color: rgba(0, 113, 227, 0.3);
-      border-top-color: var(--accent-blue);
-    }
-
     @keyframes spin {
       to { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- Main Navigation Header -->
+    <!-- Top Mission Control Navigation Header -->
     <header>
       <div class="brand-section">
         <div class="brand-logo">⚡</div>
         <div>
-          <h1 class="brand-title">TestPhoenix</h1>
-          <div class="brand-tagline">Rise above every UI change. — Self-Healing Test Verification</div>
+          <div class="brand-title">
+            TestPhoenix
+            <span class="telemetry-beacon">
+              <span class="beacon-dot"></span>
+              SYS NOMINAL
+            </span>
+          </div>
+          <div class="brand-tagline">Rise above every UI change. Self-Healing Intent Test Automation</div>
         </div>
       </div>
       <div class="header-links">
         <a id="link-launch-app" href="http://127.0.0.1:5173" target="_blank" class="btn btn-secondary">
-          <span>↗</span> Open Demo Web App
+          <span>↗</span> Launch Demo Web App
         </a>
         <button id="btn-refresh-top" class="btn btn-secondary" onclick="fetchHistory(true)">
-          <span id="refresh-icon">↻</span> Refresh
+          <span id="refresh-icon">↻</span> Refresh Feed
         </button>
       </div>
     </header>
@@ -626,95 +691,97 @@
     <!-- Notification / Alert Banners -->
     <div id="status-banner" class="alert-banner">
       <span id="status-banner-text">Status message</span>
-      <button class="btn" style="padding: 0.2rem 0.5rem; background: none; border: none; font-size: 1.1rem; cursor: pointer;" onclick="hideStatusBanner()">✕</button>
+      <button class="btn" style="padding: 0.2rem 0.5rem; background: none; border: none; font-size: 1.1rem; cursor: pointer; color: inherit;" onclick="hideStatusBanner()">✕</button>
     </div>
 
-    <!-- Test Automation Execution Panel -->
+    <!-- Mission Control Execution Console -->
     <section class="action-panel">
-      <div class="section-eyebrow">Real Playwright Browser Automation</div>
-      <h2 class="section-heading">Execute Test Scenarios</h2>
-
-      <!-- Main CTA Bar -->
-      <div class="cta-control-bar">
-        <label for="select-scenario" style="font-size: 0.875rem; font-weight: 600; color: var(--text-primary);">
-          Select Scenario:
-        </label>
-        <select id="select-scenario" class="cta-select">
-          <option value="normal">Normal Test (Version A — Baseline Intent)</option>
-          <option value="self-healing">Self-Healing Test (Version B — Layout Redesign)</option>
-          <option value="broken-backend">Failure Test (Broken Backend — HTTP 500)</option>
-          <option value="ambiguous">Ambiguous UI Challenge (Safety Threshold Gate)</option>
-        </select>
-        <button id="btn-main-run-test" class="btn btn-primary" onclick="runSelectedScenario()">
-          <span id="main-cta-spinner" style="display: none;" class="spinner"></span>
-          <span id="main-cta-label">▶ Run Test</span>
-        </button>
+      <div class="section-eyebrow">
+        <span>◆</span> Autonomous Browser Automation Hub
       </div>
+      <h2 class="section-heading">Execute Playwright Test Scenarios</h2>
 
-      <!-- Quick Execution Buttons -->
-      <div class="scenario-grid">
-        <button id="btn-run-normal" class="scenario-btn" onclick="executeTestEndpoint('/api/tests/normal', 'Normal Test (Version A)')">
-          <span class="scenario-btn-title">
-            <span style="color: var(--status-pass);">✓</span> Run Normal Test
-          </span>
-          <span class="scenario-btn-desc">
-            Executes baseline scenario against original UI. Confirms canonical locator passes cleanly.
-          </span>
-        </button>
+      <div class="action-grid-layout">
+        <!-- Left: Scenario Selector & Main CTA -->
+        <div class="cta-control-box">
+          <div>
+            <label for="select-scenario" style="font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-secondary); display: block; margin-bottom: 0.5rem;">
+              Select Mission Scenario
+            </label>
+            <select id="select-scenario" class="cta-select">
+              <option value="normal">Normal Test (Version A — Baseline Intent)</option>
+              <option value="self-healing">Self-Healing Test (Version B — Layout Redesign)</option>
+              <option value="broken-backend">Failure Test (Broken Backend — HTTP 500)</option>
+              <option value="ambiguous">Ambiguous UI Challenge (Safety Threshold Gate)</option>
+            </select>
+          </div>
+          <button id="btn-main-run-test" class="btn btn-primary" style="padding: 0.85rem; font-size: 0.95rem; width: 100%;" onclick="runSelectedScenario()">
+            <span id="main-cta-spinner" style="display: none;" class="spinner"></span>
+            <span id="main-cta-label">▶ Run Automated Scenario</span>
+          </button>
+          <div style="font-size: 0.75rem; color: var(--text-muted); text-align: center; font-family: 'JetBrains Mono', monospace;">
+            Real Chromium Headless Engine // SQLite Persistence
+          </div>
+        </div>
 
-        <button id="btn-run-healing" class="scenario-btn" onclick="executeTestEndpoint('/api/tests/self-healing', 'Self-Healing Test (Version B)')">
-          <span class="scenario-btn-title">
-            <span style="color: var(--accent-blue);">⚡</span> Run Self-Healing Test
-          </span>
-          <span class="scenario-btn-desc">
-            Executes on redesigned UI. Catches broken locator, scores DOM candidates, heals & verifies.
-          </span>
-        </button>
+        <!-- Right: 4 Interactive Scenario Cards -->
+        <div class="scenario-grid">
+          <button id="btn-scenario-normal" class="scenario-btn" onclick="executeTestEndpoint('/api/tests/normal', 'Normal Test (Version A)')">
+            <div class="scenario-btn-title">
+              <span style="color: var(--status-pass);">✓</span> Version A (Baseline)
+            </div>
+            <div class="scenario-btn-desc">
+              Canonical locator <code>#create-task-btn</code> verified directly. Deterministic PASS.
+            </div>
+          </button>
 
-        <button id="btn-run-failure" class="scenario-btn" onclick="executeTestEndpoint('/api/tests/broken-backend', 'Failure Test (Broken Backend)')">
-          <span class="scenario-btn-title">
-            <span style="color: var(--status-fail);">✕</span> Run Failure Test
-          </span>
-          <span class="scenario-btn-desc">
-            Triggers simulated HTTP 500 database failure. Suppresses healing and verifies true defect.
-          </span>
-        </button>
+          <button id="btn-scenario-self-healing" class="scenario-btn" onclick="executeTestEndpoint('/api/tests/self-healing', 'Self-Healing Test (Version B)')">
+            <div class="scenario-btn-title">
+              <span style="color: var(--status-healed);">⚡</span> Version B (Redesign)
+            </div>
+            <div class="scenario-btn-desc">
+              Original selector fails. Scorer ranks <code>#new-work-item-btn</code>, recovers workflow, persists to DB.
+            </div>
+          </button>
 
-        <button id="btn-run-ambiguous" class="scenario-btn" onclick="executeTestEndpoint('/api/tests/ambiguous', 'Ambiguous UI Challenge')">
-          <span class="scenario-btn-title">
-            <span style="color: var(--status-review);">⚖️</span> Run Ambiguous Test
-          </span>
-          <span class="scenario-btn-desc">
-            Presents duplicate candidate buttons. Validates safety gate: escalates to Human Review.
-          </span>
-        </button>
+          <button id="btn-scenario-broken" class="scenario-btn" onclick="executeTestEndpoint('/api/tests/broken-backend', 'Failure Test (Broken Backend)')">
+            <div class="scenario-btn-title">
+              <span style="color: var(--status-fail);">✕</span> Backend Defect (500)
+            </div>
+            <div class="scenario-btn-desc">
+              Provokes real HTTP 500 error. Detects backend defect; avoids false healing.
+            </div>
+          </button>
+
+          <button id="btn-scenario-ambiguous" class="scenario-btn" onclick="executeTestEndpoint('/api/tests/ambiguous', 'Ambiguous UI Challenge')">
+            <div class="scenario-btn-title">
+              <span style="color: var(--status-review);">⚖️</span> Ambiguity Gate
+            </div>
+            <div class="scenario-btn-desc">
+              Two candidate buttons with identical score. Refuses guess; halts for human review.
+            </div>
+          </button>
+        </div>
       </div>
     </section>
 
-    <!-- Active Result Inspection Card -->
-    <section class="result-card" id="active-result-card">
+    <!-- Real-time Active Execution Telemetry Card -->
+    <section id="active-result-card" class="result-card">
       <div class="result-header">
         <div class="result-title-group">
-          <div class="section-eyebrow">Latest Execution Inspection</div>
-          <h2 id="res-scenario">No Test Run Executed Yet</h2>
-          <div id="res-time" class="result-meta">Select a test scenario above to execute the real Playwright engine.</div>
+          <div class="section-eyebrow"><span>●</span> Real-Time Flight Telemetry</div>
+          <h2 id="res-scenario">Scenario Execution</h2>
+          <div id="res-time" class="result-meta">Executed at: —</div>
         </div>
-        <div style="display: flex; align-items: center; gap: 0.75rem;">
-          <span id="res-status-badge" class="badge" style="display: none;">PENDING</span>
-          <button id="btn-view-current-details" class="btn btn-secondary" style="display: none;" onclick="openActiveRunModal()">
-            View Full Diagnostics
-          </button>
+        <div>
+          <span id="res-status-badge" class="badge badge-PASS">PASS</span>
         </div>
       </div>
 
       <div class="grid-details">
         <div class="detail-card">
           <div class="detail-label">Original Locator</div>
-          <div id="res-orig-locator" class="detail-val">—</div>
-        </div>
-        <div class="detail-card">
-          <div class="detail-label">Original Locator Status</div>
-          <div id="res-orig-worked" class="detail-val">—</div>
+          <div id="res-orig-loc" class="detail-val"><code class="detail-code">—</code></div>
         </div>
         <div class="detail-card">
           <div class="detail-label">Initial Failure Reason</div>
@@ -722,7 +789,7 @@
         </div>
         <div class="detail-card">
           <div class="detail-label">Selected Replacement</div>
-          <div id="res-replacement" class="detail-val" style="color: var(--accent-blue);">—</div>
+          <div id="res-replacement" class="detail-val" style="color: var(--nasa-cyan);">—</div>
         </div>
         <div class="detail-card">
           <div class="detail-label">Confidence Score</div>
@@ -736,7 +803,7 @@
 
       <div class="detail-card" style="margin-bottom: 0;">
         <div class="detail-label">Recovery Engine Actions & Diagnostics</div>
-        <div id="res-actions" class="detail-val" style="font-family: ui-monospace, Menlo, monospace; font-size: 0.875rem;">—</div>
+        <div id="res-actions" class="detail-val" style="font-family: 'JetBrains Mono', monospace; font-size: 0.825rem; color: var(--text-secondary);">—</div>
       </div>
     </section>
 
@@ -744,12 +811,12 @@
     <section class="history-card">
       <div class="history-header">
         <div>
-          <div class="section-eyebrow">Persistent Storage</div>
-          <h2 style="font-size: 1.25rem; font-weight: 600; color: var(--text-primary);">
+          <div class="section-eyebrow"><span>◆</span> Telemetry Archive</div>
+          <h2 style="font-size: 1.4rem; font-weight: 700; color: #FFFFFF;">
             Test Run History (SQLite)
           </h2>
         </div>
-        <div style="display: flex; gap: 0.75rem;">
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
           <button id="btn-refresh-history" class="btn btn-secondary" onclick="fetchHistory(true)">
             <span>↻</span> Refresh History
           </button>
@@ -775,7 +842,7 @@
           </thead>
           <tbody id="history-tbody">
             <tr>
-              <td colspan="8" style="text-align: center; color: var(--text-secondary); padding: 2rem;">
+              <td colspan="8" style="text-align: center; color: var(--text-secondary); padding: 2.5rem;">
                 Loading test history...
               </td>
             </tr>
@@ -785,15 +852,15 @@
     </section>
 
     <!-- Advanced UI Change Evaluation Matrix Section -->
-    <section class="history-card" style="margin-top: 2rem;">
+    <section class="history-card" style="margin-top: 2.5rem;">
       <div class="history-header">
         <div>
-          <div class="section-eyebrow">Comprehensive Benchmark Matrix</div>
-          <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary);">
+          <div class="section-eyebrow"><span>◆</span> Empirical Validation Benchmark</div>
+          <h2 style="font-size: 1.4rem; font-weight: 700; color: #FFFFFF;">
             Advanced UI Change Validation Matrix
           </h2>
-          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;">
-            Empirical validation measuring intent reconstruction, UI drift resilience, and genuine defect detection across automated scenarios.
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.35rem;">
+            Empirical validation measuring intent reconstruction, UI drift resilience, and genuine defect isolation across 20 automated browser test scenarios.
           </p>
         </div>
         <div style="display: flex; gap: 0.65rem; flex-wrap: wrap;">
@@ -811,47 +878,47 @@
       </div>
 
       <!-- Metric KPI Tiles -->
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.75rem; margin-bottom: 1.5rem;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.85rem; margin-bottom: 1.75rem;">
         <div class="detail-card">
           <div class="detail-label">Total Executions</div>
-          <div id="eval-kpi-total" style="font-size: 1.35rem; font-weight: 700; color: var(--text-primary);">20</div>
-          <div style="font-size: 0.7rem; color: var(--text-secondary);">2 Full Passes</div>
+          <div id="eval-kpi-total" style="font-size: 1.4rem; font-weight: 700; color: #FFFFFF;">20</div>
+          <div style="font-size: 0.7rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace;">2 Full Passes</div>
         </div>
         <div class="detail-card">
           <div class="detail-label">UI Drift Failures</div>
-          <div id="eval-kpi-ui-failures" style="font-size: 1.35rem; font-weight: 700; color: var(--text-primary);">10</div>
-          <div style="font-size: 0.7rem; color: var(--text-secondary);">Eligible Denominator</div>
+          <div id="eval-kpi-ui-failures" style="font-size: 1.4rem; font-weight: 700; color: #FFFFFF;">10</div>
+          <div style="font-size: 0.7rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace;">Eligible Denom</div>
         </div>
         <div class="detail-card">
           <div class="detail-label">Successful Heals</div>
-          <div id="eval-kpi-healed" style="font-size: 1.35rem; font-weight: 700; color: var(--status-pass);">10</div>
-          <div style="font-size: 0.7rem; color: var(--status-pass);">Verified Outcome</div>
+          <div id="eval-kpi-healed" style="font-size: 1.4rem; font-weight: 700; color: var(--status-pass);">10</div>
+          <div style="font-size: 0.7rem; color: var(--status-pass); font-family: 'JetBrains Mono', monospace;">Verified Outcome</div>
         </div>
-        <div class="detail-card" style="background: #E8F5E9; border-color: #C8E6C9;">
-          <div class="detail-label" style="color: #2E7D32;">Recovery Rate</div>
-          <div id="eval-kpi-rate" style="font-size: 1.35rem; font-weight: 800; color: #1B5E20;">100.0%</div>
-          <div style="font-size: 0.7rem; color: #2E7D32;">Empirically Measured</div>
+        <div class="detail-card" style="background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.35);">
+          <div class="detail-label" style="color: #34D399;">Recovery Rate</div>
+          <div id="eval-kpi-rate" style="font-size: 1.4rem; font-weight: 800; color: #10B981;">100.0%</div>
+          <div style="font-size: 0.7rem; color: #34D399; font-family: 'JetBrains Mono', monospace;">Empirically Measured</div>
         </div>
         <div class="detail-card">
           <div class="detail-label">Human Review</div>
-          <div id="eval-kpi-review" style="font-size: 1.35rem; font-weight: 700; color: var(--status-review);">2</div>
-          <div style="font-size: 0.7rem; color: var(--text-secondary);">Ambiguity Gate</div>
+          <div id="eval-kpi-review" style="font-size: 1.4rem; font-weight: 700; color: var(--status-review);">2</div>
+          <div style="font-size: 0.7rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace;">Ambiguity Gate</div>
         </div>
         <div class="detail-card">
           <div class="detail-label">Genuine Defects</div>
-          <div id="eval-kpi-defects" style="font-size: 1.35rem; font-weight: 700; color: var(--status-fail);">6</div>
-          <div style="font-size: 0.7rem; color: var(--text-secondary);">500s & Disabled</div>
+          <div id="eval-kpi-defects" style="font-size: 1.4rem; font-weight: 700; color: var(--status-fail);">6</div>
+          <div style="font-size: 0.7rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace;">500s & Disabled</div>
         </div>
         <div class="detail-card">
           <div class="detail-label">Avg Exec Time</div>
-          <div id="eval-kpi-avg-time" style="font-size: 1.35rem; font-weight: 700; color: var(--text-primary);">2,591 ms</div>
-          <div style="font-size: 0.7rem; color: var(--text-secondary);">Per Scenario</div>
+          <div id="eval-kpi-avg-time" style="font-size: 1.4rem; font-weight: 700; color: #FFFFFF;">2,591 ms</div>
+          <div style="font-size: 0.7rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace;">Per Scenario</div>
         </div>
       </div>
 
       <!-- Denominator Explanation Callout -->
-      <div style="background: var(--bg-secondary); padding: 0.85rem 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); margin-bottom: 1.25rem; font-size: 0.825rem; color: var(--text-secondary); line-height: 1.5;">
-        <strong style="color: var(--text-primary);">Denominator & Metrics Definition:</strong> Recovery success rate is defined strictly as
+      <div style="background: var(--bg-inset); padding: 1rem 1.25rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); margin-bottom: 1.5rem; font-size: 0.825rem; color: var(--text-secondary); line-height: 1.55;">
+        <strong style="color: #FFFFFF;">Denominator & Metrics Definition:</strong> Recovery success rate is defined strictly as
         <code class="detail-code">(Successful Recoveries / UI Failures) * 100 = 100.0%</code> (10/10). Test cases representing genuine application server defects (HTTP 500), missing postconditions, and ambiguity safety gates are segregated and correctly marked as <code>FAIL</code> or <code>HUMAN REVIEW REQUIRED</code> rather than falsely masked as recovery failures. Incorrect recovery attempts on defects: <strong>0 (zero false positives)</strong>.
       </div>
 
@@ -882,71 +949,63 @@
     </section>
   </div>
 
-  <!-- Detailed Diagnostics Modal -->
+  <!-- Detailed Diagnostics Modal Sheet -->
   <div id="details-modal" class="modal-backdrop" onclick="handleBackdropClick(event)">
     <div class="modal-window">
       <div class="modal-head">
         <div>
-          <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 600;">
-            Diagnostic Telemetry
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.725rem; text-transform: uppercase; color: var(--nasa-cyan); font-weight: 600;">
+            Diagnostic Flight Telemetry
           </div>
-          <h2 id="modal-title" style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin-top: 0.2rem;">
+          <h2 id="modal-title" style="font-size: 1.3rem; font-weight: 700; color: #FFFFFF; margin-top: 0.2rem;">
             Run Details
           </h2>
         </div>
-        <button id="modal-close-x" class="btn btn-secondary" style="padding: 0.4rem 0.75rem; font-size: 1rem;" onclick="closeModal()">
+        <button id="modal-close-x" class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.9rem;" onclick="closeModal()">
           ✕
         </button>
       </div>
-
-      <div class="modal-body" id="modal-content">
-        <!-- Injected via JavaScript -->
+      <div id="modal-content" class="modal-body">
+        <!-- Dynamically Populated -->
       </div>
-
       <div class="modal-foot">
-        <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+        <button class="btn btn-secondary" onclick="closeModal()">Close Console</button>
       </div>
     </div>
   </div>
 
   <script>
-    let currentLatestRun = null;
     let isOperationRunning = false;
+    let currentLatestRun = null;
 
-    // Toast / Banner helpers
+    function setRunningState(running, label = 'Running Test...') {
+      isOperationRunning = running;
+      const mainBtn = document.getElementById('btn-main-run-test');
+      const spinner = document.getElementById('main-cta-spinner');
+      const text = document.getElementById('main-cta-label');
+
+      mainBtn.disabled = running;
+      spinner.style.display = running ? 'inline-block' : 'none';
+      text.innerText = running ? label : '▶ Run Automated Scenario';
+
+      ['btn-scenario-normal', 'btn-scenario-self-healing', 'btn-scenario-broken', 'btn-scenario-ambiguous', 'btn-refresh-history', 'btn-reset-demo-db'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = running;
+      });
+    }
+
     function showStatusBanner(message, type = 'info') {
       const banner = document.getElementById('status-banner');
       const text = document.getElementById('status-banner-text');
       banner.className = `alert-banner active alert-${type}`;
       text.innerText = message;
-      if (type === 'success') {
-        setTimeout(hideStatusBanner, 6000);
-      }
     }
 
     function hideStatusBanner() {
       const banner = document.getElementById('status-banner');
-      banner.classList.remove('active');
+      banner.className = 'alert-banner';
     }
 
-    // Set interactive buttons disabled during test execution
-    function setRunningState(running, activeLabel = 'Running Test...') {
-      isOperationRunning = running;
-      const allButtons = document.querySelectorAll('.btn, .scenario-btn, .cta-select, .table-btn');
-      allButtons.forEach(el => el.disabled = running);
-
-      const mainBtnLabel = document.getElementById('main-cta-label');
-      const mainBtnSpinner = document.getElementById('main-cta-spinner');
-      if (running) {
-        mainBtnLabel.innerText = activeLabel;
-        mainBtnSpinner.style.display = 'inline-block';
-      } else {
-        mainBtnLabel.innerText = '▶ Run Test';
-        mainBtnSpinner.style.display = 'none';
-      }
-    }
-
-    // Main CTA Run Handler
     async function runSelectedScenario() {
       const select = document.getElementById('select-scenario');
       const scenarioKey = select.value;
@@ -961,7 +1020,6 @@
       await executeTestEndpoint(endpoint, scenarioName);
     }
 
-    // Core Test Execution Trigger
     async function executeTestEndpoint(endpoint, scenarioName) {
       if (isOperationRunning) return;
 
@@ -989,7 +1047,6 @@
         renderActiveResult(runRecord);
         await fetchHistory(false);
 
-        // Feedback based on real status
         if (runRecord.status === 'PASS') {
           showStatusBanner(`✓ Test completed successfully — PASS (${runRecord.scenario})`, 'success');
         } else if (runRecord.status === 'SELF-HEALED') {
@@ -1007,7 +1064,6 @@
       }
     }
 
-    // Render result into UI
     function renderActiveResult(data) {
       document.getElementById('res-scenario').innerText = data.scenario || 'Execution Completed';
       document.getElementById('res-time').innerText = 'Executed at: ' + new Date(data.created_at).toLocaleString();
@@ -1017,116 +1073,115 @@
       badge.className = 'badge badge-' + (data.status || 'FAIL').replace(/ /g, '-');
       badge.innerText = data.status || 'UNKNOWN';
 
-      document.getElementById('res-orig-locator').innerHTML = data.original_locator 
-        ? `<span class="detail-code">${escapeHtml(data.original_locator)}</span>` 
-        : '—';
+      document.getElementById('res-orig-loc').innerHTML = `<code class="detail-code">${escapeHtml(data.original_locator || '—')}</code>`;
+      document.getElementById('res-fail-reason').innerText = data.initial_failure_reason || 'None (Original locator succeeded)';
+      document.getElementById('res-replacement').innerHTML = `<code class="detail-code" style="color: var(--nasa-cyan);">${escapeHtml(data.replacement_selector || 'None')}</code>`;
 
-      document.getElementById('res-orig-worked').innerHTML = data.original_locator_worked
-        ? '<span style="color: var(--status-pass); font-weight: 600;">✓ Succeeded Cleanly</span>'
-        : '<span style="color: var(--status-fail); font-weight: 600;">✕ Timed Out / Broken</span>';
+      const scoreEl = document.getElementById('res-score');
+      if (data.candidate_score !== null && data.candidate_score !== undefined) {
+        scoreEl.innerText = `${(data.candidate_score * 100).toFixed(1)}% Confidence`;
+      } else {
+        scoreEl.innerText = '100% (Baseline Match)';
+      }
 
-      document.getElementById('res-fail-reason').innerText = data.initial_failure_reason || 'None (Selector passed without issue)';
-      
-      document.getElementById('res-replacement').innerHTML = data.replacement_selector 
-        ? `<span class="detail-code" style="color: var(--accent-blue);">${escapeHtml(data.replacement_selector)}</span>` 
-        : 'None (Original retained)';
-
-      document.getElementById('res-score').innerText = data.candidate_score 
-        ? (data.candidate_score * 100).toFixed(1) + '%' 
-        : (data.original_locator_worked ? '100% (Baseline)' : 'N/A');
-
-      document.getElementById('res-verification').innerText = data.verification_result || 'Verified';
+      document.getElementById('res-verification').innerText = data.verification_result || 'PASSED';
       document.getElementById('res-actions').innerText = data.recovery_actions || 'No recovery action required.';
 
-      const viewDetailsBtn = document.getElementById('btn-view-current-details');
-      viewDetailsBtn.style.display = 'inline-flex';
+      const card = document.getElementById('active-result-card');
+      card.classList.add('active');
     }
 
-    // Fetch History from SQLite
-    async function fetchHistory(showToast = false) {
-      const refreshIcon = document.getElementById('refresh-icon');
-      if (refreshIcon) refreshIcon.style.display = 'inline-block';
-
+    async function fetchHistory(showNotification = false) {
       try {
-        const res = await fetch('/api/tests/history');
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const runs = await res.json();
+        const response = await fetch('/api/tests/history');
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const runs = await response.json();
+        renderHistoryTable(runs);
 
-        const tbody = document.getElementById('history-tbody');
-        if (!runs || runs.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-secondary); padding: 2rem;">No test runs recorded yet. Execute one of the scenarios above.</td></tr>';
-          return;
+        if (runs.length > 0 && !currentLatestRun) {
+          currentLatestRun = runs[0];
+          renderActiveResult(runs[0]);
         }
 
-        tbody.innerHTML = runs.map(run => {
-          const badgeClass = 'badge badge-' + (run.status || 'FAIL').replace(/ /g, '-');
-          const scoreDisplay = run.candidate_score ? (run.candidate_score * 100).toFixed(1) + '%' : '—';
-          const timeDisplay = new Date(run.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-
-          return `
-            <tr>
-              <td><strong>#${run.id}</strong></td>
-              <td><strong>${escapeHtml(run.scenario)}</strong></td>
-              <td><span class="${badgeClass}">${escapeHtml(run.status)}</span></td>
-              <td><code class="detail-code">${escapeHtml(run.original_locator || '—')}</code></td>
-              <td><code class="detail-code">${escapeHtml(run.replacement_selector || '—')}</code></td>
-              <td>${scoreDisplay}</td>
-              <td style="color: var(--text-secondary);">${timeDisplay}</td>
-              <td style="text-align: right;">
-                <button class="table-btn" onclick="openRunDetailsModal(${run.id})">
-                  View Details
-                </button>
-              </td>
-            </tr>
-          `;
-        }).join('');
-
-        if (showToast) {
-          showStatusBanner('✓ Run history refreshed successfully.', 'success');
+        if (showNotification) {
+          showStatusBanner('✓ Telemetry feed refreshed successfully.', 'success');
+          setTimeout(hideStatusBanner, 3000);
         }
       } catch (err) {
-        console.error('Failed to load history:', err);
-        if (showToast) {
-          showStatusBanner('Failed to fetch test history from backend.', 'error');
-        }
+        console.error('History fetch error:', err);
+        document.getElementById('history-tbody').innerHTML = `
+          <tr>
+            <td colspan="8" style="text-align: center; color: var(--status-fail); padding: 2rem;">
+              Failed to load run history from backend API. Please verify FastAPI backend is active.
+            </td>
+          </tr>
+        `;
       }
     }
 
-    // Reset Demo Data
+    function renderHistoryTable(runs) {
+      const tbody = document.getElementById('history-tbody');
+      if (!runs || runs.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" style="text-align: center; color: var(--text-secondary); padding: 2rem;">
+              No automated test runs found in database. Execute a test scenario above to start.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = runs.map(run => {
+        const badgeClass = (run.status || 'FAIL').replace(/ /g, '-');
+        const scoreDisplay = run.candidate_score !== null ? `${(run.candidate_score * 100).toFixed(1)}%` : '—';
+        const dateStr = new Date(run.created_at).toLocaleTimeString();
+
+        return `
+          <tr>
+            <td style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--text-secondary);">#${run.id}</td>
+            <td style="font-weight: 600; color: #FFFFFF;">${escapeHtml(run.scenario)}</td>
+            <td><span class="badge badge-${badgeClass}">${escapeHtml(run.status)}</span></td>
+            <td><code class="detail-code">${escapeHtml(run.original_locator || '—')}</code></td>
+            <td><code class="detail-code" style="color: var(--nasa-cyan);">${escapeHtml(run.replacement_selector || '—')}</code></td>
+            <td style="font-family: 'JetBrains Mono', monospace; font-size: 0.825rem;">${scoreDisplay}</td>
+            <td style="color: var(--text-secondary); font-size: 0.8rem; font-family: 'JetBrains Mono', monospace;">${dateStr}</td>
+            <td style="text-align: right;">
+              <button class="btn btn-secondary" style="padding: 0.35rem 0.85rem; font-size: 0.775rem;" onclick="viewRunDetails(${run.id})">
+                Telemetry
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
     async function resetDemoData() {
-      if (!confirm('Reset SQLite demo data to clean seed baseline?')) return;
+      if (isOperationRunning) return;
+      if (!confirm('Reset SQLite database to baseline seeded state?')) return;
+
       try {
-        const res = await fetch('/api/test/reset', { method: 'POST' });
-        if (res.ok) {
-          showStatusBanner('Demo database successfully reset to clean seed baseline.', 'success');
-          await fetchHistory(false);
-        } else {
-          throw new Error(`HTTP ${res.status}`);
-        }
+        const response = await fetch('/api/test/reset', { method: 'POST' });
+        if (!response.ok) throw new Error('Reset failed');
+        showStatusBanner('✓ Demo SQLite database successfully reset to clean seed state.', 'success');
+        await fetchHistory(false);
       } catch (err) {
-        showStatusBanner('Failed to reset demo database: ' + err.message, 'error');
+        showStatusBanner(`Database reset failed: ${err.message}`, 'error');
       }
     }
 
-    // Modal Handling
-    function openActiveRunModal() {
-      if (currentLatestRun) {
-        displayRunInModal(currentLatestRun);
-      }
-    }
-
-    async function openRunDetailsModal(runId) {
+    async function viewRunDetails(runId) {
       try {
-        const res = await fetch(`/api/tests/history/${runId}`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const run = await res.json();
-        displayRunInModal(run);
+        const response = await fetch(`/api/tests/history/${runId}`);
+        if (!response.ok) throw new Error('Run not found');
+        const run = await response.json();
+        renderModalDetails(run);
       } catch (err) {
-        alert('Could not load details for run #' + runId + ': ' + err.message);
+        alert(`Failed to load details for run #${runId}: ${err.message}`);
       }
     }
 
-    function displayRunInModal(run) {
+    function renderModalDetails(run) {
       document.getElementById('modal-title').innerText = `Run #${run.id} — ${run.scenario}`;
 
       let stepsHtml = '';
@@ -1136,18 +1191,19 @@
           if (Array.isArray(steps) && steps.length > 0) {
             stepsHtml = steps.map(s => {
               const diag = s.diagnostics || {};
-              const candidatesCount = diag.candidates_evaluated ? diag.candidates_evaluated.length : 0;
+              const candidatesCount = (diag.candidates_evaluated || []).length;
+              const statusClass = (s.status || 'PASS').replace(/ /g, '_');
               return `
-                <div class="step-log-item status-${s.status || 'PASS'}">
+                <div class="step-log-item status-${statusClass}">
                   <div style="display: flex; justify-content: space-between; font-weight: 600; font-size: 0.85rem;">
-                    <span>Step: ${escapeHtml(s.name || s.intent || 'Step')}</span>
-                    <span class="badge badge-${(s.status || 'PASS').replace(/_/g, '-')}">${s.status || 'PASS'}</span>
+                    <span style="color: #FFFFFF;">${escapeHtml(s.name || s.intent || 'Execution Step')}</span>
+                    <span class="badge badge-${(s.status || 'PASS').replace(/ /g, '-')}">${escapeHtml(s.status || 'PASS')}</span>
                   </div>
-                  <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.25rem;">
+                  <div style="font-size: 0.775rem; color: var(--text-secondary); margin-top: 0.25rem; font-family: 'JetBrains Mono', monospace;">
                     Intent: <em>${escapeHtml(s.intent || '—')}</em> | Action: <code>${s.action || 'CLICK'}</code>
                   </div>
-                  ${diag.rationale ? `<div style="font-size: 0.8rem; margin-top: 0.25rem;"><strong>Diagnostics:</strong> ${escapeHtml(diag.rationale)}</div>` : ''}
-                  ${candidatesCount > 0 ? `<div style="font-size: 0.775rem; color: var(--accent-blue); margin-top: 0.2rem;">Evaluated ${candidatesCount} DOM candidate element(s)</div>` : ''}
+                  ${diag.rationale ? `<div style="font-size: 0.8rem; margin-top: 0.35rem; color: var(--text-primary);"><strong>Diagnostics:</strong> ${escapeHtml(diag.rationale)}</div>` : ''}
+                  ${candidatesCount > 0 ? `<div style="font-size: 0.775rem; color: var(--nasa-cyan); margin-top: 0.25rem; font-family: 'JetBrains Mono', monospace;">Evaluated ${candidatesCount} DOM candidate element(s)</div>` : ''}
                 </div>
               `;
             }).join('');
@@ -1156,16 +1212,16 @@
       }
 
       const content = `
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
           <span class="badge badge-${(run.status || 'FAIL').replace(/ /g, '-')}">${run.status}</span>
-          <span style="font-size: 0.85rem; color: var(--text-secondary);">
-            Timestamp: ${new Date(run.created_at).toLocaleString()} ${run.execution_duration_ms ? `(${run.execution_duration_ms} ms)` : ''}
+          <span style="font-size: 0.825rem; color: var(--text-secondary); font-family: 'JetBrains Mono', monospace;">
+            ${new Date(run.created_at).toLocaleString()} ${run.execution_duration_ms ? `(${run.execution_duration_ms} ms)` : ''}
           </span>
         </div>
 
         <div class="detail-card" style="margin-bottom: 1.25rem;">
           <div class="detail-label">Original Test Intent</div>
-          <div class="detail-val" style="font-weight: 600; color: var(--text-primary);">
+          <div class="detail-val" style="font-weight: 600; color: #FFFFFF;">
             ${escapeHtml(run.original_intent || 'Intent-driven test execution')}
           </div>
         </div>
@@ -1177,11 +1233,11 @@
           </div>
           <div class="detail-card">
             <div class="detail-label">Replacement Selector</div>
-            <div class="detail-val"><code class="detail-code">${escapeHtml(run.replacement_selector || 'None')}</code></div>
+            <div class="detail-val"><code class="detail-code" style="color: var(--nasa-cyan);">${escapeHtml(run.replacement_selector || 'None')}</code></div>
           </div>
           <div class="detail-card">
             <div class="detail-label">Confidence Score</div>
-            <div class="detail-val">${run.candidate_score ? (run.candidate_score * 100).toFixed(1) + '%' : '100%'}</div>
+            <div class="detail-val" style="font-family: 'JetBrains Mono', monospace;">${run.candidate_score ? (run.candidate_score * 100).toFixed(1) + '%' : '100%'}</div>
           </div>
           <div class="detail-card">
             <div class="detail-label">Verification Outcome</div>
@@ -1204,15 +1260,15 @@
           <div class="detail-val">${escapeHtml(run.recovery_actions || 'None required')}</div>
         </div>
 
-        <div style="margin-top: 1rem;">
+        <div style="margin-top: 1.25rem;">
           <div class="section-eyebrow">Execution Steps & Diagnostic Trail</div>
           ${stepsHtml || '<p style="font-size: 0.85rem; color: var(--text-secondary);">No step-level telemetry recorded for this run.</p>'}
         </div>
 
-        <div style="margin-top: 1.25rem;">
+        <div style="margin-top: 1.5rem;">
           <details>
-            <summary style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); cursor: pointer;">
-              Raw Diagnostics JSON Telemetry
+            <summary style="font-size: 0.8rem; font-weight: 600; color: var(--nasa-cyan); cursor: pointer; font-family: 'JetBrains Mono', monospace;">
+              ▶ View Raw Telemetry JSON
             </summary>
             <pre class="log-terminal">${escapeHtml(run.diagnostics_json || '{}')}</pre>
           </details>
@@ -1279,16 +1335,16 @@
         const badgeClass = (sc.final_status || 'FAIL').replace(/ /g, '-');
         return `
           <tr>
-            <td style="font-family: monospace; color: var(--text-secondary); font-size: 0.8rem;">${idx + 1}</td>
-            <td style="font-weight: 600; color: var(--text-primary); white-space: nowrap;">${escapeHtml(sc.scenario_name)}</td>
-            <td style="max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtml(sc.original_intent)}">
+            <td style="font-family: 'JetBrains Mono', monospace; color: var(--text-secondary); font-size: 0.8rem;">${idx + 1}</td>
+            <td style="font-weight: 600; color: #FFFFFF; white-space: nowrap;">${escapeHtml(sc.scenario_name)}</td>
+            <td style="max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-secondary);" title="${escapeHtml(sc.original_intent)}">
               ${escapeHtml(sc.original_intent)}
             </td>
-            <td style="color: var(--text-secondary);">${escapeHtml(sc.ui_change_type)}</td>
-            <td style="color: var(--text-secondary); max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtml(sc.original_locator_result)}">
+            <td style="color: var(--text-secondary); font-size: 0.825rem;">${escapeHtml(sc.ui_change_type)}</td>
+            <td style="color: var(--text-muted); max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: 'JetBrains Mono', monospace; font-size: 0.775rem;" title="${escapeHtml(sc.original_locator_result)}">
               ${escapeHtml(sc.original_locator_result)}
             </td>
-            <td style="font-size: 0.775rem;">${escapeHtml(sc.recovery_decision)}</td>
+            <td style="font-size: 0.775rem; color: var(--text-secondary);">${escapeHtml(sc.recovery_decision)}</td>
             <td><code class="detail-code">${escapeHtml(sc.reconstructed_steps)}</code></td>
             <td style="white-space: nowrap;">
               <span class="badge badge-${badgeClass}">${escapeHtml(sc.final_status)}</span>

@@ -14,7 +14,7 @@ export const AmbiguousVersion: React.FC = () => {
         <div>
           <strong>Scenario D — Ambiguous UI Challenge:</strong> This screen presents two equally plausible task creation actions. The engine must refuse to make an unverified guess and escalate to <code>HUMAN REVIEW REQUIRED</code>.
         </div>
-        <span className="badge" style={{ background: '#FFF8E6', color: '#B45309', borderColor: '#FDE68A' }}>
+        <span className="badge" style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#FBBF24', borderColor: 'rgba(245, 158, 11, 0.4)' }}>
           Ambiguity Safety Gate
         </span>
       </div>

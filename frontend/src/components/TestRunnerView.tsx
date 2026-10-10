@@ -247,13 +247,13 @@ export const TestRunnerView: React.FC = () => {
 
         {/* Main CTA Bar */}
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap', background: 'var(--bg-secondary)', padding: '1rem 1.25rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', marginBottom: '1.25rem' }}>
-          <label htmlFor="cta-scenario-select" style={{ fontSize: '0.875rem', fontWeight: 600 }}>
+          <label htmlFor="cta-scenario-select" style={{ fontSize: '0.875rem', fontWeight: 600, color: '#F8FAFC' }}>
             Scenario:
           </label>
           <select
             id="cta-scenario-select"
             className="form-select"
-            style={{ maxWidth: 320, background: '#FFFFFF' }}
+            style={{ maxWidth: 320 }}
             value={selectedScenarioKey}
             onChange={(e) => setSelectedScenarioKey(e.target.value)}
             disabled={isRunning}
@@ -278,7 +278,7 @@ export const TestRunnerView: React.FC = () => {
           <button
             id="btn-run-normal-test"
             className="btn-secondary"
-            style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: '1rem', height: 'auto', background: '#FFFFFF' }}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: '1rem', height: 'auto' }}
             onClick={() => executeScenario('/api/tests/normal', 'Normal Test')}
             disabled={isRunning}
           >
@@ -291,7 +291,7 @@ export const TestRunnerView: React.FC = () => {
           <button
             id="btn-run-selfhealing-test"
             className="btn-secondary"
-            style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: '1rem', height: 'auto', background: '#FFFFFF' }}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: '1rem', height: 'auto' }}
             onClick={() => executeScenario('/api/tests/self-healing', 'Self-Healing Test')}
             disabled={isRunning}
           >
@@ -304,7 +304,7 @@ export const TestRunnerView: React.FC = () => {
           <button
             id="btn-run-failure-test"
             className="btn-secondary"
-            style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: '1rem', height: 'auto', background: '#FFFFFF' }}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: '1rem', height: 'auto' }}
             onClick={() => executeScenario('/api/tests/broken-backend', 'Failure Test')}
             disabled={isRunning}
           >
@@ -317,7 +317,7 @@ export const TestRunnerView: React.FC = () => {
           <button
             id="btn-run-ambiguous-test"
             className="btn-secondary"
-            style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: '1rem', height: 'auto', background: '#FFFFFF' }}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: '1rem', height: 'auto' }}
             onClick={() => executeScenario('/api/tests/ambiguous', 'Ambiguous UI Test')}
             disabled={isRunning}
           >
@@ -353,7 +353,7 @@ export const TestRunnerView: React.FC = () => {
                   : activeRun.status === 'HUMAN REVIEW REQUIRED'
                   ? 'badge-todo'
                   : 'badge-todo'
-              }`} style={activeRun.status === 'FAIL' ? { background: '#FFF5F5', color: '#B91C1C', borderColor: '#FFD0CE' } : {}}>
+              }`} style={activeRun.status === 'FAIL' ? { background: 'rgba(239, 68, 68, 0.15)', color: '#F87171', borderColor: 'rgba(239, 68, 68, 0.35)' } : {}}>
                 {activeRun.status}
               </span>
               <button
@@ -469,17 +469,17 @@ export const TestRunnerView: React.FC = () => {
                           : r.status === 'SELF-HEALED'
                           ? 'badge-in-progress'
                           : 'badge-todo'
-                      }`} style={r.status === 'FAIL' ? { background: '#FFF5F5', color: '#B91C1C', borderColor: '#FFD0CE' } : {}}>
+                      }`} style={r.status === 'FAIL' ? { background: 'rgba(239, 68, 68, 0.15)', color: '#F87171', borderColor: 'rgba(239, 68, 68, 0.35)' } : {}}>
                         {r.status}
                       </span>
                     </td>
                     <td style={{ padding: '0.75rem 1rem' }}>
-                      <code style={{ fontSize: '0.8rem', background: '#EBEBED', padding: '0.2rem 0.4rem', borderRadius: 4 }}>
+                      <code style={{ fontSize: '0.8rem' }}>
                         {r.original_locator || '—'}
                       </code>
                     </td>
                     <td style={{ padding: '0.75rem 1rem' }}>
-                      <code style={{ fontSize: '0.8rem', background: '#EBEBED', padding: '0.2rem 0.4rem', borderRadius: 4, color: 'var(--primary)' }}>
+                      <code style={{ fontSize: '0.8rem', color: 'var(--primary)' }}>
                         {r.replacement_selector || '—'}
                       </code>
                     </td>
@@ -584,12 +584,12 @@ export const TestRunnerView: React.FC = () => {
             <div style={{ fontSize: '0.7rem', color: 'var(--status-pass)' }}>Verified Outcome</div>
           </div>
 
-          <div style={{ background: '#E8F5E9', padding: '0.85rem 1rem', borderRadius: 'var(--radius-sm)', border: '1px solid #C8E6C9' }}>
-            <div style={{ fontSize: '0.7rem', color: '#2E7D32', textTransform: 'uppercase', fontWeight: 700 }}>Recovery Rate</div>
-            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#1B5E20', marginTop: '0.2rem' }}>
+          <div style={{ background: 'rgba(16, 185, 129, 0.12)', padding: '0.85rem 1rem', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(16, 185, 129, 0.35)' }}>
+            <div style={{ fontSize: '0.7rem', color: '#34D399', textTransform: 'uppercase', fontWeight: 700 }}>Recovery Rate</div>
+            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#10B981', marginTop: '0.2rem' }}>
               {evaluationReport?.summary.recovery_success_rate_percent != null ? `${evaluationReport.summary.recovery_success_rate_percent}%` : '100.0%'}
             </div>
-            <div style={{ fontSize: '0.7rem', color: '#2E7D32' }}>Empirically Measured</div>
+            <div style={{ fontSize: '0.7rem', color: '#34D399' }}>Empirically Measured</div>
           </div>
 
           <div style={{ background: 'var(--bg-secondary)', padding: '0.85rem 1rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
@@ -649,7 +649,7 @@ export const TestRunnerView: React.FC = () => {
                 evaluationReport.scenarios.map((sc, idx) => (
                   <tr
                     key={idx}
-                    style={{ borderBottom: '1px solid var(--border-color)', background: idx % 2 === 0 ? '#FFFFFF' : 'var(--bg-secondary)' }}
+                    style={{ borderBottom: '1px solid var(--border-color)', background: idx % 2 === 0 ? 'rgba(15, 23, 42, 0.5)' : 'rgba(3, 7, 18, 0.5)' }}
                   >
                     <td style={{ padding: '0.65rem 0.85rem', fontFamily: 'monospace', color: 'var(--text-muted)' }}>
                       {idx + 1}
@@ -670,7 +670,7 @@ export const TestRunnerView: React.FC = () => {
                       {sc.recovery_decision}
                     </td>
                     <td style={{ padding: '0.65rem 0.85rem' }}>
-                      <code style={{ fontSize: '0.75rem', background: '#EBEBED', padding: '0.15rem 0.35rem', borderRadius: 4, color: 'var(--primary)' }}>
+                      <code style={{ fontSize: '0.75rem', color: 'var(--primary)' }}>
                         {sc.reconstructed_steps}
                       </code>
                     </td>
@@ -687,9 +687,9 @@ export const TestRunnerView: React.FC = () => {
                         }`}
                         style={
                           sc.final_status === 'FAIL'
-                            ? { background: '#FFF5F5', color: '#B91C1C', borderColor: '#FFD0CE' }
+                            ? { background: 'rgba(239, 68, 68, 0.15)', color: '#F87171', borderColor: 'rgba(239, 68, 68, 0.35)' }
                             : sc.final_status === 'HUMAN REVIEW REQUIRED'
-                            ? { background: '#FFFBEB', color: '#B45309', borderColor: '#FDE68A' }
+                            ? { background: 'rgba(245, 158, 11, 0.15)', color: '#FBBF24', borderColor: 'rgba(245, 158, 11, 0.35)' }
                             : {}
                         }
                       >

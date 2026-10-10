@@ -51,7 +51,7 @@ export const BrokenVersion: React.FC<BrokenVersionProps> = ({
         <div>
           <strong>Broken Version — Controlled Backend Failure Mode:</strong> Any task creation attempt in this mode deterministically triggers an HTTP 500 internal server error. This proves the system correctly identifies real backend application failures.
         </div>
-        <span className="badge" style={{ background: '#FFF0EF', color: 'var(--danger)', borderColor: '#FFCDD2' }}>
+        <span className="badge" style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#F87171', borderColor: 'rgba(239, 68, 68, 0.4)' }}>
           Simulating HTTP 500
         </span>
       </div>
@@ -134,7 +134,7 @@ export const BrokenVersion: React.FC<BrokenVersionProps> = ({
 
             <form onSubmit={handleSubmit}>
               <div className="modal-body">
-                <div style={{ background: '#FFF5F5', border: '1px solid #FFD0CE', borderRadius: 8, padding: '0.75rem', marginBottom: '1rem', fontSize: '0.825rem', color: '#B91C1C' }}>
+                <div style={{ background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.35)', borderRadius: 8, padding: '0.75rem', marginBottom: '1rem', fontSize: '0.825rem', color: '#FECACA' }}>
                   Notice: Submitting this form will send <code>X-Simulate-Backend-Failure: true</code> to the backend, provoking a 500 error.
                 </div>
 
