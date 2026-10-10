@@ -4,6 +4,7 @@ import { Navbar } from './components/Navbar';
 import { VersionA } from './components/VersionA';
 import { VersionB } from './components/VersionB';
 import { BrokenVersion } from './components/BrokenVersion';
+import { AmbiguousVersion } from './components/AmbiguousVersion';
 
 export function App() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -12,6 +13,7 @@ export function App() {
     const modeParam = params.get('mode');
     if (modeParam === 'version-b') return 'version-b';
     if (modeParam === 'broken') return 'broken';
+    if (modeParam === 'ambiguous') return 'ambiguous';
     return 'version-a';
   });
 
@@ -162,6 +164,10 @@ export function App() {
             serverError={serverError}
             onClearError={() => setServerError(null)}
           />
+        )}
+
+        {currentMode === 'ambiguous' && (
+          <AmbiguousVersion />
         )}
       </main>
     </div>

@@ -7,7 +7,7 @@ export interface Task {
   created_at: string;
 }
 
-export type DemoMode = 'version-a' | 'version-b' | 'broken';
+export type DemoMode = 'version-a' | 'version-b' | 'broken' | 'ambiguous';
 
 export interface TaskFormPayload {
   title: string;

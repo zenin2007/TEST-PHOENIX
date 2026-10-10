@@ -51,6 +51,14 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             <span>⚠️</span> Broken (Backend 500)
           </button>
+          <button
+            id="tab-ambiguous"
+            className={`nav-tab ${currentMode === 'ambiguous' ? 'active' : ''}`}
+            style={currentMode === 'ambiguous' ? { background: '#d97706', color: '#fff' } : {}}
+            onClick={() => onSelectMode('ambiguous')}
+          >
+            <span>⚖️</span> Ambiguous UI
+          </button>
         </nav>
 
         <div className="nav-actions">
