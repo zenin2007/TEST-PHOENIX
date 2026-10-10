@@ -24,6 +24,22 @@ def init_db() -> None:
                 created_at TEXT NOT NULL
             )
         """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS test_runs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                scenario TEXT NOT NULL,
+                status TEXT NOT NULL,
+                original_locator TEXT,
+                original_locator_worked INTEGER DEFAULT 1,
+                initial_failure_reason TEXT,
+                replacement_selector TEXT,
+                candidate_score REAL,
+                recovery_actions TEXT,
+                verification_result TEXT,
+                diagnostics_json TEXT,
+                created_at TEXT NOT NULL
+            )
+        """)
         conn.commit()
     finally:
         conn.close()
@@ -89,6 +105,86 @@ def reset_db_data(seed: bool = True) -> None:
                 VALUES (?, ?, ?, ?, ?)
             """, sample_tasks)
         conn.commit()
+    finally:
+        conn.close()
+
+def save_test_run(
+    scenario: str,
+    status: str,
+    original_locator: Optional[str] = None,
+    original_locator_worked: bool = True,
+    initial_failure_reason: Optional[str] = None,
+    replacement_selector: Optional[str] = None,
+    candidate_score: Optional[float] = None,
+    recovery_actions: Optional[str] = None,
+    verification_result: Optional[str] = None,
+    diagnostics_json: Optional[str] = None
+) -> Dict[str, Any]:
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        now = datetime.now(timezone.utc).isoformat()
+        cursor.execute("""
+            INSERT INTO test_runs (
+                scenario, status, original_locator, original_locator_worked,
+                initial_failure_reason, replacement_selector, candidate_score,
+                recovery_actions, verification_result, diagnostics_json, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            scenario, status, original_locator, 1 if original_locator_worked else 0,
+            initial_failure_reason, replacement_selector, candidate_score,
+            recovery_actions, verification_result, diagnostics_json, now
+        ))
+        conn.commit()
+        run_id = cursor.lastrowid
+        return {
+            "id": run_id,
+            "scenario": scenario,
+            "status": status,
+            "original_locator": original_locator,
+            "original_locator_worked": bool(original_locator_worked),
+            "initial_failure_reason": initial_failure_reason,
+            "replacement_selector": replacement_selector,
+            "candidate_score": candidate_score,
+            "recovery_actions": recovery_actions,
+            "verification_result": verification_result,
+            "diagnostics_json": diagnostics_json,
+            "created_at": now
+        }
+    finally:
+        conn.close()
+
+def get_test_runs(limit: int = 50) -> List[Dict[str, Any]]:
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT id, scenario, status, original_locator, original_locator_worked,
+                   initial_failure_reason, replacement_selector, candidate_score,
+                   recovery_actions, verification_result, created_at
+            FROM test_runs ORDER BY id DESC LIMIT ?
+        """, (limit,))
+        rows = cursor.fetchall()
+        result = []
+        for row in rows:
+            d = dict(row)
+            d["original_locator_worked"] = bool(d["original_locator_worked"])
+            result.append(d)
+        return result
+    finally:
+        conn.close()
+
+def get_test_run_by_id(run_id: int) -> Optional[Dict[str, Any]]:
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM test_runs WHERE id = ?", (run_id,))
+        row = cursor.fetchone()
+        if not row:
+            return None
+        d = dict(row)
+        d["original_locator_worked"] = bool(d["original_locator_worked"])
+        return d
     finally:
         conn.close()
 

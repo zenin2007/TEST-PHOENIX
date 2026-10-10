@@ -69,6 +69,16 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             {backendHealthy ? 'API Online' : 'API Connecting...'}
           </span>
+          <a
+            id="results-dashboard-link"
+            href="http://127.0.0.1:8000/results"
+            target="_blank"
+            rel="noreferrer"
+            className="btn-secondary"
+            style={{ textDecoration: 'none', background: '#312e81', borderColor: '#4f46e5', color: '#c7d2fe' }}
+          >
+            📊 Test Results Dashboard
+          </a>
           <button
             id="reset-db-btn"
             className="btn-secondary"

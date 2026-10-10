@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TestPhoenix — Self-Healing Test Results</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #3b82f6;
+      --accent-purple: #8b5cf6;
+      --danger: #ef4444;
+      --success: #10b981;
+      --warning: #f59e0b;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 2rem;
+    }
+    .container { max-width: 1100px; margin: 0 auto; }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--card-border);
+      margin-bottom: 2rem;
+    }
+    .brand-title { font-size: 1.75rem; font-weight: 800; color: #fff; }
+    .brand-tagline { font-size: 0.95rem; color: #a78bfa; font-weight: 500; }
+    .btn-group { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 2rem; }
+    .btn {
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border: 1px solid transparent;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+    }
+    .btn-a { background: #2563eb; color: #fff; }
+    .btn-a:hover { background: #1d4ed8; }
+    .btn-b { background: #7c3aed; color: #fff; }
+    .btn-b:hover { background: #6d28d9; }
+    .btn-c { background: #dc2626; color: #fff; }
+    .btn-c:hover { background: #b91c1c; }
+    .btn-d { background: #d97706; color: #fff; }
+    .btn-d:hover { background: #b45309; }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .result-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 1.75rem;
+      margin-bottom: 2.5rem;
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.4);
+    }
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .badge {
+      padding: 0.35rem 0.85rem;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .badge-PASS { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #059669; }
+    .badge-SELF-HEALED { background: rgba(139, 92, 246, 0.2); color: #c4b5fd; border: 1px solid #7c3aed; }
+    .badge-FAIL { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid #dc2626; }
+    .badge-HUMAN-REVIEW-REQUIRED { background: rgba(245, 158, 11, 0.2); color: #fde68a; border: 1px solid #d97706; }
+    
+    .grid-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+    .detail-item {
+      background: #0b1120;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+    .detail-label { font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.35rem; font-weight: 600; }
+    .detail-val { font-size: 0.95rem; font-weight: 500; word-break: break-all; }
+
+    .history-section { margin-top: 2rem; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.875rem; text-align: left; }
+    th { padding: 0.75rem 1rem; background: #0b1120; color: var(--text-muted); font-weight: 600; border-bottom: 1px solid var(--card-border); }
+    td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--card-border); }
+    tr:hover td { background: rgba(255,255,255,0.02); }
+    .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #fff; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1 class="brand-title">TestPhoenix Prototype</h1>
+        <div class="brand-tagline">"Rise above every UI change."</div>
+      </div>
+      <div>
+        <a href="http://127.0.0.1:5173" target="_blank" style="color: var(--primary); font-size: 0.9rem; text-decoration: none; font-weight: 500;">
+          Launch Demo Web App &rarr;
+        </a>
+      </div>
+    </header>
+
+    <div style="margin-bottom: 1.25rem; font-size: 0.95rem; color: var(--text-muted);">
+      Trigger real automated Playwright scenarios against the live application:
+    </div>
+
+    <!-- Demonstration Buttons -->
+    <div class="btn-group">
+      <button id="btn-run-a" class="btn btn-a" onclick="runScenario('version-a')">
+        <span>▶</span> Run Version A (Normal Test)
+      </button>
+      <button id="btn-run-b" class="btn btn-b" onclick="runScenario('version-b')">
+        <span>⚡</span> Run Version B (Self-Healing Test)
+      </button>
+      <button id="btn-run-c" class="btn btn-c" onclick="runScenario('broken')">
+        <span>⚠️</span> Run Broken Backend (Failure Detection)
+      </button>
+      <button id="btn-run-d" class="btn btn-d" onclick="runScenario('ambiguous')">
+        <span>⚖️</span> Run Ambiguous UI Challenge
+      </button>
+    </div>
+
+    <div id="loading-bar" style="display: none; padding: 1rem; background: #1e293b; border-radius: 8px; margin-bottom: 1.5rem; text-align: center;">
+      <span class="spinner"></span> Running automated browser test with TestPhoenix...
+    </div>
+
+    <!-- Active Result Display Card -->
+    <div id="result-display" class="result-card">
+      <div class="result-header">
+        <div>
+          <h2 id="res-scenario" style="font-size: 1.35rem; font-weight: 700;">No test executed yet</h2>
+          <span id="res-time" style="font-size: 0.8rem; color: var(--text-muted);">Select a scenario above to run the live test engine</span>
+        </div>
+        <span id="res-status-badge" class="badge" style="display: none;">PENDING</span>
+      </div>
+
+      <div class="grid-details">
+        <div class="detail-item">
+          <div class="detail-label">Original Locator</div>
+          <div id="res-orig-locator" class="detail-val">—</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Original Locator Worked?</div>
+          <div id="res-orig-worked" class="detail-val">—</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Initial Failure Reason</div>
+          <div id="res-fail-reason" class="detail-val" style="color: #fca5a5;">—</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Replacement Selected</div>
+          <div id="res-replacement" class="detail-val" style="color: #c4b5fd;">—</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Confidence Score</div>
+          <div id="res-score" class="detail-val">—</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Verification Result</div>
+          <div id="res-verification" class="detail-val">—</div>
+        </div>
+      </div>
+
+      <div class="detail-item" style="margin-bottom: 1.25rem;">
+        <div class="detail-label">Recovery Actions Taken</div>
+        <div id="res-actions" class="detail-val" style="font-family: monospace; font-size: 0.85rem;">—</div>
+      </div>
+    </div>
+
+    <!-- History Section -->
+    <div class="history-section">
+      <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem;">Recent Test Run History (SQLite)</h3>
+      <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 8px; overflow: hidden;">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Scenario</th>
+              <th>Status</th>
+              <th>Original Locator</th>
+              <th>Replacement</th>
+              <th>Confidence</th>
+              <th>Timestamp</th>
+            </tr>
+          </thead>
+          <tbody id="history-tbody">
+            <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Loading history...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function fetchHistory() {
+      try {
+        const res = await fetch('/api/tests/history');
+        if (!res.ok) return;
+        const runs = await res.json();
+        const tbody = document.getElementById('history-tbody');
+        if (!runs || runs.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">No runs recorded yet. Click one of the buttons above to run a scenario.</td></tr>';
+          return;
+        }
+        tbody.innerHTML = runs.map(r => `
+          <tr>
+            <td>#${r.id}</td>
+            <td><strong>${r.scenario}</strong></td>
+            <td><span class="badge badge-${r.status.replace(/ /g, '-')}">${r.status}</span></td>
+            <td><code>${r.original_locator || '—'}</code></td>
+            <td><code>${r.replacement_selector || '—'}</code></td>
+            <td>${r.candidate_score ? (r.candidate_score * 100).toFixed(1) + '%' : '—'}</td>
+            <td>${new Date(r.created_at).toLocaleTimeString()}</td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function runScenario(scenarioKey) {
+      const btns = document.querySelectorAll('.btn');
+      btns.forEach(b => b.disabled = true);
+      document.getElementById('loading-bar').style.display = 'block';
+
+      try {
+        const res = await fetch('/api/tests/run', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ scenario: scenarioKey })
+        });
+        const data = await res.json();
+        renderResult(data);
+        await fetchHistory();
+      } catch (err) {
+        alert('Error running scenario: ' + err.message);
+      } finally {
+        btns.forEach(b => b.disabled = false);
+        document.getElementById('loading-bar').style.display = 'none';
+      }
+    }
+
+    function renderResult(data) {
+      document.getElementById('res-scenario').innerText = data.scenario;
+      document.getElementById('res-time').innerText = 'Executed at: ' + new Date(data.created_at).toLocaleTimeString();
+
+      const badge = document.getElementById('res-status-badge');
+      badge.style.display = 'inline-block';
+      badge.className = 'badge badge-' + data.status.replace(/ /g, '-');
+      badge.innerText = data.status;
+
+      document.getElementById('res-orig-locator').innerText = data.original_locator || 'N/A';
+      document.getElementById('res-orig-worked').innerHTML = data.original_locator_worked
+        ? '<span style="color: #34d399;">✓ Yes (Passed initially)</span>'
+        : '<span style="color: #f87171;">✗ No (Timed out / Changed)</span>';
+
+      document.getElementById('res-fail-reason').innerText = data.initial_failure_reason || 'None (Selector succeeded cleanly)';
+      document.getElementById('res-replacement').innerText = data.replacement_selector || 'None (Original retained)';
+      document.getElementById('res-score').innerText = data.candidate_score ? (data.candidate_score * 100).toFixed(1) + '%' : 'N/A';
+      document.getElementById('res-verification').innerText = data.verification_result || 'N/A';
+      document.getElementById('res-actions').innerText = data.recovery_actions || 'N/A';
+    }
+
+    // Initial load
+    fetchHistory();
+  </script>
+</body>
+</html>

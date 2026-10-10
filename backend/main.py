@@ -120,6 +120,52 @@ def reset_test_data(payload: Optional[ResetDataRequest] = None):
         "tasks_count": len(tasks)
     }
 
+# ==================== TestPhoenix MVP Test Execution Endpoints ====================
+
+@app.post("/api/tests/run")
+def trigger_test_run(payload: TestRunRequest):
+    """
+    Executes a real automated Playwright browser test using the TestPhoenix engine
+    and stores the execution record in SQLite.
+    """
+    from backend.test_runner import execute_scenario_run
+    try:
+        run_record = execute_scenario_run(scenario_key=payload.scenario)
+        return run_record
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Test scenario execution failed: {str(e)}"
+        )
+
+@app.get("/api/tests/history")
+def list_test_runs(limit: int = 50):
+    """Retrieve recent test run history from SQLite."""
+    from backend.database import get_test_runs
+    return get_test_runs(limit=limit)
+
+@app.get("/api/tests/history/{run_id}")
+def get_test_run_details(run_id: int):
+    """Retrieve full details and diagnostic logs for an individual test run."""
+    from backend.database import get_test_run_by_id
+    run = get_test_run_by_id(run_id)
+    if not run:
+        raise HTTPException(status_code=404, detail=f"Test run #{run_id} not found")
+    return run
+
+# Serve Results Dashboard HTML interface
+@app.get("/results")
+@app.get("/dashboard")
+@app.get("/")
+def serve_results_page():
+    from fastapi.responses import FileResponse
+    import os
+    results_path = os.path.join(os.path.dirname(__file__), "static", "results.html")
+    if os.path.exists(results_path):
+        return FileResponse(results_path)
+    return {"message": "TestPhoenix API Online. Results page not found."}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("backend.main:app", host="127.0.0.1", port=8000, reload=True)
+

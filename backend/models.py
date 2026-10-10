@@ -20,3 +20,7 @@ class FailureModeRequest(BaseModel):
 
 class ResetDataRequest(BaseModel):
     seed: bool = True
+
+class TestRunRequest(BaseModel):
+    scenario: str = Field(default="version-a", description="Scenario key: version-a, version-b, broken, ambiguous")
+

@@ -91,3 +91,33 @@ def test_controlled_backend_failure_via_toggle():
     success_resp = client.post("/api/tasks", json=failing_task)
     assert success_resp.status_code == 201
     assert success_resp.json()["title"] == failing_task["title"]
+
+def test_test_run_history_and_details_endpoints():
+    from backend.database import save_test_run
+    save_test_run(
+        scenario="Version A — Normal Test",
+        status="PASS",
+        original_locator="#create-task-btn",
+        original_locator_worked=True,
+        candidate_score=1.0,
+        recovery_actions="None",
+        verification_result="PASSED: Task created and persisted"
+    )
+
+    history_resp = client.get("/api/tests/history")
+    assert history_resp.status_code == 200
+    runs = history_resp.json()
+    assert len(runs) >= 1
+    run_id = runs[0]["id"]
+
+    detail_resp = client.get(f"/api/tests/history/{run_id}")
+    assert detail_resp.status_code == 200
+    assert detail_resp.json()["id"] == run_id
+    assert detail_resp.json()["status"] == "PASS"
+
+def test_results_dashboard_page_served():
+    resp = client.get("/results")
+    assert resp.status_code == 200
+    assert "TestPhoenix" in resp.text
+    assert "Rise above every UI change" in resp.text
+
