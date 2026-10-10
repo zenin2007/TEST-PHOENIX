@@ -21,6 +21,7 @@ def execute_scenario_run(
     """
     engine = TestPhoenixEngine()
     unique_title = f"Task {uuid.uuid4().hex[:6]}"
+    start_time = time.time()
 
     # Reset demo database to seed state
     try:
@@ -34,7 +35,7 @@ def execute_scenario_run(
         page = context.new_page()
 
         try:
-            if scenario_key == "version-a":
+            if scenario_key in ["version-a", "normal"]:
                 page.goto(f"{frontend_url}/?mode=version-a")
                 
                 step_open = IntentStep(
@@ -87,6 +88,9 @@ def execute_scenario_run(
                     "candidate_score": 1.0,
                     "recovery_actions": "None required (Original locator #create-task-btn was found and interacted cleanly)",
                     "verification_result": "PASSED: Task was persisted into SQLite and verified in UI card deck",
+                    "original_intent": "Open creation modal, enter task details, save task, and verify UI & SQLite persistence",
+                    "detected_differences": "None — Interface elements match baseline specification",
+                    "reconstructed_workflow": "#create-task-btn -> #task-title-input -> #task-assignee-input -> #submit-task-btn",
                     "diagnostics_json": json.dumps([
                         TestPhoenixReporter.to_dict("Open Modal", step_open),
                         TestPhoenixReporter.to_dict("Fill Title", step_title),
@@ -94,11 +98,11 @@ def execute_scenario_run(
                     ])
                 }
 
-            elif scenario_key == "version-b":
+            elif scenario_key in ["version-b", "self-healing"]:
                 page.goto(f"{frontend_url}/?mode=version-b")
 
                 step_open = IntentStep(
-                    intent="Open task creation modal",
+                    intent="Click button to create new task",
                     original_locator="#create-task-btn", # Missing on Version B
                     expected_role="button",
                     expected_name="Create Task",
@@ -116,7 +120,7 @@ def execute_scenario_run(
                     action=StepAction.FILL,
                     input_data=unique_title
                 )
-                engine.execute_step(page, step_title, test_name="Demo 2: Fill Title")
+                status_title = engine.execute_step(page, step_title, test_name="Demo 2: Fill Title")
 
                 step_assignee = IntentStep(
                     intent="Enter task assignee",
@@ -126,10 +130,10 @@ def execute_scenario_run(
                     action=StepAction.FILL,
                     input_data="Lead Engineer"
                 )
-                engine.execute_step(page, step_assignee, test_name="Demo 2: Fill Assignee")
+                status_assignee = engine.execute_step(page, step_assignee, test_name="Demo 2: Fill Assignee")
 
                 step_submit = IntentStep(
-                    intent="Save task and persist to backend",
+                    intent="Submit task form and persist",
                     original_locator="#submit-task-btn",
                     expected_role="button",
                     expected_name="Save Task",
@@ -155,6 +159,9 @@ def execute_scenario_run(
                     "candidate_score": best_score,
                     "recovery_actions": f"Discovered replacement '{replacement_sel}' (Score: {best_score:.3f}). Healed dialog open, input fields, and submit action.",
                     "verification_result": "PASSED: Verified task in UI work item cards and confirmed persistence in SQLite backend",
+                    "original_intent": "Open creation modal, enter task details, save task, and verify UI & SQLite persistence",
+                    "detected_differences": "Layout redesign: Action moved to workspace sidebar (#new-work-item-btn); Composer modal transformed to slideover sheet (#workitem-slideover); Form fields and submit button renamed",
+                    "reconstructed_workflow": f"{replacement_sel} -> #workitem-title-input -> #workitem-owner-input -> #submit-workitem-btn",
                     "diagnostics_json": json.dumps([
                         TestPhoenixReporter.to_dict("Open Composer", step_open),
                         TestPhoenixReporter.to_dict("Fill Title", step_title),
@@ -162,7 +169,7 @@ def execute_scenario_run(
                     ])
                 }
 
-            elif scenario_key == "broken":
+            elif scenario_key in ["broken", "broken-backend"]:
                 page.goto(f"{frontend_url}/?mode=broken")
 
                 step_open = IntentStep(
@@ -214,7 +221,10 @@ def execute_scenario_run(
                     "replacement_selector": None,
                     "candidate_score": None,
                     "recovery_actions": "Self-healing bypassed. Genuine application defect identified (NETWORK_OR_BACKEND_ERROR).",
-                    "verification_result": f"CONFIRMED FAILURE: Task was NOT saved in SQLite (Safe abort, database uncorrupted)",
+                    "verification_result": "CONFIRMED FAILURE: Task was NOT saved in SQLite (Safe abort, database uncorrupted)",
+                    "original_intent": "Submit task form and verify task is committed to SQLite database without corruption",
+                    "detected_differences": "Infrastructure failure: Backend API returned HTTP 500 DB_TRANSACTION_FAILURE",
+                    "reconstructed_workflow": "Self-healing suppressed to preserve true failure classification",
                     "diagnostics_json": json.dumps([
                         TestPhoenixReporter.to_dict("Open Modal", step_open),
                         TestPhoenixReporter.to_dict("Submit Form", step_submit)
@@ -244,6 +254,9 @@ def execute_scenario_run(
                     "candidate_score": 0.912,
                     "recovery_actions": "Automated action aborted. Human review requested to prevent speculative action.",
                     "verification_result": "HUMAN REVIEW REQUIRED: Ambiguity detected between Workstream Alpha and Workstream Beta",
+                    "original_intent": "Create new engineering task in multi-stream workspace",
+                    "detected_differences": "Ambiguity detected: Two candidate actions (#btn-create-task-stream-alpha, #btn-create-task-stream-beta) with score delta < 0.15 threshold",
+                    "reconstructed_workflow": "Workflow aborted; escalated to HUMAN REVIEW REQUIRED",
                     "diagnostics_json": json.dumps([
                         TestPhoenixReporter.to_dict("Ambiguous UI", step_ambig)
                     ])
@@ -260,12 +273,18 @@ def execute_scenario_run(
                     "candidate_score": None,
                     "recovery_actions": "None",
                     "verification_result": "FAILED",
+                    "original_intent": "N/A",
+                    "detected_differences": "N/A",
+                    "reconstructed_workflow": "N/A",
                     "diagnostics_json": "[]"
                 }
 
         finally:
             context.close()
             browser.close()
+
+    duration_ms = round((time.time() - start_time) * 1000, 2)
+    report_data["execution_duration_ms"] = duration_ms
 
     # Save to SQLite database
     saved_record = save_test_run(
@@ -278,6 +297,10 @@ def execute_scenario_run(
         candidate_score=report_data["candidate_score"],
         recovery_actions=report_data["recovery_actions"],
         verification_result=report_data["verification_result"],
-        diagnostics_json=report_data["diagnostics_json"]
+        diagnostics_json=report_data["diagnostics_json"],
+        original_intent=report_data.get("original_intent"),
+        detected_differences=report_data.get("detected_differences"),
+        reconstructed_workflow=report_data.get("reconstructed_workflow"),
+        execution_duration_ms=duration_ms
     )
     return saved_record

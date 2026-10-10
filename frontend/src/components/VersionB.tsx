@@ -46,11 +46,11 @@ export const VersionB: React.FC<VersionBProps> = ({ tasks, onCreateTask, isLoadi
   return (
     <div id="version-b-container" className="version-b-root">
       {/* Informative Banner */}
-      <div className="mode-banner purple-banner">
+      <div className="mode-banner info-banner">
         <div>
           <strong>Version B: Redesigned UI</strong> — Interface layout redesigned with sidebar action panel and slide-out composer.
         </div>
-        <span className="badge" style={{ background: 'rgba(139, 92, 246, 0.25)', color: '#c4b5fd' }}>
+        <span className="badge badge-in-progress">
           UI Redesign Challenge
         </span>
       </div>
@@ -59,12 +59,12 @@ export const VersionB: React.FC<VersionBProps> = ({ tasks, onCreateTask, isLoadi
         {/* Left Sidebar Action Panel (Different DOM position & ID) */}
         <aside className="redesign-sidebar" id="workspace-sidebar">
           <div style={{ marginBottom: '1.25rem' }}>
-            <h2 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f3e8ff' }}>Workspace Actions</h2>
-            <p style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Agile delivery stream</p>
+            <h2 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-main)' }}>Workspace Actions</h2>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Agile delivery stream</p>
           </div>
 
           <div className="sidebar-action-box">
-            <p style={{ fontSize: '0.85rem', color: '#cbd5e1', marginBottom: '1rem' }}>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
               Have a new feature or chore to schedule?
             </p>
             {/* The renamed button with new HTML ID */}
@@ -79,14 +79,14 @@ export const VersionB: React.FC<VersionBProps> = ({ tasks, onCreateTask, isLoadi
             </button>
           </div>
 
-          <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.4rem 0', borderBottom: '1px solid #334155' }}>
+          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.4rem 0', borderBottom: '1px solid var(--border-color)' }}>
               <span>Total Items</span>
-              <strong style={{ color: '#fff' }}>{tasks.length}</strong>
+              <strong style={{ color: 'var(--text-main)' }}>{tasks.length}</strong>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.4rem 0' }}>
               <span>Completed</span>
-              <strong style={{ color: '#34d399' }}>{tasks.filter(t => t.status === 'Done').length}</strong>
+              <strong style={{ color: 'var(--status-pass)' }}>{tasks.filter(t => t.status === 'Done').length}</strong>
             </div>
           </div>
         </aside>
@@ -94,7 +94,7 @@ export const VersionB: React.FC<VersionBProps> = ({ tasks, onCreateTask, isLoadi
         {/* Right Main Content Area */}
         <main className="redesign-main-content">
           <div style={{ marginBottom: '1.5rem' }}>
-            <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#f8fafc', letterSpacing: '-0.02em' }}>
+            <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-main)', letterSpacing: '-0.02em' }}>
               Active Work Items
             </h1>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
@@ -112,7 +112,7 @@ export const VersionB: React.FC<VersionBProps> = ({ tasks, onCreateTask, isLoadi
               >
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                    <span style={{ fontSize: '0.75rem', color: '#a78bfa', fontWeight: 600 }}>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: 600 }}>
                       ITEM-{task.id}
                     </span>
                     <span
@@ -127,17 +127,17 @@ export const VersionB: React.FC<VersionBProps> = ({ tasks, onCreateTask, isLoadi
                       {task.status}
                     </span>
                   </div>
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: '#f8fafc', marginBottom: '0.5rem' }}>
+                  <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-main)', marginBottom: '0.5rem' }}>
                     {task.title}
                   </h3>
-                  <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '1rem', lineHeight: 1.4 }}>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem', lineHeight: 1.4 }}>
                     {task.description || 'No additional details.'}
                   </p>
                 </div>
 
                 <div className="task-card-footer">
-                  <span style={{ color: '#e2e8f0', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#8b5cf6' }}></span>
+                  <span style={{ color: 'var(--text-main)', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--primary)' }}></span>
                     {task.assignee}
                   </span>
                   <span style={{ color: 'var(--text-muted)' }}>
@@ -154,14 +154,14 @@ export const VersionB: React.FC<VersionBProps> = ({ tasks, onCreateTask, isLoadi
       {isDrawerOpen && (
         <div className="modal-overlay" id="workitem-drawer-overlay">
           <div className="drawer-slideover" id="workitem-slideover">
-            <div className="modal-header" style={{ borderBottomColor: 'rgba(139, 92, 246, 0.3)' }}>
+            <div className="modal-header">
               <div>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#f3e8ff' }}>Compose Work Item</h2>
-                <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Redesigned item creation sheet</span>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-main)' }}>Compose Work Item</h2>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Redesigned item creation sheet</span>
               </div>
               <button
                 id="close-drawer-btn"
-                style={{ background: 'none', border: 'none', color: '#cbd5e1', cursor: 'pointer', fontSize: '1.25rem' }}
+                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '1.25rem' }}
                 onClick={() => setIsDrawerOpen(false)}
               >
                 ✕
@@ -177,7 +177,7 @@ export const VersionB: React.FC<VersionBProps> = ({ tasks, onCreateTask, isLoadi
                 )}
 
                 <div className="form-group">
-                  <label htmlFor="workitem-title-input" className="form-label" style={{ color: '#c4b5fd' }}>
+                  <label htmlFor="workitem-title-input" className="form-label">
                     Item Title *
                   </label>
                   <input
@@ -192,7 +192,7 @@ export const VersionB: React.FC<VersionBProps> = ({ tasks, onCreateTask, isLoadi
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="workitem-desc-input" className="form-label" style={{ color: '#c4b5fd' }}>
+                  <label htmlFor="workitem-desc-input" className="form-label">
                     Scope & Description
                   </label>
                   <textarea
@@ -207,7 +207,7 @@ export const VersionB: React.FC<VersionBProps> = ({ tasks, onCreateTask, isLoadi
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="workitem-owner-input" className="form-label" style={{ color: '#c4b5fd' }}>
+                  <label htmlFor="workitem-owner-input" className="form-label">
                     Lead Assignee / Owner *
                   </label>
                   <input
@@ -221,7 +221,7 @@ export const VersionB: React.FC<VersionBProps> = ({ tasks, onCreateTask, isLoadi
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="workitem-stage-select" className="form-label" style={{ color: '#c4b5fd' }}>
+                  <label htmlFor="workitem-stage-select" className="form-label">
                     Workflow Stage
                   </label>
                   <select
@@ -238,7 +238,7 @@ export const VersionB: React.FC<VersionBProps> = ({ tasks, onCreateTask, isLoadi
                 </div>
               </div>
 
-              <div className="modal-footer" style={{ borderTopColor: 'rgba(139, 92, 246, 0.3)' }}>
+              <div className="modal-footer">
                 <button
                   type="button"
                   id="cancel-workitem-btn"

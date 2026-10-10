@@ -37,9 +37,24 @@ def init_db() -> None:
                 recovery_actions TEXT,
                 verification_result TEXT,
                 diagnostics_json TEXT,
+                original_intent TEXT,
+                detected_differences TEXT,
+                reconstructed_workflow TEXT,
+                execution_duration_ms REAL,
                 created_at TEXT NOT NULL
             )
         """)
+        # Ensure migration columns for pre-existing databases
+        cursor.execute("PRAGMA table_info(test_runs)")
+        existing_cols = {row[1] for row in cursor.fetchall()}
+        for col_name, col_type in [
+            ("original_intent", "TEXT"),
+            ("detected_differences", "TEXT"),
+            ("reconstructed_workflow", "TEXT"),
+            ("execution_duration_ms", "REAL")
+        ]:
+            if col_name not in existing_cols:
+                cursor.execute(f"ALTER TABLE test_runs ADD COLUMN {col_name} {col_type}")
         conn.commit()
     finally:
         conn.close()
@@ -118,7 +133,11 @@ def save_test_run(
     candidate_score: Optional[float] = None,
     recovery_actions: Optional[str] = None,
     verification_result: Optional[str] = None,
-    diagnostics_json: Optional[str] = None
+    diagnostics_json: Optional[str] = None,
+    original_intent: Optional[str] = None,
+    detected_differences: Optional[str] = None,
+    reconstructed_workflow: Optional[str] = None,
+    execution_duration_ms: Optional[float] = None
 ) -> Dict[str, Any]:
     conn = get_connection()
     try:
@@ -128,12 +147,16 @@ def save_test_run(
             INSERT INTO test_runs (
                 scenario, status, original_locator, original_locator_worked,
                 initial_failure_reason, replacement_selector, candidate_score,
-                recovery_actions, verification_result, diagnostics_json, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                recovery_actions, verification_result, diagnostics_json,
+                original_intent, detected_differences, reconstructed_workflow,
+                execution_duration_ms, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             scenario, status, original_locator, 1 if original_locator_worked else 0,
             initial_failure_reason, replacement_selector, candidate_score,
-            recovery_actions, verification_result, diagnostics_json, now
+            recovery_actions, verification_result, diagnostics_json,
+            original_intent, detected_differences, reconstructed_workflow,
+            execution_duration_ms, now
         ))
         conn.commit()
         run_id = cursor.lastrowid
@@ -149,6 +172,10 @@ def save_test_run(
             "recovery_actions": recovery_actions,
             "verification_result": verification_result,
             "diagnostics_json": diagnostics_json,
+            "original_intent": original_intent,
+            "detected_differences": detected_differences,
+            "reconstructed_workflow": reconstructed_workflow,
+            "execution_duration_ms": execution_duration_ms,
             "created_at": now
         }
     finally:
@@ -161,7 +188,9 @@ def get_test_runs(limit: int = 50) -> List[Dict[str, Any]]:
         cursor.execute("""
             SELECT id, scenario, status, original_locator, original_locator_worked,
                    initial_failure_reason, replacement_selector, candidate_score,
-                   recovery_actions, verification_result, created_at
+                   recovery_actions, verification_result, original_intent,
+                   detected_differences, reconstructed_workflow, execution_duration_ms,
+                   created_at
             FROM test_runs ORDER BY id DESC LIMIT ?
         """, (limit,))
         rows = cursor.fetchall()

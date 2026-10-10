@@ -63,6 +63,7 @@ class StepDiagnostics:
     rationale: str = ""
     postcondition_verified: bool = False
     execution_time_ms: float = 0.0
+    detected_differences: str = ""
 
 @dataclass
 class IntentStep:
@@ -72,7 +73,30 @@ class IntentStep:
     expected_role: Optional[str] = None
     expected_name: Optional[str] = None
     input_data: Optional[Any] = None
+    is_idempotent: bool = True
     postcondition: Optional[Callable[[Page], bool]] = None
     postcondition_description: Optional[str] = None
     status: StepStatus = StepStatus.PENDING
     diagnostics: StepDiagnostics = field(default_factory=StepDiagnostics)
+
+@dataclass
+class WorkflowRecoveryReport:
+    workflow_name: str
+    original_intent: str
+    expected_outcome: str
+    final_status: StepStatus
+    steps: List[IntentStep] = field(default_factory=list)
+    detected_differences: List[str] = field(default_factory=list)
+    reconstructed_workflow: List[str] = field(default_factory=list)
+    recovery_attempts: int = 0
+    verification_evidence: str = ""
+    execution_duration_ms: float = 0.0
+
+@dataclass
+class IntentWorkflow:
+    name: str
+    original_intent: str
+    expected_outcome: str
+    steps: List[IntentStep] = field(default_factory=list)
+    ui_verifier: Optional[Callable[[Page], bool]] = None
+    backend_verifier: Optional[Callable[[], bool]] = None

@@ -4,7 +4,7 @@ from typing import List, Optional
 from contextlib import asynccontextmanager
 
 from backend.database import init_db, get_all_tasks, get_task_by_id, create_task, reset_db_data
-from backend.models import TaskCreate, TaskResponse, FailureModeRequest, ResetDataRequest
+from backend.models import TaskCreate, TaskResponse, FailureModeRequest, ResetDataRequest, TestRunRequest
 
 # Controlled test failure state (in-memory, reset on command or app reload)
 _failure_mode_active = False
@@ -138,13 +138,35 @@ def trigger_test_run(payload: TestRunRequest):
             detail=f"Test scenario execution failed: {str(e)}"
         )
 
+@app.post("/api/tests/normal")
+def run_normal_test():
+    from backend.test_runner import execute_scenario_run
+    return execute_scenario_run(scenario_key="normal")
+
+@app.post("/api/tests/self-healing")
+def run_self_healing_test():
+    from backend.test_runner import execute_scenario_run
+    return execute_scenario_run(scenario_key="self-healing")
+
+@app.post("/api/tests/broken-backend")
+def run_broken_backend_test():
+    from backend.test_runner import execute_scenario_run
+    return execute_scenario_run(scenario_key="broken-backend")
+
+@app.post("/api/tests/ambiguous")
+def run_ambiguous_test():
+    from backend.test_runner import execute_scenario_run
+    return execute_scenario_run(scenario_key="ambiguous")
+
 @app.get("/api/tests/history")
+@app.get("/api/runs")
 def list_test_runs(limit: int = 50):
     """Retrieve recent test run history from SQLite."""
     from backend.database import get_test_runs
     return get_test_runs(limit=limit)
 
 @app.get("/api/tests/history/{run_id}")
+@app.get("/api/runs/{run_id}")
 def get_test_run_details(run_id: int):
     """Retrieve full details and diagnostic logs for an individual test run."""
     from backend.database import get_test_run_by_id
@@ -164,6 +186,48 @@ def serve_results_page():
     if os.path.exists(results_path):
         return FileResponse(results_path)
     return {"message": "TestPhoenix API Online. Results page not found."}
+
+# ==================== Advanced Evaluation & Metrics Endpoints ====================
+
+@app.get("/api/evaluation/latest")
+def get_latest_evaluation():
+    """Retrieve the latest evaluated benchmark report from JSON."""
+    import os
+    import json
+    json_path = os.path.join(os.path.dirname(__file__), "..", "advanced_evaluation_report.json")
+    if not os.path.exists(json_path):
+        # Fallback to evaluation_report.json if advanced report not yet generated
+        fallback_path = os.path.join(os.path.dirname(__file__), "..", "evaluation_report.json")
+        if os.path.exists(fallback_path):
+            with open(fallback_path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        raise HTTPException(status_code=404, detail="No evaluation report found.")
+    with open(json_path, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+@app.get("/api/evaluation/csv")
+def download_evaluation_csv():
+    """Download the latest evaluated benchmark report as CSV."""
+    from fastapi.responses import FileResponse
+    import os
+    csv_path = os.path.join(os.path.dirname(__file__), "..", "advanced_evaluation_report.csv")
+    if not os.path.exists(csv_path):
+        raise HTTPException(status_code=404, detail="No evaluation CSV report found.")
+    return FileResponse(
+        csv_path,
+        media_type="text/csv",
+        filename="advanced_evaluation_report.csv"
+    )
+
+@app.post("/api/evaluation/run")
+def trigger_evaluation_run():
+    """Execute the full multi-scenario evaluation matrix and return refreshed metrics."""
+    from run_advanced_evaluation import run_advanced_evaluation
+    try:
+        report = run_advanced_evaluation(iterations=2)
+        return report
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Evaluation execution failed: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn

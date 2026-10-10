@@ -56,7 +56,7 @@ export const VersionA: React.FC<VersionAProps> = ({ tasks, onCreateTask, isLoadi
       {/* Action Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.75rem' }}>
         <div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: '#f8fafc' }}>Tasks & Milestones</h1>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-main)' }}>Tasks & Milestones</h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
             Manage and track software engineering deliverables.
           </p>

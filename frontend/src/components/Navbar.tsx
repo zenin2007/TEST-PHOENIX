@@ -19,7 +19,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <header className="top-nav">
       <div className="nav-container">
-        <div className="brand">
+        <div className="brand" onClick={() => onSelectMode('version-a')}>
           <div className="brand-icon">⚡</div>
           <div>
             <span>TestPhoenix</span>
@@ -54,10 +54,16 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             id="tab-ambiguous"
             className={`nav-tab ${currentMode === 'ambiguous' ? 'active' : ''}`}
-            style={currentMode === 'ambiguous' ? { background: '#d97706', color: '#fff' } : {}}
             onClick={() => onSelectMode('ambiguous')}
           >
             <span>⚖️</span> Ambiguous UI
+          </button>
+          <button
+            id="tab-test-runner"
+            className={`nav-tab ${currentMode === 'test-runner' ? 'active' : ''}`}
+            onClick={() => onSelectMode('test-runner')}
+          >
+            <span>▶</span> Test Automation Suite
           </button>
         </nav>
 
@@ -75,9 +81,9 @@ export const Navbar: React.FC<NavbarProps> = ({
             target="_blank"
             rel="noreferrer"
             className="btn-secondary"
-            style={{ textDecoration: 'none', background: '#312e81', borderColor: '#4f46e5', color: '#c7d2fe' }}
+            style={{ textDecoration: 'none' }}
           >
-            📊 Test Results Dashboard
+            <span>📊</span> Results Dashboard
           </a>
           <button
             id="reset-db-btn"

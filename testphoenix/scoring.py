@@ -19,11 +19,11 @@ class ScoringConfig:
 # Domain synonym groupings for deterministic intent semantic matching
 SYNONYM_GROUPS: List[Set[str]] = [
     # Creation & addition actions
-    {"create", "new", "add", "compose", "insert", "make", "plus", "+", "generate"},
+    {"create", "new", "add", "compose", "insert", "make", "plus", "+", "generate", "open", "launch", "trigger", "start"},
     # Task / work entities
     {"task", "work", "item", "workitem", "work_item", "issue", "ticket", "story", "chore", "job", "milestone", "todo"},
     # Submission & persistence actions
-    {"save", "submit", "publish", "confirm", "apply", "commit", "record", "persist", "persistence", "add"},
+    {"save", "submit", "publish", "confirm", "apply", "commit", "record", "persist", "persistence"},
     # Cancellation & dismissal
     {"cancel", "dismiss", "close", "abort", "back", "exit"},
     # Title / Summary fields
@@ -33,7 +33,9 @@ SYNONYM_GROUPS: List[Set[str]] = [
     # Assignee / Ownership
     {"assignee", "owner", "lead", "member", "person", "responsible", "user"},
     # Status / Workflow state
-    {"status", "stage", "state", "progress", "workflow", "phase"}
+    {"status", "stage", "state", "progress", "workflow", "phase"},
+    # Dialog & presentation containers
+    {"dialog", "modal", "slideover", "drawer", "sheet", "form", "composer", "view", "panel"}
 ]
 
 STOP_WORDS = {

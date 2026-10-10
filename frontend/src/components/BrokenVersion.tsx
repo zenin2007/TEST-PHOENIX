@@ -51,7 +51,7 @@ export const BrokenVersion: React.FC<BrokenVersionProps> = ({
         <div>
           <strong>Broken Version — Controlled Backend Failure Mode:</strong> Any task creation attempt in this mode deterministically triggers an HTTP 500 internal server error. This proves the system correctly identifies real backend application failures.
         </div>
-        <span className="badge" style={{ background: '#7f1d1d', color: '#fca5a5' }}>
+        <span className="badge" style={{ background: '#FFF0EF', color: 'var(--danger)', borderColor: '#FFCDD2' }}>
           Simulating HTTP 500
         </span>
       </div>
@@ -59,14 +59,14 @@ export const BrokenVersion: React.FC<BrokenVersionProps> = ({
       {/* Visible Server Error Alert */}
       {serverError && (
         <div id="error-alert" data-testid="error-message" className="alert-error">
-          <div style={{ fontSize: '1.25rem' }}>❌</div>
+          <div style={{ fontSize: '1.25rem' }}>✕</div>
           <div>
             <strong>Backend Error Encountered (HTTP 500)</strong>
             <p style={{ marginTop: '0.25rem', fontSize: '0.85rem' }}>{serverError}</p>
           </div>
           <button
             onClick={onClearError}
-            style={{ marginLeft: 'auto', background: 'none', border: 'none', color: '#fca5a5', cursor: 'pointer' }}
+            style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', fontSize: '1.1rem' }}
           >
             ✕
           </button>
@@ -74,9 +74,9 @@ export const BrokenVersion: React.FC<BrokenVersionProps> = ({
       )}
 
       {/* Action Header matching Version A */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.75rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.75rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: '#f8fafc' }}>Tasks & Milestones (Broken Mode)</h1>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-main)' }}>Tasks & Milestones (Broken Mode)</h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
             UI matches Version A, but backend task creation is set to fail deterministically.
           </p>
@@ -85,7 +85,7 @@ export const BrokenVersion: React.FC<BrokenVersionProps> = ({
           id="create-task-btn"
           data-testid="create-task-button"
           className="btn-primary"
-          style={{ background: '#dc2626' }}
+          style={{ background: 'var(--danger)', borderColor: 'var(--danger)' }}
           onClick={() => setIsModalOpen(true)}
         >
           <span>⚠️</span> Create Task (Will Fail)
@@ -134,7 +134,7 @@ export const BrokenVersion: React.FC<BrokenVersionProps> = ({
 
             <form onSubmit={handleSubmit}>
               <div className="modal-body">
-                <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: 6, padding: '0.75rem', marginBottom: '1rem', fontSize: '0.825rem', color: '#fca5a5' }}>
+                <div style={{ background: '#FFF5F5', border: '1px solid #FFD0CE', borderRadius: 8, padding: '0.75rem', marginBottom: '1rem', fontSize: '0.825rem', color: '#B91C1C' }}>
                   Notice: Submitting this form will send <code>X-Simulate-Backend-Failure: true</code> to the backend, provoking a 500 error.
                 </div>
 
@@ -215,7 +215,7 @@ export const BrokenVersion: React.FC<BrokenVersionProps> = ({
                   type="submit"
                   id="submit-task-btn"
                   className="btn-primary"
-                  style={{ background: '#dc2626' }}
+                  style={{ background: 'var(--danger)', borderColor: 'var(--danger)' }}
                   disabled={isLoading}
                 >
                   {isLoading ? 'Simulating Call...' : 'Save Task (Trigger 500)'}

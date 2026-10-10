@@ -5,6 +5,7 @@ import { VersionA } from './components/VersionA';
 import { VersionB } from './components/VersionB';
 import { BrokenVersion } from './components/BrokenVersion';
 import { AmbiguousVersion } from './components/AmbiguousVersion';
+import { TestRunnerView } from './components/TestRunnerView';
 
 export function App() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -14,6 +15,7 @@ export function App() {
     if (modeParam === 'version-b') return 'version-b';
     if (modeParam === 'broken') return 'broken';
     if (modeParam === 'ambiguous') return 'ambiguous';
+    if (modeParam === 'test-runner') return 'test-runner';
     return 'version-a';
   });
 
@@ -168,6 +170,10 @@ export function App() {
 
         {currentMode === 'ambiguous' && (
           <AmbiguousVersion />
+        )}
+
+        {currentMode === 'test-runner' && (
+          <TestRunnerView />
         )}
       </main>
     </div>

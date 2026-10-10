@@ -224,3 +224,116 @@ class TestPhoenixEngine:
                 pass
             if verbose:
                 print(TestPhoenixReporter.format_step_report(test_name, step))
+
+    def execute_workflow(
+        self,
+        page: Page,
+        workflow: 'IntentWorkflow',
+        verbose: bool = True
+    ) -> 'WorkflowRecoveryReport':
+        """
+        Executes an end-to-end intent-driven workflow.
+        Stores intent separately from selectors.
+        Reconstructs the workflow dynamically upon locator failures.
+        Guards non-idempotent actions against duplicates.
+        Verifies both UI and backend outcomes.
+        """
+        from testphoenix.models import WorkflowRecoveryReport
+        start_time = time.time()
+        report = WorkflowRecoveryReport(
+            workflow_name=workflow.name,
+            original_intent=workflow.original_intent,
+            expected_outcome=workflow.expected_outcome,
+            final_status=StepStatus.PENDING,
+            steps=workflow.steps
+        )
+
+        overall_status = StepStatus.PASS
+        reconstructed_steps: List[str] = []
+        detected_diffs: List[str] = []
+        total_recoveries = 0
+
+        for idx, step in enumerate(workflow.steps):
+            # Guard non-idempotent actions before retrying or re-executing
+            if not step.is_idempotent and workflow.backend_verifier:
+                try:
+                    if workflow.backend_verifier():
+                        step.status = StepStatus.PASS
+                        step.diagnostics.rationale = "Action already satisfied in backend (idempotency guard active)."
+                        reconstructed_steps.append(f"{step.intent}: [Skipped - already verified]")
+                        continue
+                except Exception:
+                    pass
+
+            step_status = self.execute_step(page, step, test_name=f"{workflow.name}: Step {idx+1}", verbose=verbose)
+
+            if step_status == StepStatus.SELF_HEALED:
+                total_recoveries += 1
+                if step.diagnostics.selected_candidate:
+                    reconstructed_steps.append(step.diagnostics.selected_candidate.selector)
+                    detected_diffs.append(
+                        f"Step '{step.intent}': Original '{step.original_locator}' replaced by '{step.diagnostics.selected_candidate.selector}' "
+                        f"(Score: {step.diagnostics.selected_candidate.score.total_score if step.diagnostics.selected_candidate.score else 1.0:.3f})"
+                    )
+                else:
+                    reconstructed_steps.append(step.original_locator)
+                if overall_status == StepStatus.PASS:
+                    overall_status = StepStatus.SELF_HEALED
+
+            elif step_status == StepStatus.PASS:
+                reconstructed_steps.append(step.original_locator)
+
+            elif step_status == StepStatus.HUMAN_REVIEW_REQUIRED:
+                overall_status = StepStatus.HUMAN_REVIEW_REQUIRED
+                report.final_status = StepStatus.HUMAN_REVIEW_REQUIRED
+                report.reconstructed_workflow = reconstructed_steps
+                report.detected_differences = detected_diffs
+                report.verification_evidence = f"Human review requested: {step.diagnostics.rationale}"
+                report.execution_duration_ms = round((time.time() - start_time) * 1000, 2)
+                return report
+
+            else:  # FAIL
+                overall_status = StepStatus.FAIL
+                report.final_status = StepStatus.FAIL
+                report.reconstructed_workflow = reconstructed_steps
+                report.detected_differences = detected_diffs
+                report.verification_evidence = f"Failed at step '{step.intent}': {step.diagnostics.rationale}"
+                report.execution_duration_ms = round((time.time() - start_time) * 1000, 2)
+                return report
+
+        # Final verification checks across both UI and backend
+        ui_passed = True
+        if workflow.ui_verifier:
+            try:
+                ui_passed = workflow.ui_verifier(page)
+                if not ui_passed:
+                    report.verification_evidence += "UI verification failed. "
+            except Exception as e:
+                ui_passed = False
+                report.verification_evidence += f"UI verification failed: {e}. "
+
+        backend_passed = True
+        if workflow.backend_verifier:
+            try:
+                backend_passed = workflow.backend_verifier()
+                if not backend_passed:
+                    report.verification_evidence += "Backend verification failed. "
+            except Exception as e:
+                backend_passed = False
+                report.verification_evidence += f"Backend verification failed: {e}. "
+
+        if not ui_passed or not backend_passed:
+            overall_status = StepStatus.FAIL
+            report.verification_evidence += "Outcome verification failed across UI/backend."
+        else:
+            report.verification_evidence = (
+                f"VERIFIED: Expected outcome '{workflow.expected_outcome}' confirmed in both UI and SQLite backend."
+            )
+
+        report.final_status = overall_status
+        report.reconstructed_workflow = reconstructed_steps
+        report.detected_differences = detected_diffs
+        report.recovery_attempts = total_recoveries
+        report.execution_duration_ms = round((time.time() - start_time) * 1000, 2)
+        return report
+
