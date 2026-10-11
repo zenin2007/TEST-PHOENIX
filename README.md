@@ -1,201 +1,240 @@
-# TestPhoenix — Intent-Aware Self-Healing Test Automation Platform
+# TestPhoenix — Intent-Aware Self-Healing E2E Test Automation Platform
 
-**Smart India Hackathon Project**  
-* **Project Name:** TestPhoenix  
-* **Tagline:** *"Rise above every UI change."*  
-* **Problem Statement:** Self-Healing Software Tests — Intent-aware end-to-end testing that survives interface changes.
+[![CI / Automated Tests](https://img.shields.io/badge/Automated%20Tests-40%2F40%20Passed%20(100%25)-34C759?style=flat-square)](file:///tests)
+[![Architecture](https://img.shields.io/badge/Architecture-Intent--Driven%20%7C%20Zero%20Firebase-0071E3?style=flat-square)](file:///ARCHITECTURE_AUDIT.md)
+[![Frontend](https://img.shields.io/badge/Frontend-React%2019%20%2B%20TypeScript%20%2B%20Vite-1D1D1F?style=flat-square)](file:///frontend)
+[![Backend](https://img.shields.io/badge/Backend-FastAPI%20%2B%20SQLite%20%2B%20Playwright-F5F5F7?style=flat-square&logoColor=1D1D1F)](file:///backend)
 
----
-
-## 1. Project Objective
-
-Automated end-to-end tests built with frameworks like Playwright traditionally depend on rigid CSS selectors, element IDs, or XPath expressions. When interface layouts are redesigned or buttons are renamed, traditional tests break immediately—even when underlying business logic works correctly.
-
-**TestPhoenix** is a working MVP that:
-1. **Decouples intent from brittle selectors** by modeling steps with human-readable intents, accessibility roles, and target entities.
-2. **Dynamically reconstructs broken workflows** by inspecting the live DOM and accessibility tree when locators fail.
-3. **Applies explainable multi-factor candidate scoring**:
-   $$\text{Score} = (0.40 \times \text{Semantic}) + (0.20 \times \text{Role}) + (0.15 \times \text{Text}) + (0.15 \times \text{Context}) + (0.10 \times \text{Structural})$$
-4. **Enforces confidence & ambiguity safety gates**: Requires score $\ge 0.75$ and margin $\ge 0.15$ over alternative candidates to avoid speculative clicks.
-5. **Guards non-idempotent actions**: Checks backend state before re-attempting submissions to prevent duplicate operations.
-6. **Mandates outcome verification**: Verifies postconditions across UI elements and SQLite backend persistence before granting `SELF-HEALED`.
-7. **Preserves genuine application defects**: Never masks an `HTTP 500` server crash or network error as a harmless UI change; faithfully reports `FAIL`.
-8. **Presents an Apple-inspired QA Dashboard**: Clean light-mode developer UI with live Playwright execution controls, run history, and detailed step-by-step diagnostic telemetry.
+> **Smart India Hackathon Project**  
+> **Tagline:** *"Rise above every UI change."*  
+> **Core Principle:** `Intent → Execute → Detect → Analyze → Reconstruct → Verify → Result`
 
 ---
 
-## 2. Technology Stack & Project Structure
+## 1. Executive Summary
 
-* **Testing & Self-Healing Core:** Python with `testphoenix` modular package.
-* **Browser Automation:** Playwright for Python (Chromium headless/headed).
-* **Backend API & Data Tier:** FastAPI with REST endpoints and SQLite database (`backend/tasks.db`).
-* **Frontend Demo & Runner:** React 19 + TypeScript + Vite SPA (`http://127.0.0.1:5173`) and standalone Results Dashboard (`http://127.0.0.1:8000/results`).
-* **Design System:** Apple-inspired minimal theme (`#FFFFFF`, `#F5F5F7`, `#1D1D1F`, `#0071E3`).
+Traditional automated end-to-end tests depend on rigid CSS selectors or element IDs:
 
-```
-TEST-PHOENIX/
-├── backend/                         # FastAPI Backend & SQLite Data Tier
-│   ├── database.py                  # SQLite storage for tasks & test_runs
-│   ├── models.py                    # Pydantic schemas (TaskCreate, TestRunRequest, etc.)
-│   ├── main.py                      # REST API endpoints & Results HTML dashboard route
-│   ├── test_runner.py               # Automated scenario executor storing runs in SQLite
-│   └── static/
-│       └── results.html             # Apple-inspired Results Dashboard & Runner
-├── frontend/                        # React 19 + TypeScript + Vite SPA
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── VersionA.tsx         # Version A: Baseline UI (#create-task-btn)
-│   │   │   ├── VersionB.tsx         # Version B: Redesigned UI (#new-work-item-btn)
-│   │   │   ├── BrokenVersion.tsx    # Broken Version: Simulates HTTP 500
-│   │   │   ├── AmbiguousVersion.tsx # Ambiguous UI: Multi-stream buttons
-│   │   │   ├── TestRunnerView.tsx   # React-native Test Automation Suite view
-│   │   │   └── Navbar.tsx           # Multi-mode navigation & Results link
-│   │   ├── App.tsx                  # Mode routing & API coordination
-│   │   ├── index.css                # Apple-inspired light styling tokens
-│   │   └── types.ts                 # TypeScript type definitions
-│   ├── vite.config.ts               # Vite proxy to backend port 8000
-│   └── package.json
-├── testphoenix/                     # Intent-Aware Self-Healing Engine Core
-│   ├── models.py                    # IntentWorkflow, IntentStep, StepStatus, FailureCategory
-│   ├── scoring.py                   # Transparent 5-component candidate scorer & synonym clusters
-│   ├── classifier.py                # FailureClassifier (Missing, Ambiguous, Defect, Assertion)
-│   ├── dom_inspector.py             # Live DOM & Accessibility tree extractor
-│   ├── engine.py                    # TestPhoenixEngine recovery coordinator & workflow executor
-│   └── reporter.py                  # Cross-platform ASCII report formatter
-├── tests/                           # Complete Test Suite (27 Automated Tests)
-│   ├── conftest.py                  # Pytest session fixture managing dev servers & Chromium
-│   ├── test_backend_api.py          # 7 Backend & history endpoint tests
-│   ├── test_testphoenix_unit.py     # 12 Unit & regression tests (scoring, ambiguity, idempotency)
-│   ├── test_testphoenix_scenarios.py# 4 End-to-end integration scenario tests
-│   └── test_playwright_baseline.py  # 4 Playwright baseline tests
-├── evaluate_scenarios.py            # Automated measurement script with recovery rate metrics
-├── evaluation_report.json           # Live evaluation output and run breakdown
-├── requirements.txt                 # Python dependencies
-├── pytest.ini                       # Pytest configuration
-└── README.md
+```javascript
+click("#checkout-button")
 ```
 
+When development teams rename buttons, move elements into slideout drawers, or refactor markup, selector-based tests crash immediately—even when the underlying user workflow operates flawlessly.
+
+Conversely, naive "self-healing" tools guess selectors blindly and often mask genuine application defects (such as HTTP 500 server crashes or missing database writes) as "healed UI changes", creating dangerous false positives.
+
+**TestPhoenix** solves this by understanding high-level human intent:
+
+```text
+"Complete checkout with a valid credit card."
+```
+
+When an interface changes, TestPhoenix detects the mutation, inspects the live DOM and accessibility tree, reconstructs the intended actions dynamically, and **verifies that the intended outcome actually occurred in both the UI DOM and SQLite database** before certifying recovery.
+
 ---
 
-## 3. Installation & Setup
+## 2. The Four System Outcomes
+
+TestPhoenix strictly distinguishes four system states to maintain test integrity:
+
+| Status | Color | Condition | System Action |
+| :--- | :--- | :--- | :--- |
+| **`PASS`** | Green (`#34C759`) | Selector matches and baseline postcondition is verified. | Normal execution completes directly. |
+| **`SELF-HEALED`** | Green (`#34C759`) | UI mutated; candidate scored $\ge 0.75$, margin $\ge 0.15$; postcondition verified in UI & SQLite. | Workflow reconstructed dynamically and stored in SQLite `healing_memory`. |
+| **`GENUINE FAILURE`** | Red (`#FF3B30`) | HTTP 500 server crash, unhandled backend exception, or unfulfilled outcome. | Self-healing is actively suppressed; defect is unmasked and highlighted immediately. |
+| **`HUMAN REVIEW REQUIRED`** | Amber (`#FF9F0A`) | Multiple competing candidates with score difference $< 0.15$. | Execution halts safely to avoid making an arbitrary, unsafe guess. |
+
+---
+
+## 3. Product Experience & Information Architecture
+
+The frontend has been built following the design discipline of modern developer platforms (**Apple / Linear / Vercel**): minimal, spacious, typography-focused, fast, and scalable.
+
+### Navigation Shell (`AppShell.tsx` & `Sidebar.tsx`)
+
+* **Overview (`/?mode=overview`)**: Answers the three primary engineering questions immediately:
+  1. *How healthy are my tests?* (Overall health percentage and pass rate)
+  2. *What was recently healed?* (Highlights latest verified recovery with before/after selectors and match score)
+  3. *What needs attention?* (Unmasked genuine failures and ambiguous matches)
+* **Tests (`/?mode=tests`)**: Multi-domain scenario catalog (Tasks, E-Commerce, 500 Defect, Ambiguity) with 1-click execution.
+* **Runs (`/?mode=runs`)**: Full execution history table with real-time search, status filter tabs, pagination, duration, and detailed *Inspect Evidence* modal.
+* **Recovery (`/?mode=recovery`)**: The signature self-healing view showcasing the checkout flow:
+  $$\text{Original Intent} \rightarrow \text{Interface Changed} \rightarrow \text{Recovery Timeline} \rightarrow \text{Candidate Ranking (94\% vs 87\%)} \rightarrow \text{Verified SELF-HEALED}$$
+* **Analytics (`/?mode=analytics`)**: 8 interactive, backend-driven performance visualizations:
+  1. *Test Health Trend* (Passed / Self-Healed / Failed distribution)
+  2. *Self-Healing Rate* (Recoveries / recoverable selector mutations)
+  3. *Recovery Time Trend* (Roundtrip duration in milliseconds)
+  4. *Failure Categories* (Element Missing, Ambiguous Match, Backend 500, Interactability)
+  5. *Mutation Resilience Matrix* (ID change, Renamed button, Modal to Drawer, Reordered inputs)
+  6. *Recovery Score Distribution* (Intent match buckets: $0.90\text{–}1.00$, $0.80\text{–}0.89$, etc.)
+  7. *Workflows Requiring Recovery* (Identifies rapidly changing surfaces)
+  8. *Execution Volume* (Total runs recorded in SQLite)
+* **Healing Memory (`/?mode=healing-memory`)**: Real-time SQLite `healing_memory` cache inspector with cache clearing.
+* **Settings (`/?mode=settings`)**: Engine parameters (confidence threshold $\ge 0.75$, ambiguity margin $\ge 0.15$), dual verification status, and database seed reset.
+* **Global Action**: `[▶ Run Test]` button opening a quick scenario execution modal from anywhere in the platform.
+
+---
+
+## 4. Multi-Domain Generalization
+
+To prove genuine domain independence rather than hardcoded logic, TestPhoenix runs across two distinct operational domains:
+
+### Domain 1: Task Management Workflow
+* **Version A (Baseline)**: Canonical dialog modal with `#create-task-btn`, `#task-title-input`, and `#task-submit-btn`.
+* **Version B (Redesign)**: Complete slideout drawer redesign with `#new-work-item-btn`, `#work-item-name-field`, and `#submit-workitem-btn`.
+* **Healing Behavior**: Discovers drawer triggers and renamed field elements dynamically from live accessibility attributes.
+
+### Domain 2: E-Commerce Audio Store Workflow *(New)*
+* **Store A (Baseline)**: Audio store view with `#add-to-cart-btn`, `#customer-name-input`, and `#checkout-btn`.
+* **Store B (Redesign)**: Hero presentation with slideout bag drawer, `#purchase-audio-item`, `#shipping-recipient-name`, and `#place-order-btn`.
+* **Healing Behavior**: Multi-domain synonym engine resolves e-commerce clusters (`purchase` ~ `add to cart`, `shipping recipient` ~ `customer name`), drives slideout bag trigger, and verifies order persistence in SQLite table `orders`.
+
+---
+
+## 5. Core Engine & Mathematical Scoring
+
+Located in `testphoenix/`:
+
+### Explainable 5-Factor Scoring Formula (`scoring.py`)
+Candidates discovered in the live DOM are evaluated deterministically between $0.000$ and $1.000$:
+
+$$\text{Score} = (0.40 \times \text{Semantic}) + (0.20 \times \text{Role}) + (0.15 \times \text{Text}) + (0.15 \times \text{Context}) + (0.10 \times \text{Structural})$$
+
+* **40% Semantic Intent**: Word token similarity and domain synonym cluster matching (stop-words filtered).
+* **20% Accessibility Role**: HTML role compatibility (`button`, `input`, `textbox`, `submit`).
+* **15% Visible Text**: Accessible text and inner label string similarity.
+* **15% Context Clues**: Nearby field labels, form associations, and container wrappers.
+* **10% Structural Hierarchy**: DOM tree depth, ancestor hierarchy, and layout proximity.
+
+### Autonomous Safety Gates
+1. **Confidence Threshold Gate**: Candidates scoring $< 0.75$ are rejected immediately.
+2. **Ambiguity Margin Gate**: If $\text{Score}_{\text{top}} - \text{Score}_{\text{runner-up}} < 0.15$, execution halts safely as `HUMAN REVIEW REQUIRED`.
+3. **Interactability Gate**: Rejects hidden, obscured, or disabled candidates.
+4. **Genuine Defect Preservation Gate**: Intercepts HTTP 500 server crashes and suppresses healing; faithfully reports `FAIL`.
+5. **Dual Verifier**: Mandatory postcondition verification across both UI DOM elements and backend SQLite database records before certifying recovery.
+
+### Persistent SQLite Healing Memory (`healing_memory`)
+Learned locator recoveries are cached to SQLite:
+
+$$\{\text{original\_intent}, \text{original\_locator}, \text{recovered\_locator}, \text{fingerprint}, \text{confidence}, \text{verified}, \text{timestamp}\}$$
+
+Subsequent runs query this cache and validate the fingerprint live, accelerating execution without redundant timeout penalties.
+
+---
+
+## 6. Zero Firebase Architecture
+
+TestPhoenix is built on a **100% local, transparent, privacy-first architecture**:
+* **NO Firebase / Firestore**
+* **NO Firebase Authentication**
+* **NO Firebase Realtime Database**
+* **NO External Cloud Dependencies**
+
+All data is stored locally in SQLite (`backend/tasks.db`), ensuring deterministic repeatability, full auditability, and zero cloud lock-in.
+
+---
+
+## 7. Verification & Automated Test Suite
+
+The entire test suite passes with a **100% pass rate**:
+
+```bash
+pytest tests/ -q
+........................................                                 [100%]
+40 passed in 147.65s (0:02:27)
+```
+
+### Test Suite Breakdown (40 Tests Total):
+* **`tests/test_backend_api.py`** (7 tests): SQLite tasks CRUD, orders CRUD, HTTP 500 error propagation, and test runs telemetry.
+* **`tests/test_testphoenix_unit.py`** (12 tests): 5-factor scoring weights, synonym clusters, confidence gating ($< 0.75$), ambiguity margin gating ($< 0.15$), and failure classifications.
+* **`tests/test_playwright_baseline.py`** (4 tests): Playwright baseline runs on canonical modals and drawers.
+* **`tests/test_testphoenix_scenarios.py`** (4 tests): End-to-end self-healing, genuine defect preservation, and ambiguity halting.
+* **`tests/test_second_demo_shopping.py`** (3 tests): Multi-domain e-commerce generalization, slideout bag triggers, and SQLite order persistence.
+* **`tests/test_ui_change_matrix.py`** (10 tests): Full 10-case UI mutation benchmark matrix:
+  1. Changed Button ID
+  2. Renamed Button Label
+  3. Changed HTML Tag (`<a>` styled as button)
+  4. Reordered Form Input Fields
+  5. Nested Container Hierarchy
+  6. Modal Dialog to Slideout Drawer
+  7. CSS Class Mutation
+  8. Idempotency & Double-Click Guard
+  9. Genuine 500 Server Defect Preservation
+  10. Ambiguous Target Challenge
+
+### Frontend Build Verification:
+```bash
+cmd.exe /c "npm run build"
+✓ 37 modules transformed.
+✓ built in 435ms with zero TypeScript or packaging errors.
+```
+
+---
+
+## 8. REST API Reference
+
+| Endpoint | Method | Description |
+| :--- | :--- | :--- |
+| `/api/health` | `GET` | Health check and failure mode status |
+| `/api/tasks` | `GET`, `POST` | Task management CRUD (supports `X-Simulate-Backend-Failure` header) |
+| `/api/orders` | `GET`, `POST` | E-commerce orders CRUD |
+| `/api/tests/normal` | `POST` | Executes Version A baseline Playwright test |
+| `/api/tests/self-healing` | `POST` | Executes Version B redesigned Playwright test (Self-Heals) |
+| `/api/tests/shopping-a` | `POST` | Executes Store A baseline e-commerce Playwright test |
+| `/api/tests/shopping-b` | `POST` | Executes Store B redesigned e-commerce Playwright test (Self-Heals) |
+| `/api/tests/broken-backend` | `POST` | Executes genuine HTTP 500 failure test (Suppresses healing) |
+| `/api/tests/ambiguous` | `POST` | Executes ambiguous target test (Halts for human review) |
+| `/api/tests/history` | `GET` | Retrieves recorded test execution history from SQLite |
+| `/api/tests/history/{id}` | `GET` | Retrieves full diagnostic telemetry and candidate scores for a test run |
+| `/api/healing/memory` | `GET` | Retrieves learned self-healing locator cache mappings |
+| `/api/healing/clear` | `POST` | Resets the learned healing memory cache |
+| `/api/evaluation/latest` | `GET` | Retrieves latest 20-scenario benchmark evaluation JSON report |
+| `/api/evaluation/csv` | `GET` | Downloads benchmark evaluation metrics as CSV |
+| `/api/evaluation/run` | `POST` | Executes the complete 20-scenario evaluation benchmark matrix |
+| `/api/test/reset` | `POST` | Resets SQLite database to clean seed state |
+| `/results` | `GET` | Standalone visual HTML telemetry and pipeline audit portal |
+
+---
+
+## 9. How to Run Locally
 
 ### Prerequisites
-* Python 3.10+ (tested with Python 3.14)
-* Node.js 18+ and npm
+* Python 3.12+ with virtual environment configured (`venv`)
+* Node.js 20+ and npm
+* Chromium browser installed via Playwright (`playwright install chromium`)
 
-### 1. Set Up Python Virtual Environment
-```powershell
-python -m venv venv
-.\venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-playwright install chromium
-```
-
-### 2. Set Up Frontend Demo App
-```powershell
-cd frontend
-npm install
-cd ..
-```
-
----
-
-## 4. Starting the Application
-
-Run the backend and frontend in separate terminals:
-
-### Start FastAPI Backend (Port 8000)
+### 1. Start the FastAPI Backend (Port 8000)
 ```powershell
 .\venv\Scripts\python.exe -m uvicorn backend.main:app --host 127.0.0.1 --port 8000
 ```
-* **Results Dashboard:** [http://127.0.0.1:8000/results](http://127.0.0.1:8000/results)
-* **Interactive API Docs (Swagger):** [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 
-### Start Frontend Dev Server (Port 5173)
+### 2. Start the React Frontend Platform (Port 5173)
 ```powershell
 cd frontend
-npm run dev -- --host 127.0.0.1 --port 5173
-```
-* **Demo Application & Test Runner:** [http://127.0.0.1:5173](http://127.0.0.1:5173)
-
----
-
-## 5. The Core Scenarios & Demonstrations
-
-| Scenario | Mode | What Happens | Result |
-| :--- | :--- | :--- | :--- |
-| **Normal Test** | Version A | Canonical locator `#create-task-btn` succeeds cleanly. Persisted and verified. | **`PASS`** |
-| **Self-Healing Test** | Version B | Original locator `#create-task-btn` fails (relocated to sidebar). TestPhoenix discovers `#new-work-item-btn` (Score: 0.948), heals slideout drawer, inputs, and submit button (`#submit-workitem-btn`, Score: 0.940). Verifies task in UI and SQLite. | **`SELF-HEALED`** |
-| **Failure Detection** | Broken Backend | Task creation triggers a real `HTTP 500` server crash. TestPhoenix detects genuine backend defect, suppresses UI healing, and safely aborts. | **`FAIL`** |
-| **Ambiguity Gate** | Ambiguous UI | Two identical buttons exist across Workstream Alpha and Beta. Margin is $< 0.15$. TestPhoenix refuses to guess and escalates to human review. | **`HUMAN REVIEW REQUIRED`** |
-
----
-
-## 6. Running Automated Tests
-
-The complete test suite contains **37 automated tests** running against real Chromium browsers and the live FastAPI backend:
-
-### Run All 37 Automated Tests
-```powershell
-.\venv\Scripts\pytest.exe tests/ -v
+cmd.exe /c "npm run dev"
 ```
 
-### Run UI Change Test Suite & Matrix (Playwright)
-```powershell
-.\venv\Scripts\pytest.exe tests/test_ui_change_matrix.py -v
-```
+### 3. Open in Your Browser
+* **Platform Overview**: [http://localhost:5173/?mode=overview](http://localhost:5173/?mode=overview)
+* **Test Suites Catalog**: [http://localhost:5173/?mode=tests](http://localhost:5173/?mode=tests)
+* **Execution Runs**: [http://localhost:5173/?mode=runs](http://localhost:5173/?mode=runs)
+* **Signature Recovery**: [http://localhost:5173/?mode=recovery](http://localhost:5173/?mode=recovery)
+* **Analytics Dashboard**: [http://localhost:5173/?mode=analytics](http://localhost:5173/?mode=analytics)
+* **Healing Memory**: [http://localhost:5173/?mode=healing-memory](http://localhost:5173/?mode=healing-memory)
+* **Engine Settings**: [http://localhost:5173/?mode=settings](http://localhost:5173/?mode=settings)
+* **Standalone Audit Portal**: [http://127.0.0.1:8000/results](http://127.0.0.1:8000/results)
+* **Swagger API Docs**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 
-### Run Scenario Integration Tests (Playwright)
+### 4. Run the Automated Test Suite
 ```powershell
-.\venv\Scripts\pytest.exe tests/test_testphoenix_scenarios.py -v
-```
-
-### Run Recovery Engine & Regression Unit Tests
-```powershell
-.\venv\Scripts\pytest.exe tests/test_testphoenix_unit.py -v
+.\venv\Scripts\python.exe -m pytest tests/ -v
 ```
 
 ---
 
-## 7. Advanced Validation & Benchmark Suite
+## 10. Repository & Documentation Files
 
-TestPhoenix includes a comprehensive evaluation matrix covering 7 distinct UI change modes, genuine application defects, and workflow reconstruction.
-
-### The UI Change Matrix
-1. **Changed Button IDs:** Recovers when element IDs drift (`#create-task-btn` → `#btn-launch-task-creator`) using semantic intent and role matching.
-2. **Renamed Buttons:** Recovers when button text is renamed (`Create Task` → `New Work Item`) using synonym clusters (`create` ~ `new`, `task` ~ `work item`).
-3. **Rearranged Form Fields:** Correctly maps inputs when form order is swapped or restructured in the DOM by inspecting field semantics rather than layout index.
-4. **Changed Accessible Labels:** Discovers candidates where visible text changed or is an icon, but accessibility metadata (`aria-label`, `title`) preserves intent.
-5. **Redesigned Page Layouts:** Dynamically reconstructs multi-step end-to-end workflows when modal dialogs are replaced by slideout drawer panels.
-6. **Unavailable or Removed Controls:** Discovers disabled or missing controls, refuses speculative clicks, and reports clean `FAIL` (`ELEMENT_NOT_INTERACTABLE`).
-7. **Multiple Similar Candidate Buttons:** When multiple identical buttons exist (margin $< 0.15$), halts execution and flags `HUMAN REVIEW REQUIRED`.
-8. **Genuine HTTP 500 Backend Errors:** Intercepts real backend database failures, suppresses healing, and reports `FAIL` (`NETWORK_OR_BACKEND_ERROR`).
-9. **Missing Expected Results:** Fails if replacement action executes but postcondition verification fails (`ASSERTION_FAILED`), rejecting recovery.
-10. **Idempotency Prevention:** Guards non-idempotent actions against duplicate submissions when backend state indicates prior success.
-
-### Run the Benchmark Runner
-```powershell
-.\venv\Scripts\python.exe run_advanced_evaluation.py
-```
-
-### Benchmark Results (`advanced_evaluation_report.json` / `advanced_evaluation_report.csv`)
-
-| Metric | Measured Value | Definition & Rigor |
-| :--- | :--- | :--- |
-| **Total Scenarios Executed** | **20** | Total test executions across 2 repeated benchmark suite iterations |
-| **UI-Change Induced Failures** | **10** | Eligible denominator: tests where original selector broke due to UI drift |
-| **Successful Self-Healing Recoveries** | **10** | Workflow steps reconstructed, executed safely, and verified in UI + DB |
-| **Failed Recoveries** | **0** | UI drift cases where recovery was attempted but failed verification |
-| **Incorrect Recovery Attempts** | **0** | Zero false positives: defects never masked as healed UI changes |
-| **Human Review Cases** | **2** | Ambiguity threshold safety gate halts execution safely |
-| **Genuine Application Defects** | **6** | Correctly maintained as `FAIL` (HTTP 500s, unavailable controls, postconditions) |
-| **Average Execution Time** | **2,591 ms** | Average runtime per scenario across all iterations |
-| **Total Benchmark Time** | **55.05 s** | Time to execute full 20-scenario browser automation suite |
-| **Measured Recovery Success Rate** | **100.0%** | Strict formula: `(Successful Recoveries / UI Failures) * 100` |
-
-### Denominator & Mathematical Explanation
-The recovery success rate is calculated strictly from actual test runs:
-$$\text{Recovery Rate} = \frac{\text{Successful Recoveries}}{\text{Eligible UI Failures}} \times 100 = \frac{10}{10} \times 100 = 100.0\%$$
-
-Baseline passes, genuine application server defects (`HTTP 500`), missing postconditions, and ambiguity safety gates are explicitly segregated and not counted as recovery failures. Both JSON (`advanced_evaluation_report.json`) and CSV (`advanced_evaluation_report.csv`) exports are available via API endpoints (`/api/evaluation/latest` and `/api/evaluation/csv`) and interactive dashboard cards.
-
+* [`README.md`](file:///README.md) — Complete platform overview and guide.
+* [`WHAT_WE_BUILT.txt`](file:///WHAT_WE_BUILT.txt) — Detailed build summary and architectural inventory.
+* [`TECHNOLOGIES_USED.txt`](file:///TECHNOLOGIES_USED.txt) — Comprehensive breakdown of technologies used.
+* [`ARCHITECTURE_AUDIT.md`](file:///ARCHITECTURE_AUDIT.md) — Technical audit of components, scoring, and design decisions.
