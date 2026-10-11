@@ -13,23 +13,28 @@ interface AnalyticsViewProps {
 export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ runs, evaluationReport }) => {
   const [selectedPipelineStep, setSelectedPipelineStep] = useState<number | null>(null);
   const [filterDrilldown, setFilterDrilldown] = useState<string | null>(null);
+  const [dataMode, setDataMode] = useState<'REAL' | 'DEMO'>('REAL');
+
+  const realRuns = runs.filter((r) => !r.is_demo);
+  const demoRuns = runs.filter((r) => Boolean(r.is_demo));
+  const activeRuns = dataMode === 'REAL' ? realRuns : demoRuns;
 
   const benchmarkSuccessRate = evaluationReport?.summary?.recovery_success_rate_percent;
 
-  const totalRuns = runs.length;
-  const passes = runs.filter((r) => r.status.toUpperCase().includes('PASS')).length;
-  const heals = runs.filter((r) => r.status.toUpperCase().includes('HEAL')).length;
-  const fails = runs.filter((r) => r.status.toUpperCase().includes('FAIL')).length;
-  const reviews = runs.filter((r) => r.status.toUpperCase().includes('REVIEW')).length;
+  const totalRuns = activeRuns.length;
+  const passes = activeRuns.filter((r) => r.status.toUpperCase().includes('PASS')).length;
+  const heals = activeRuns.filter((r) => r.status.toUpperCase().includes('HEAL')).length;
+  const fails = activeRuns.filter((r) => r.status.toUpperCase().includes('FAIL')).length;
+  const reviews = activeRuns.filter((r) => r.status.toUpperCase().includes('REVIEW')).length;
 
   // 1. Test Health Trend (Line Chart: % of tests passing or healed)
   const healthTrendData: LineChartPoint[] = React.useMemo(() => {
-    if (runs.length === 0) return [];
-    const batchSize = Math.max(1, Math.ceil(runs.length / 8));
+    if (activeRuns.length === 0) return [];
+    const batchSize = Math.max(1, Math.ceil(activeRuns.length / 8));
     const points: LineChartPoint[] = [];
 
     // Chronological order
-    const chronRuns = [...runs].reverse();
+    const chronRuns = [...activeRuns].reverse();
     for (let i = 0; i < chronRuns.length; i += batchSize) {
       const slice = chronRuns.slice(i, i + batchSize);
       const passedOrHealed = slice.filter((r) => {
@@ -44,14 +49,14 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ runs, evaluationRe
       });
     }
     return points;
-  }, [runs]);
+  }, [activeRuns]);
 
   // 2. Self-Healing Rate Trend (Line Chart)
   const healingTrendData: LineChartPoint[] = React.useMemo(() => {
-    if (runs.length === 0) return [];
-    const batchSize = Math.max(1, Math.ceil(runs.length / 8));
+    if (activeRuns.length === 0) return [];
+    const batchSize = Math.max(1, Math.ceil(activeRuns.length / 8));
     const points: LineChartPoint[] = [];
-    const chronRuns = [...runs].reverse();
+    const chronRuns = [...activeRuns].reverse();
 
     for (let i = 0; i < chronRuns.length; i += batchSize) {
       const slice = chronRuns.slice(i, i + batchSize);
@@ -68,14 +73,14 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ runs, evaluationRe
       });
     }
     return points;
-  }, [runs]);
+  }, [activeRuns]);
 
   // 3. Execution Volume Trend (Line Chart: Runs accumulated)
   const volumeTrendData: LineChartPoint[] = React.useMemo(() => {
-    if (runs.length === 0) return [];
-    const batchSize = Math.max(1, Math.ceil(runs.length / 8));
+    if (activeRuns.length === 0) return [];
+    const batchSize = Math.max(1, Math.ceil(activeRuns.length / 8));
     const points: LineChartPoint[] = [];
-    const chronRuns = [...runs].reverse();
+    const chronRuns = [...activeRuns].reverse();
 
     for (let i = 0; i < chronRuns.length; i += batchSize) {
       const slice = chronRuns.slice(i, i + batchSize);
@@ -86,13 +91,13 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ runs, evaluationRe
       });
     }
     return points;
-  }, [runs]);
+  }, [activeRuns]);
 
   // 4. Recovery Time Trend (Line Chart: Average duration ms)
   const recoveryTimeData: LineChartPoint[] = React.useMemo(() => {
-    if (runs.length === 0) return [];
+    if (activeRuns.length === 0) return [];
     const points: LineChartPoint[] = [];
-    const chronRuns = [...runs].reverse().slice(0, 10);
+    const chronRuns = [...activeRuns].reverse().slice(0, 10);
 
     chronRuns.forEach((r) => {
       points.push({
@@ -102,7 +107,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ runs, evaluationRe
       });
     });
     return points;
-  }, [runs]);
+  }, [activeRuns]);
 
   // 5. Failure Categories (Horizontal Bar Chart)
   const failureCategoryItems: BarChartItem[] = React.useMemo(() => {
@@ -112,7 +117,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ runs, evaluationRe
       'Backend Defect (HTTP 500)': 0,
       'Timing / Element Block': 0,
     };
-    runs.forEach((r) => {
+    activeRuns.forEach((r) => {
       const reason = (r.initial_failure_reason || '').toLowerCase();
       if (reason.includes('500') || reason.includes('backend') || reason.includes('database')) {
         counts['Backend Defect (HTTP 500)'] += 1;
@@ -131,7 +136,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ runs, evaluationRe
       { label: 'Backend Defect (HTTP 500)', value: counts['Backend Defect (HTTP 500)'], color: '#FF3B30' },
       { label: 'Timing / Element Block', value: counts['Timing / Element Block'], color: '#86868B' },
     ];
-  }, [runs]);
+  }, [activeRuns]);
 
   // 6. Mutation Resilience Matrix (Bar Chart)
   const mutationResilienceItems: BarChartItem[] = [
@@ -151,7 +156,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ runs, evaluationRe
       '< 0.75 (Rejected / Unsafe)': { count: 0, color: '#FF3B30' },
     };
 
-    runs.forEach((r) => {
+    activeRuns.forEach((r) => {
       if (r.candidate_score !== null && r.candidate_score !== undefined) {
         const s = r.candidate_score;
         if (s >= 0.9) buckets['0.90 - 1.00 (High Confidence)'].count += 1;
@@ -166,12 +171,12 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ runs, evaluationRe
       value: b.count,
       color: b.color,
     }));
-  }, [runs]);
+  }, [activeRuns]);
 
   // 8. Tests Requiring Recovery (Ranked Horizontal Bar Chart)
   const unstableWorkflowsItems: BarChartItem[] = React.useMemo(() => {
     const map: Record<string, { total: number; healed: number }> = {};
-    runs.forEach((r) => {
+    activeRuns.forEach((r) => {
       if (!map[r.scenario]) map[r.scenario] = { total: 0, healed: 0 };
       map[r.scenario].total += 1;
       if (r.status.toUpperCase().includes('HEAL')) map[r.scenario].healed += 1;
@@ -186,7 +191,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ runs, evaluationRe
       }))
       .sort((a, b) => b.value - a.value)
       .slice(0, 5);
-  }, [runs]);
+  }, [activeRuns]);
 
   // 9. Outcome Distribution
   const outcomeItems = [
@@ -236,28 +241,86 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ runs, evaluationRe
     },
   ];
 
-  if (totalRuns === 0) {
-    return (
-      <div style={{ maxWidth: 800, margin: '2rem auto' }}>
-        <EmptyState
-          icon="📊"
-          title="No telemetry data collected yet"
-          description="Execute automated test scenarios from the Tests or Overview page to populate the interactive analytics engine with real execution metrics."
-        />
-      </div>
-    );
-  }
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-      <div>
-        <h1 style={{ fontSize: '1.75rem', fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
-          Analytics &amp; Reliability Trends
-        </h1>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '0.25rem' }}>
-          Real backend-driven performance analytics derived from SQLite execution records and evaluation matrix telemetry.
-        </p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+        <div>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
+            Analytics &amp; Reliability Trends
+          </h1>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '0.25rem' }}>
+            Real backend-driven performance analytics derived from SQLite execution records and evaluation matrix telemetry.
+          </p>
+        </div>
+
+        {/* Telemetry Mode Toggle */}
+        <div style={{ display: 'flex', gap: '0.25rem', background: 'var(--bg-inset)', padding: '0.25rem', borderRadius: 'var(--radius-full)', border: '1px solid var(--border-color)' }}>
+          <button
+            onClick={() => setDataMode('REAL')}
+            style={{
+              border: 'none',
+              background: dataMode === 'REAL' ? '#FFFFFF' : 'transparent',
+              color: dataMode === 'REAL' ? '#166534' : 'var(--text-secondary)',
+              fontWeight: dataMode === 'REAL' ? 700 : 500,
+              fontSize: '0.775rem',
+              padding: '0.35rem 0.85rem',
+              borderRadius: 'var(--radius-full)',
+              cursor: 'pointer',
+              boxShadow: dataMode === 'REAL' ? 'var(--shadow-subtle)' : 'none',
+            }}
+          >
+            ● REAL DATA ONLY ({realRuns.length})
+          </button>
+          <button
+            onClick={() => setDataMode('DEMO')}
+            style={{
+              border: 'none',
+              background: dataMode === 'DEMO' ? '#FFFFFF' : 'transparent',
+              color: dataMode === 'DEMO' ? '#92400E' : 'var(--text-secondary)',
+              fontWeight: dataMode === 'DEMO' ? 700 : 500,
+              fontSize: '0.775rem',
+              padding: '0.35rem 0.85rem',
+              borderRadius: 'var(--radius-full)',
+              cursor: 'pointer',
+              boxShadow: dataMode === 'DEMO' ? 'var(--shadow-subtle)' : 'none',
+            }}
+          >
+            ● DEMO DATA ({demoRuns.length})
+          </button>
+        </div>
       </div>
+
+      {dataMode === 'DEMO' && (
+        <div style={{ background: '#FEF3C7', border: '1px solid #FDE68A', color: '#92400E', padding: '0.75rem 1.25rem', borderRadius: 'var(--radius-md)', fontSize: '0.85rem', fontWeight: 600 }}>
+          ⚠️ DEMO BENCHMARK DATA: These charts display synthetic evaluation data from built-in scenarios. They are strictly isolated from real telemetry.
+        </div>
+      )}
+
+      {totalRuns === 0 ? (
+        <div style={{ maxWidth: 800, margin: '2rem auto' }}>
+          <EmptyState
+            icon="📊"
+            title={dataMode === 'REAL' ? "No real telemetry data collected yet" : "No demo benchmark data available"}
+            description={
+              dataMode === 'REAL'
+                ? "Analytics strictly reflect verified execution telemetry. We do not fabricate numbers when real executions have not taken place. You can view demo benchmark charts by toggling to Demo Data mode."
+                : "Execute benchmark scenarios to populate demo charts."
+            }
+            action={
+              dataMode === 'REAL' && demoRuns.length > 0 ? (
+                <button
+                  className="btn-secondary"
+                  onClick={() => setDataMode('DEMO')}
+                  style={{ fontSize: '0.85rem' }}
+                >
+                  View Demo Benchmark Analytics ({demoRuns.length} runs)
+                </button>
+              ) : undefined
+            }
+          />
+        </div>
+      ) : (
+        <>
 
       {/* 9. Outcome Distribution Summary Bar */}
       <Card
@@ -473,6 +536,8 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ runs, evaluationRe
           </div>
         </Card>
       </div>
+      </>
+    )}
     </div>
   );
 };

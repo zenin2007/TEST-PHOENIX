@@ -42,7 +42,29 @@ def init_db() -> None:
                 detected_differences TEXT,
                 reconstructed_workflow TEXT,
                 execution_duration_ms REAL,
+                is_demo INTEGER DEFAULT 0,
+                app_version TEXT DEFAULT 'App V1',
+                test_version_label TEXT DEFAULT 'Test V1',
+                test_version_id INTEGER,
                 created_at TEXT NOT NULL
+            )
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS test_versions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                test_id TEXT NOT NULL,
+                version_number INTEGER NOT NULL,
+                version_label TEXT NOT NULL,
+                app_version TEXT NOT NULL,
+                parent_version_id INTEGER,
+                is_active_baseline INTEGER DEFAULT 1,
+                workflow_steps_json TEXT NOT NULL,
+                healing_summary TEXT,
+                confidence REAL,
+                verification_result TEXT,
+                run_id INTEGER,
+                created_at TEXT NOT NULL,
+                FOREIGN KEY(parent_version_id) REFERENCES test_versions(id)
             )
         """)
         cursor.execute("""
@@ -55,6 +77,8 @@ def init_db() -> None:
                 page_context TEXT,
                 confidence REAL NOT NULL,
                 outcome TEXT NOT NULL,
+                app_version TEXT DEFAULT 'App V1',
+                test_version_label TEXT DEFAULT 'Test V1',
                 created_at TEXT NOT NULL,
                 last_verified_at TEXT NOT NULL
             )
@@ -77,10 +101,38 @@ def init_db() -> None:
             ("original_intent", "TEXT"),
             ("detected_differences", "TEXT"),
             ("reconstructed_workflow", "TEXT"),
-            ("execution_duration_ms", "REAL")
+            ("execution_duration_ms", "REAL"),
+            ("is_demo", "INTEGER DEFAULT 0"),
+            ("app_version", "TEXT DEFAULT 'App V1'"),
+            ("test_version_label", "TEXT DEFAULT 'Test V1'"),
+            ("test_version_id", "INTEGER")
         ]:
             if col_name not in existing_cols:
                 cursor.execute(f"ALTER TABLE test_runs ADD COLUMN {col_name} {col_type}")
+
+        cursor.execute("PRAGMA table_info(healing_memory)")
+        hm_cols = {row[1] for row in cursor.fetchall()}
+        for col_name, col_type in [
+            ("app_version", "TEXT DEFAULT 'App V1'"),
+            ("test_version_label", "TEXT DEFAULT 'Test V1'")
+        ]:
+            if col_name not in hm_cols:
+                cursor.execute(f"ALTER TABLE healing_memory ADD COLUMN {col_name} {col_type}")
+
+        # Classify any pre-existing demo scenario rows as is_demo = 1
+        cursor.execute("""
+            UPDATE test_runs 
+            SET is_demo = 1 
+            WHERE (scenario LIKE '%Version A%' 
+               OR scenario LIKE '%Version B%' 
+               OR scenario LIKE '%Store A%' 
+               OR scenario LIKE '%Store B%' 
+               OR scenario LIKE '%Simulated Database%' 
+               OR scenario LIKE '%Ambiguous%'
+               OR scenario LIKE '%Benchmark%')
+              AND is_demo = 0
+        """)
+
         conn.commit()
     finally:
         conn.close()
@@ -287,7 +339,19 @@ def clear_healing_memory() -> None:
     finally:
         conn.close()
 
-# ----------------- Test Run Persistence -----------------
+# ----------------- Test Run Persistence & Separation -----------------
+
+def clear_demo_runs() -> int:
+    """Deletes all demo scenario execution records while strictly preserving real test telemetry."""
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM test_runs WHERE is_demo = 1")
+        deleted = cursor.rowcount
+        conn.commit()
+        return deleted
+    finally:
+        conn.close()
 
 def save_test_run(
     scenario: str,
@@ -303,26 +367,36 @@ def save_test_run(
     original_intent: Optional[str] = None,
     detected_differences: Optional[str] = None,
     reconstructed_workflow: Optional[str] = None,
-    execution_duration_ms: Optional[float] = None
+    execution_duration_ms: Optional[float] = None,
+    is_demo: Optional[bool] = None,
+    app_version: Optional[str] = "App V1",
+    test_version_label: Optional[str] = "Test V1",
+    test_version_id: Optional[int] = None
 ) -> Dict[str, Any]:
     conn = get_connection()
     try:
         cursor = conn.cursor()
         now = datetime.now(timezone.utc).isoformat()
+
+        # Default is_demo to 0 (real test) unless explicitly passed as True (e.g. from demo scenario runner)
+        is_demo_val = 1 if is_demo else 0
+
         cursor.execute("""
             INSERT INTO test_runs (
                 scenario, status, original_locator, original_locator_worked,
                 initial_failure_reason, replacement_selector, candidate_score,
                 recovery_actions, verification_result, diagnostics_json,
                 original_intent, detected_differences, reconstructed_workflow,
-                execution_duration_ms, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                execution_duration_ms, is_demo, app_version, test_version_label,
+                test_version_id, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             scenario, status, original_locator, 1 if original_locator_worked else 0,
             initial_failure_reason, replacement_selector, candidate_score,
             recovery_actions, verification_result, diagnostics_json,
             original_intent, detected_differences, reconstructed_workflow,
-            execution_duration_ms, now
+            execution_duration_ms, is_demo_val, app_version or "App V1",
+            test_version_label or "Test V1", test_version_id, now
         ))
         conn.commit()
         run_id = cursor.lastrowid
@@ -342,28 +416,50 @@ def save_test_run(
             "detected_differences": detected_differences,
             "reconstructed_workflow": reconstructed_workflow,
             "execution_duration_ms": execution_duration_ms,
+            "is_demo": bool(is_demo_val),
+            "app_version": app_version or "App V1",
+            "test_version_label": test_version_label or "Test V1",
+            "test_version_id": test_version_id,
             "created_at": now
         }
     finally:
         conn.close()
 
-def get_test_runs(limit: int = 50) -> List[Dict[str, Any]]:
+def get_test_runs(limit: int = 50, mode: str = "real") -> List[Dict[str, Any]]:
+    """
+    Retrieves test execution records.
+    - mode='real': returns REAL test runs only (default).
+    - mode='demo': returns DEMO runs only.
+    - mode='all': returns all test runs.
+    """
     conn = get_connection()
     try:
         cursor = conn.cursor()
-        cursor.execute("""
+        query = """
             SELECT id, scenario, status, original_locator, original_locator_worked,
                    initial_failure_reason, replacement_selector, candidate_score,
                    recovery_actions, verification_result, original_intent,
                    detected_differences, reconstructed_workflow, execution_duration_ms,
+                   is_demo, app_version, test_version_label, test_version_id,
                    created_at
-            FROM test_runs ORDER BY id DESC LIMIT ?
-        """, (limit,))
+            FROM test_runs
+        """
+        params = []
+        if mode == "real":
+            query += " WHERE is_demo = 0 "
+        elif mode == "demo":
+            query += " WHERE is_demo = 1 "
+
+        query += " ORDER BY id DESC LIMIT ?"
+        params.append(limit)
+
+        cursor.execute(query, params)
         rows = cursor.fetchall()
         result = []
         for row in rows:
             d = dict(row)
             d["original_locator_worked"] = bool(d["original_locator_worked"])
+            d["is_demo"] = bool(d.get("is_demo", 0))
             result.append(d)
         return result
     finally:
@@ -379,9 +475,218 @@ def get_test_run_by_id(run_id: int) -> Optional[Dict[str, Any]]:
             return None
         d = dict(row)
         d["original_locator_worked"] = bool(d["original_locator_worked"])
+        d["is_demo"] = bool(d.get("is_demo", 0))
         return d
+    finally:
+        conn.close()
+
+# ----------------- Continuous Test Versioning Operations -----------------
+
+def get_active_test_version(test_id: str) -> Optional[Dict[str, Any]]:
+    """Retrieves the active baseline test version for a test workflow."""
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT * FROM test_versions
+            WHERE test_id = ? AND is_active_baseline = 1
+            ORDER BY version_number DESC LIMIT 1
+        """, (test_id,))
+        row = cursor.fetchone()
+        if not row:
+            return None
+        d = dict(row)
+        d["is_active_baseline"] = bool(d["is_active_baseline"])
+        return d
+    finally:
+        conn.close()
+
+def get_test_version_history(test_id: Optional[str] = None) -> List[Dict[str, Any]]:
+    """Retrieves all historical test versions forming the version chain."""
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        if test_id:
+            cursor.execute("""
+                SELECT * FROM test_versions
+                WHERE test_id = ?
+                ORDER BY version_number ASC
+            """, (test_id,))
+        else:
+            cursor.execute("""
+                SELECT * FROM test_versions
+                ORDER BY test_id ASC, version_number ASC
+            """)
+        rows = cursor.fetchall()
+        result = []
+        for r in rows:
+            d = dict(r)
+            d["is_active_baseline"] = bool(d["is_active_baseline"])
+            result.append(d)
+        return result
+    finally:
+        conn.close()
+
+def save_test_version(
+    test_id: str,
+    version_number: int,
+    version_label: str,
+    app_version: str,
+    parent_version_id: Optional[int],
+    is_active_baseline: bool,
+    workflow_steps_json: str,
+    healing_summary: Optional[str] = None,
+    confidence: Optional[float] = 1.0,
+    verification_result: Optional[str] = "VERIFIED",
+    run_id: Optional[int] = None
+) -> Dict[str, Any]:
+    """Saves a test version record without mutating previous records."""
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        now = datetime.now(timezone.utc).isoformat()
+        if is_active_baseline:
+            cursor.execute("UPDATE test_versions SET is_active_baseline = 0 WHERE test_id = ?", (test_id,))
+        cursor.execute("""
+            INSERT INTO test_versions (
+                test_id, version_number, version_label, app_version,
+                parent_version_id, is_active_baseline, workflow_steps_json,
+                healing_summary, confidence, verification_result, run_id, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            test_id, version_number, version_label, app_version,
+            parent_version_id, 1 if is_active_baseline else 0, workflow_steps_json,
+            healing_summary, confidence, verification_result, run_id, now
+        ))
+        conn.commit()
+        ver_id = cursor.lastrowid
+        return {
+            "id": ver_id,
+            "test_id": test_id,
+            "version_number": version_number,
+            "version_label": version_label,
+            "app_version": app_version,
+            "parent_version_id": parent_version_id,
+            "is_active_baseline": is_active_baseline,
+            "workflow_steps_json": workflow_steps_json,
+            "healing_summary": healing_summary,
+            "confidence": confidence,
+            "verification_result": verification_result,
+            "run_id": run_id,
+            "created_at": now
+        }
+    finally:
+        conn.close()
+
+def promote_healed_test_version(
+    test_id: str,
+    app_version: str,
+    healing_summary: str,
+    confidence: float,
+    verification_result: str,
+    updated_steps_json: str,
+    run_id: Optional[int] = None
+) -> Dict[str, Any]:
+    """
+    Core continuous healing rule:
+    Every successful healing creates a new Test Version, and that version automatically
+    becomes the baseline for the next healing. Historical versions remain preserved.
+    """
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        now = datetime.now(timezone.utc).isoformat()
+
+        # 1. Fetch current active baseline for this test_id
+        cursor.execute("""
+            SELECT * FROM test_versions
+            WHERE test_id = ? AND is_active_baseline = 1
+            ORDER BY version_number DESC LIMIT 1
+        """, (test_id,))
+        current_baseline = cursor.fetchone()
+
+        if current_baseline:
+            parent_id = current_baseline["id"]
+            next_num = current_baseline["version_number"] + 1
+            # Mark previous active baseline as not active (retired but preserved!)
+            cursor.execute("UPDATE test_versions SET is_active_baseline = 0 WHERE test_id = ?", (test_id,))
+        else:
+            parent_id = None
+            next_num = 1
+
+        next_label = f"Test V{next_num}"
+
+        # 2. Insert new version as the active baseline
+        cursor.execute("""
+            INSERT INTO test_versions (
+                test_id, version_number, version_label, app_version,
+                parent_version_id, is_active_baseline, workflow_steps_json,
+                healing_summary, confidence, verification_result, run_id, created_at
+            ) VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?)
+        """, (
+            test_id, next_num, next_label, app_version,
+            parent_id, updated_steps_json,
+            healing_summary, confidence, verification_result, run_id, now
+        ))
+        conn.commit()
+        new_version_id = cursor.lastrowid
+
+        return {
+            "id": new_version_id,
+            "test_id": test_id,
+            "version_number": next_num,
+            "version_label": next_label,
+            "app_version": app_version,
+            "parent_version_id": parent_id,
+            "is_active_baseline": True,
+            "workflow_steps_json": updated_steps_json,
+            "healing_summary": healing_summary,
+            "confidence": confidence,
+            "verification_result": verification_result,
+            "run_id": run_id,
+            "created_at": now
+        }
+    finally:
+        conn.close()
+
+def seed_default_test_versions() -> None:
+    """Seeds initial baseline versions if none exist."""
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM test_versions")
+        count = cursor.fetchone()[0]
+        if count == 0:
+            now = datetime.now(timezone.utc).isoformat()
+            task_v1_steps = json.dumps([
+                {"intent": "Open modal", "locator": "#create-task-btn", "role": "button", "action": "CLICK"},
+                {"intent": "Fill title", "locator": "#task-title-input", "role": "textbox", "action": "FILL"},
+                {"intent": "Fill assignee", "locator": "#task-assignee-input", "role": "textbox", "action": "FILL"},
+                {"intent": "Submit task", "locator": "#submit-task-btn", "role": "button", "action": "CLICK"}
+            ])
+            cursor.execute("""
+                INSERT INTO test_versions (
+                    test_id, version_number, version_label, app_version,
+                    parent_version_id, is_active_baseline, workflow_steps_json,
+                    healing_summary, confidence, verification_result, created_at
+                ) VALUES (?, 1, 'Test V1', 'App V1', NULL, 1, ?, 'Initial baseline specification', 1.0, 'VERIFIED: Modal in DOM + SQLite', ?)
+            """, ("task-management", task_v1_steps, now))
+
+            shop_v1_steps = json.dumps([
+                {"intent": "Add to cart", "locator": "#add-to-cart-btn", "role": "button", "action": "CLICK"},
+                {"intent": "Checkout", "locator": "#checkout-btn", "role": "button", "action": "CLICK"}
+            ])
+            cursor.execute("""
+                INSERT INTO test_versions (
+                    test_id, version_number, version_label, app_version,
+                    parent_version_id, is_active_baseline, workflow_steps_json,
+                    healing_summary, confidence, verification_result, created_at
+                ) VALUES (?, 1, 'Test V1', 'App V1', NULL, 1, ?, 'Initial baseline specification', 1.0, 'VERIFIED: Cart Modal in DOM + SQLite', ?)
+            """, ("shopping-cart", shop_v1_steps, now))
+            conn.commit()
     finally:
         conn.close()
 
 # Auto-initialize database on load
 init_db()
+seed_default_test_versions()

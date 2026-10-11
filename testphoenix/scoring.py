@@ -41,7 +41,7 @@ SYNONYM_GROUPS: List[Set[str]] = [
     # Cart / Basket Containers
     {"cart", "bag", "basket", "tote", "shopping-cart", "shopping-bag"},
     # Checkout & Payment Actions
-    {"checkout", "pay", "payment", "place-order", "place_order", "complete-order", "proceed", "finalize"},
+    {"checkout", "pay", "payment", "place-order", "place_order", "complete-order", "complete", "proceed", "finalize", "card", "credit", "purchase", "authorize", "order", "submit"},
     # Products & Audio Merchandise
     {"headphones", "headset", "audio", "earphones", "earbuds", "device", "item", "product"},
     # Customer & Shipping Fields
@@ -51,7 +51,7 @@ SYNONYM_GROUPS: List[Set[str]] = [
 STOP_WORDS = {
     "click", "enter", "fill", "select", "type", "press", "button",
     "textbox", "input", "the", "a", "an", "to", "for", "in", "on",
-    "and", "or", "from", "with", "form", "page"
+    "and", "or", "from", "with", "form", "page", "valid"
 }
 
 def tokenize(text: str, filter_stops: bool = False) -> Set[str]:

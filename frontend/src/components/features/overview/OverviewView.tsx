@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { TestRun, NavigationTab } from '../../../types';
 import { Card } from '../../ui/Card';
 import { StatusBadge } from '../../ui/Badge';
@@ -18,11 +18,17 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
   onOpenQuickRun,
   onInspectRun,
 }) => {
-  const total = runs.length;
-  const selfHealed = runs.filter((r) => r.status === 'SELF-HEALED');
-  const passes = runs.filter((r) => r.status === 'PASS');
-  const failures = runs.filter((r) => r.status === 'FAIL');
-  const reviews = runs.filter((r) => r.status === 'HUMAN REVIEW REQUIRED');
+  const [dataMode, setDataMode] = useState<'REAL' | 'DEMO'>('REAL');
+
+  const realRuns = runs.filter((r) => !r.is_demo);
+  const demoRuns = runs.filter((r) => Boolean(r.is_demo));
+  const activeRuns = dataMode === 'REAL' ? realRuns : demoRuns;
+
+  const total = activeRuns.length;
+  const selfHealed = activeRuns.filter((r) => r.status === 'SELF-HEALED');
+  const passes = activeRuns.filter((r) => r.status === 'PASS');
+  const failures = activeRuns.filter((r) => r.status === 'FAIL');
+  const reviews = activeRuns.filter((r) => r.status === 'HUMAN REVIEW REQUIRED');
 
   const healthScore = total > 0 ? Math.round(((passes.length + selfHealed.length) / total) * 100) : null;
   const mostRecentHealed = selfHealed.length > 0 ? selfHealed[0] : null;
@@ -67,6 +73,57 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
           </Button>
         </div>
       </div>
+
+      {/* Telemetry Mode Switcher */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#FFFFFF', padding: '0.75rem 1.25rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-subtle)', flexWrap: 'wrap', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Telemetry Mode:</span>
+          <div style={{ display: 'flex', gap: '0.25rem', background: 'var(--bg-inset)', padding: '0.2rem', borderRadius: 'var(--radius-full)' }}>
+            <button
+              onClick={() => setDataMode('REAL')}
+              style={{
+                border: 'none',
+                background: dataMode === 'REAL' ? '#FFFFFF' : 'transparent',
+                color: dataMode === 'REAL' ? '#166534' : 'var(--text-secondary)',
+                fontWeight: dataMode === 'REAL' ? 700 : 500,
+                fontSize: '0.775rem',
+                padding: '0.3rem 0.85rem',
+                borderRadius: 'var(--radius-full)',
+                cursor: 'pointer',
+                boxShadow: dataMode === 'REAL' ? 'var(--shadow-subtle)' : 'none',
+              }}
+            >
+              ● REAL DATA ONLY ({realRuns.length})
+            </button>
+            <button
+              onClick={() => setDataMode('DEMO')}
+              style={{
+                border: 'none',
+                background: dataMode === 'DEMO' ? '#FFFFFF' : 'transparent',
+                color: dataMode === 'DEMO' ? '#92400E' : 'var(--text-secondary)',
+                fontWeight: dataMode === 'DEMO' ? 700 : 500,
+                fontSize: '0.775rem',
+                padding: '0.3rem 0.85rem',
+                borderRadius: 'var(--radius-full)',
+                cursor: 'pointer',
+                boxShadow: dataMode === 'DEMO' ? 'var(--shadow-subtle)' : 'none',
+              }}
+            >
+              ● DEMO DATA ({demoRuns.length})
+            </button>
+          </div>
+        </div>
+
+        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+          {dataMode === 'REAL' ? 'Showing verified production executions only' : 'Showing synthetic benchmark data (demo only)'}
+        </div>
+      </div>
+
+      {dataMode === 'DEMO' && (
+        <div style={{ background: '#FEF3C7', border: '1px solid #FDE68A', color: '#92400E', padding: '0.75rem 1.25rem', borderRadius: 'var(--radius-md)', fontSize: '0.85rem', fontWeight: 600 }}>
+          ⚠️ DEMO DATA MODE: These records are synthetic demo benchmark runs and are isolated from real test telemetry.
+        </div>
+      )}
 
       {/* The 3 Core Platform Answers */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
@@ -198,11 +255,23 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
           </Button>
         }
       >
-        {runs.length === 0 ? (
+        {activeRuns.length === 0 ? (
           <EmptyState
-            title="No test runs recorded yet"
-            description="Launch your first automated Playwright scenario to collect telemetry and audit data."
-            action={<Button variant="primary" onClick={onOpenQuickRun}>Run First Test</Button>}
+            title={dataMode === 'REAL' ? "No real test executions recorded yet" : "No demo runs recorded"}
+            description={
+              dataMode === 'REAL'
+                ? "This dashboard shows verified real executions only. Run a live test or switch to Demo Mode to view benchmark records."
+                : "Launch a demo scenario to record benchmark executions."
+            }
+            action={
+              dataMode === 'REAL' && demoRuns.length > 0 ? (
+                <Button variant="secondary" onClick={() => setDataMode('DEMO')}>
+                  Switch to Demo Data ({demoRuns.length} runs)
+                </Button>
+              ) : (
+                <Button variant="primary" onClick={onOpenQuickRun}>Run First Test</Button>
+              )
+            }
           />
         ) : (
           <div className="table-responsive">
@@ -219,7 +288,7 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
                 </tr>
               </thead>
               <tbody>
-                {runs.slice(0, 5).map((run) => (
+                {activeRuns.slice(0, 5).map((run) => (
                   <tr key={run.id} onClick={() => onInspectRun(run)}>
                     <td><code>#{run.id}</code></td>
                     <td style={{ maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>

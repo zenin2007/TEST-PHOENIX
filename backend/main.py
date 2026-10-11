@@ -31,10 +31,17 @@ async def lifespan(app: FastAPI):
         reset_db_data(seed=True)
     yield
 
+import os
+
+disable_docs = os.environ.get("TESTPHOENIX_DISABLE_DOCS", "false").lower() in ("true", "1")
+
 app = FastAPI(
     title="TestPhoenix Intent-Aware Self-Healing Platform API",
     description="Backend API and test runner telemetry for TestPhoenix",
     version="2.0.0",
+    docs_url=None if disable_docs else "/docs",
+    redoc_url=None if disable_docs else "/redoc",
+    openapi_url=None if disable_docs else "/openapi.json",
     lifespan=lifespan
 )
 
@@ -227,7 +234,8 @@ def run_live_website_test_endpoint(payload: LiveTestRequest):
             website_url=payload.website_url,
             test_name=payload.test_name,
             intent=payload.intent,
-            expected_outcome=payload.expected_outcome
+            expected_outcome=payload.expected_outcome,
+            allow_internal=payload.allow_internal
         )
         return result
     except Exception as e:
@@ -239,10 +247,43 @@ def run_live_website_test_endpoint(payload: LiveTestRequest):
 
 @app.get("/api/tests/history")
 @app.get("/api/runs")
-def list_test_runs(limit: int = 50):
-    """Retrieve recent test run history from SQLite."""
+def list_test_runs(limit: int = 50, mode: str = "real"):
+    """
+    Retrieve recent test run history from SQLite.
+    Default mode='real' returns REAL TELEMETRY ONLY.
+    Use mode='demo' for demo runs or mode='all' for all records.
+    """
     from backend.database import get_test_runs
-    return get_test_runs(limit=limit)
+    return get_test_runs(limit=limit, mode=mode)
+
+@app.post("/api/demo/clear")
+@app.post("/api/test/clear-demo")
+def clear_demo_telemetry():
+    """Wipes all demo scenario records while strictly preserving real test executions."""
+    from backend.database import clear_demo_runs
+    count = clear_demo_runs()
+    return {
+        "status": "ok",
+        "message": f"Successfully cleared {count} demo records. Real test telemetry preserved.",
+        "cleared_count": count
+    }
+
+# ==================== Continuous Test Versioning Endpoints ====================
+
+@app.get("/api/versions")
+def list_test_versions(test_id: Optional[str] = None):
+    """Retrieve historical test version chains (V1 -> V2 -> V3) with active baseline status."""
+    from backend.database import get_test_version_history
+    return get_test_version_history(test_id=test_id)
+
+@app.get("/api/versions/active/{test_id}")
+def get_active_version(test_id: str):
+    """Retrieve the currently active baseline test version for a test workflow."""
+    from backend.database import get_active_test_version
+    active_v = get_active_test_version(test_id=test_id)
+    if not active_v:
+        raise HTTPException(status_code=404, detail=f"No active baseline found for test workflow '{test_id}'")
+    return active_v
 
 @app.get("/api/tests/history/{run_id}")
 @app.get("/api/runs/{run_id}")
@@ -282,7 +323,7 @@ def serve_demo_checkout_page():
     raise HTTPException(status_code=404, detail="Demo checkout page not found.")
 
 @app.post("/api/demo/checkout-submit")
-def submit_demo_checkout(force_500: bool = False):
+def submit_demo_checkout(force_500: bool = False, customer_name: str = "Alex Rivers"):
     if force_500:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -292,7 +333,29 @@ def submit_demo_checkout(force_500: bool = False):
                 "retryable": False
             }
         )
-    return {"status": "ok", "message": "Payment verified and order confirmed", "order_id": 84920}
+    from backend.database import create_order
+    order = create_order(
+        product_name="Audio Wireless Headphones (Verified Golden Flow)",
+        price=249.00,
+        quantity=1,
+        customer_name=customer_name or "Alex Rivers",
+        status="Completed"
+    )
+    return {"status": "ok", "message": "Payment verified and order confirmed in SQLite", "order_id": order["id"]}
+
+@app.post("/api/demo/checkout-run")
+def run_demo_checkout_workflow(
+    version: str = "v1",
+    mutation: Optional[str] = None,
+    failure_case: Optional[str] = None
+):
+    """
+    Executes the Complete Checkout with a valid credit card golden workflow:
+    Application V1 -> Test V1 -> UI Mutation -> Self-Healing -> Verification -> Test V2 ACTIVE
+    -> Second UI Mutation -> Self-Healing -> Verification -> Test V3 ACTIVE.
+    """
+    from backend.test_runner import execute_checkout_golden_workflow
+    return execute_checkout_golden_workflow(version=version, mutation=mutation, failure_case=failure_case)
 
 
 # ==================== Advanced Evaluation & Metrics Endpoints ====================

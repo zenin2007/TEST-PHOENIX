@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TestPhoenix Controlled Demo Storefront</title>
+  <title>TestPhoenix Controlled Golden Workflow — Checkout</title>
   <style>
     :root {
       --bg: #F5F5F7;
@@ -35,7 +35,7 @@
       border-radius: 16px;
       box-shadow: 0 4px 24px rgba(0,0,0,0.06);
       width: 100%;
-      max-width: 540px;
+      max-width: 560px;
       padding: 2.25rem;
     }
     .badge {
@@ -48,8 +48,9 @@
       border-radius: 12px;
       margin-bottom: 1rem;
     }
-    .badge-a { background: #E8F0FE; color: #1967D2; }
-    .badge-b { background: #FEF7E0; color: #B06000; }
+    .badge-v1 { background: #E8F0FE; color: #1967D2; }
+    .badge-v2 { background: #FEF7E0; color: #B06000; }
+    .badge-v3 { background: #E6F4EA; color: #137333; }
     .badge-broken { background: #FCE8E6; color: #C5221F; }
     .badge-ambiguous { background: #F3E8FD; color: #7627BB; }
     h1 { font-size: 1.45rem; font-weight: 700; margin-bottom: 0.5rem; }
@@ -74,6 +75,24 @@
       font-size: 1rem;
       margin-bottom: 0;
     }
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+    .form-label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.35rem;
+    }
+    .form-input {
+      width: 100%;
+      padding: 0.65rem 0.85rem;
+      font-size: 0.9rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #FFF;
+    }
     .btn {
       width: 100%;
       padding: 0.85rem 1.25rem;
@@ -94,6 +113,7 @@
     .btn:disabled { opacity: 0.6; cursor: not-allowed; }
     .btn-payment { background: #1D1D1F; }
     .btn-payment:hover { background: #333336; }
+    .btn-primary { background: #0071E3; }
     .btn-danger { background: #D32F2F; }
     .btn-danger:hover { background: #B71C1C; }
     .confirmation {
@@ -123,13 +143,41 @@
       gap: 0.75rem;
     }
     .ambiguous-group button { flex: 1; }
+    .checkout-drawer-panel {
+      background: #F8FAFC;
+      border: 1.5px dashed #CBD5E1;
+      padding: 1.25rem;
+      border-radius: 12px;
+      margin-top: 0.5rem;
+    }
+    .card-checkout-container {
+      background: #F0FDF4;
+      border: 1.5px solid #86EFAC;
+      padding: 1.25rem;
+      border-radius: 12px;
+      margin-top: 0.5rem;
+    }
+    .checkout-step-final {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .accordion-wrapper {
+      border: 1px solid #E2E8F0;
+      border-radius: 10px;
+      padding: 1rem;
+      background: #F8FAFC;
+    }
   </style>
 </head>
 <body>
   <div class="container" id="checkout-container">
-    <div id="version-badge" class="badge badge-a">Version A (Baseline)</div>
+    <div id="version-badge" class="badge badge-v1">Application V1 (Baseline)</div>
     <h1 id="page-heading">Checkout &amp; Order Review</h1>
-    <p id="page-description">Review your cart merchandise before completing payment and placing order.</p>
+    <p id="page-description">Review your merchandise and complete payment with credit card.</p>
+
+    <!-- Top Action Area if Mutation is move-element -->
+    <div id="top-action-area" style="display:none; margin-bottom: 1.25rem;"></div>
 
     <div class="order-summary" id="order-summary">
       <div class="order-row">
@@ -137,7 +185,7 @@
         <span>$249.00</span>
       </div>
       <div class="order-row">
-        <span>Standard Shipping</span>
+        <span>Standard Express Shipping</span>
         <span>FREE</span>
       </div>
       <div class="order-row total">
@@ -146,14 +194,19 @@
       </div>
     </div>
 
-    <!-- Dynamic Button Area based on version param -->
+    <div class="form-group" id="card-group">
+      <label class="form-label" for="card-holder-input">Cardholder Name</label>
+      <input type="text" id="card-holder-input" class="form-input" value="Alex Rivers" readonly />
+    </div>
+
+    <!-- Primary Action Area -->
     <div id="action-area"></div>
 
-    <!-- Outcome Confirmation -->
+    <!-- Outcome Confirmation (asserted in UI verification) -->
     <div id="checkout-confirmation" class="confirmation">
       <strong>✓ Checkout/payment page is displayed.</strong>
-      <p style="margin-top: 0.35rem; color: #2E7D32; font-size: 0.85rem;">
-        Order #TP-84920 has been placed and confirmed. Payment processed successfully!
+      <p style="margin-top: 0.35rem; color: #2E7D32; font-size: 0.85rem;" id="confirmation-text">
+        Order confirmed. Payment processed and persisted to SQLite successfully!
       </p>
     </div>
 
@@ -168,60 +221,149 @@
 
   <script>
     const params = new URLSearchParams(window.location.search);
-    const version = (params.get('version') || 'a').toLowerCase();
+    const version = (params.get('version') || 'v1').toLowerCase();
+    const mutation = (params.get('mutation') || '').toLowerCase();
+    const failureCase = (params.get('case') || '').toLowerCase();
+
     const actionArea = document.getElementById('action-area');
+    const topActionArea = document.getElementById('top-action-area');
     const badge = document.getElementById('version-badge');
     const confirmBox = document.getElementById('checkout-confirmation');
     const errorBox = document.getElementById('error-alert');
 
-    function onCheckoutSuccess() {
+    async function onCheckoutSuccess() {
+      try {
+        const res = await fetch('/api/demo/checkout-submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ customer_name: 'Alex Rivers' })
+        });
+        const data = await res.json();
+        if (data.order_id) {
+          document.getElementById('confirmation-text').innerText = 
+            `Order #TP-${data.order_id} confirmed. Verified in SQLite database for Alex Rivers.`;
+        }
+      } catch (e) {}
       actionArea.style.display = 'none';
+      topActionArea.style.display = 'none';
       confirmBox.style.display = 'block';
     }
 
     async function onCheckoutFailure() {
       // Simulate genuine backend HTTP 500 defect
       try {
-        const res = await fetch('/api/demo/checkout-submit?force_500=true', { method: 'POST' });
+        await fetch('/api/demo/checkout-submit?force_500=true', { method: 'POST' });
       } catch (e) {}
       actionArea.style.display = 'none';
+      topActionArea.style.display = 'none';
       errorBox.style.display = 'block';
     }
 
-    if (version === 'b') {
+    // Determine target area
+    let targetArea = actionArea;
+    if (mutation === 'move-element') {
+      topActionArea.style.display = 'block';
+      targetArea = topActionArea;
+    }
+
+    // 1. Failure cases
+    if (failureCase === '500' || failureCase === 'defect' || version === 'broken') {
+      badge.className = 'badge badge-broken';
+      badge.innerText = 'Case C: Genuine Backend Defect (HTTP 500)';
+      targetArea.innerHTML = `
+        <button id="checkout-btn" class="btn btn-danger" onclick="onCheckoutFailure()">
+          Complete Checkout (Trigger Backend 500)
+        </button>
+      `;
+    } else if (failureCase === 'ambiguous' || version === 'ambiguous') {
+      badge.className = 'badge badge-ambiguous';
+      badge.innerText = 'Case B: Ambiguous Target (Human Review Required)';
+      targetArea.innerHTML = `
+        <div class="ambiguous-group">
+          <button id="btn-pay-1" class="btn btn-payment" onclick="onCheckoutSuccess()">Pay Now &amp; Place Order</button>
+          <button id="btn-pay-2" class="btn btn-payment" onclick="onCheckoutSuccess()">Pay Now &amp; Place Order</button>
+        </div>
+      `;
+    }
+    // 2. Controlled explicit mutation overrides
+    else if (mutation === 'change-id') {
+      badge.className = 'badge badge-v2';
+      badge.innerText = 'Mutation: Changed Element ID';
+      targetArea.innerHTML = `
+        <button id="submit-payment-btn" class="btn" onclick="onCheckoutSuccess()">
+          Complete Checkout
+        </button>
+      `;
+    } else if (mutation === 'rename-text') {
+      badge.className = 'badge badge-v2';
+      badge.innerText = 'Mutation: Renamed Visible Text';
+      targetArea.innerHTML = `
+        <button id="checkout-btn" class="btn btn-payment" onclick="onCheckoutSuccess()">
+          Authorize Card &amp; Complete Purchase
+        </button>
+      `;
+    } else if (mutation === 'change-structure') {
+      badge.className = 'badge badge-v2';
+      badge.innerText = 'Mutation: Changed HTML Structure (Nested Accordion)';
+      targetArea.innerHTML = `
+        <div class="accordion-wrapper">
+          <div class="accordion-header" style="font-size:0.85rem; font-weight:600; margin-bottom:0.5rem; color:#475569;">Step 3: Payment Authorization</div>
+          <button id="payment-auth-btn" class="btn btn-payment" onclick="onCheckoutSuccess()">
+            Confirm Order &amp; Pay
+          </button>
+        </div>
+      `;
+    } else if (mutation === 'move-element') {
+      badge.className = 'badge badge-v2';
+      badge.innerText = 'Mutation: Reordered Element Position';
+      topActionArea.innerHTML = `
+        <button id="reordered-checkout-btn" class="btn btn-payment" onclick="onCheckoutSuccess()">
+          Complete Checkout
+        </button>
+      `;
+    }
+    // 3. Application Version Progression (V1 -> V2 -> V3)
+    else if (version === 'b') {
       badge.className = 'badge badge-b';
       badge.innerText = 'Version B (Redesigned Button)';
-      // Version B: Renamed and redesigned button "Proceed to Payment" (#proceed-to-payment-btn)
-      // Note: #checkout-btn is completely removed!
-      actionArea.innerHTML = `
+      targetArea.innerHTML = `
         <button id="proceed-to-payment-btn" class="btn btn-payment" onclick="onCheckoutSuccess()">
           Proceed to Payment →
         </button>
       `;
-    } else if (version === 'broken') {
-      badge.className = 'badge badge-broken';
-      badge.innerText = 'Version Broken (Simulated HTTP 500)';
-      actionArea.innerHTML = `
-        <button id="checkout-btn" class="btn btn-danger" onclick="onCheckoutFailure()">
-          Checkout (Trigger Defect)
-        </button>
+    } else if (version === 'v2') {
+      badge.className = 'badge badge-v2';
+      badge.innerText = 'Application V2 (Drawer Redesign & Renamed Button)';
+      // V2 Mutation: Replaced button with slideout drawer panel and renamed to #pay-now-btn
+      targetArea.innerHTML = `
+        <div class="checkout-drawer-panel">
+          <div style="font-size:0.775rem; text-transform:uppercase; font-weight:700; color:#B06000; margin-bottom:0.5rem;">Payment Drawer Action</div>
+          <button id="pay-now-btn" class="btn btn-payment" onclick="onCheckoutSuccess()">
+            Pay Now &amp; Place Order →
+          </button>
+        </div>
       `;
-    } else if (version === 'ambiguous') {
-      badge.className = 'badge badge-ambiguous';
-      badge.innerText = 'Version Ambiguous (Competing Candidates)';
-      actionArea.innerHTML = `
-        <div class="ambiguous-group">
-          <button id="btn-pay-1" class="btn btn-payment" onclick="onCheckoutSuccess()">Proceed to Payment</button>
-          <button id="btn-pay-2" class="btn btn-payment" onclick="onCheckoutSuccess()">Proceed to Payment</button>
+    } else if (version === 'v3' || version === 'c') {
+      badge.className = 'badge badge-v3';
+      badge.innerText = 'Application V3 (Multi-Step Container & Modernized CTA)';
+      // V3 Mutation: Replaced with multi-step nested container and CTA #confirm-and-pay-btn
+      targetArea.innerHTML = `
+        <div class="card-checkout-container">
+          <div class="checkout-step-final">
+            <div style="font-size:0.775rem; text-transform:uppercase; font-weight:700; color:#15803D; margin-bottom:0.25rem;">Final Review &amp; Settlement</div>
+            <button id="confirm-and-pay-btn" class="btn btn-primary" onclick="onCheckoutSuccess()">
+              Authorize Card &amp; Complete Purchase ✓
+            </button>
+          </div>
         </div>
       `;
     } else {
-      // Default: Version A Baseline
-      badge.className = 'badge badge-a';
-      badge.innerText = 'Version A (Baseline)';
-      actionArea.innerHTML = `
+      // Default: Version 1 (Baseline)
+      badge.className = 'badge badge-v1';
+      badge.innerText = 'Application V1 (Baseline)';
+      targetArea.innerHTML = `
         <button id="checkout-btn" class="btn" onclick="onCheckoutSuccess()">
-          Checkout
+          Complete Checkout
         </button>
       `;
     }

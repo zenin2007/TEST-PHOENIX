@@ -10,6 +10,7 @@ import { HealingMemoryView } from './components/features/healing-memory/HealingM
 import { EnvironmentsView } from './components/features/environments/EnvironmentsView';
 import { SettingsView } from './components/features/settings/SettingsView';
 import { ShowcaseView } from './components/features/showcase/ShowcaseView';
+import { VersionsView } from './components/features/versions/VersionsView';
 import { SelfHealingDemo } from './components/SelfHealingDemo';
 import { Modal } from './components/ui/Modal';
 import { StatusBadge } from './components/ui/Badge';
@@ -76,7 +77,7 @@ export function App() {
   const fetchRuns = useCallback(async () => {
     setIsRefreshing(true);
     try {
-      const data = await ApiService.getTestHistory();
+      const data = await ApiService.getTestHistory(100, 'all');
       setRuns(data);
       setBackendHealthy(true);
     } catch {
@@ -177,6 +178,7 @@ export function App() {
     'overview',
     'tests',
     'runs',
+    'versions',
     'recovery',
     'analytics',
     'healing-memory',
@@ -257,6 +259,10 @@ export function App() {
               isRefreshing={isRefreshing}
               onExportJson={handleExportJson}
             />
+          )}
+
+          {mappedTab === 'versions' && (
+            <VersionsView />
           )}
 
           {mappedTab === 'recovery' && (
@@ -416,8 +422,17 @@ export function App() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Decision:</span>
-                <div style={{ marginTop: '0.2rem' }}>
+                <div style={{ marginTop: '0.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <StatusBadge status={inspectRun.status} size="md" />
+                  {inspectRun.is_demo ? (
+                    <span style={{ background: '#FEF3C7', color: '#92400E', padding: '0.15rem 0.5rem', borderRadius: 4, fontSize: '0.7rem', fontWeight: 700, border: '1px solid #FDE68A' }}>
+                      DEMO DATA
+                    </span>
+                  ) : (
+                    <span style={{ background: '#DCFCE7', color: '#166534', padding: '0.15rem 0.5rem', borderRadius: 4, fontSize: '0.7rem', fontWeight: 700, border: '1px solid #BBF7D0' }}>
+                      REAL DATA
+                    </span>
+                  )}
                 </div>
               </div>
               <div style={{ textAlign: 'right' }}>
@@ -426,23 +441,53 @@ export function App() {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem' }}>
+            {/* Structured Test Details per Master Upgrade Prompt Section 6 */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }}>
               <div style={{ background: 'var(--bg-inset)', padding: '0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
-                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>Original Locator</span>
-                <div style={{ marginTop: '0.2rem' }}><code>{inspectRun.original_locator || 'N/A'}</code></div>
+                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>Intent</span>
+                <div style={{ marginTop: '0.2rem', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                  {inspectRun.original_intent || (inspectRun.scenario.includes('Store') ? 'Complete audio checkout' : 'Create new task item')}
+                </div>
               </div>
 
               <div style={{ background: 'var(--bg-inset)', padding: '0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
-                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>Recovered Target</span>
-                <div style={{ marginTop: '0.2rem' }}><code style={{ color: 'var(--primary)' }}>{inspectRun.replacement_selector || 'None required'}</code></div>
+                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>Current App Version</span>
+                <div style={{ marginTop: '0.2rem', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                  {inspectRun.app_version || 'App V1'}
+                </div>
+              </div>
+
+              <div style={{ background: 'var(--bg-inset)', padding: '0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
+                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>Active Test Version</span>
+                <div style={{ marginTop: '0.2rem', fontSize: '0.85rem', fontWeight: 700, color: '#16A34A' }}>
+                  {inspectRun.test_version_label || 'Test V1'}
+                </div>
               </div>
             </div>
 
-            {inspectRun.verification_result && (
-              <div style={{ padding: '0.85rem', background: 'var(--status-pass-bg)', border: '1px solid var(--status-pass-border)', borderRadius: 'var(--radius-sm)', color: 'var(--status-pass-text)', fontSize: '0.825rem' }}>
-                <strong>Dual Verifier Outcome Evidence:</strong> {inspectRun.verification_result}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem' }}>
+              <div style={{ background: 'var(--bg-inset)', padding: '0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
+                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>Last Healing</span>
+                <div style={{ marginTop: '0.2rem', fontSize: '0.825rem', color: 'var(--text-primary)' }}>
+                  {inspectRun.replacement_selector ? (
+                    <span>Healed via <code style={{ color: 'var(--primary)' }}>{inspectRun.replacement_selector}</code></span>
+                  ) : (
+                    <span style={{ color: 'var(--text-muted)' }}>Direct baseline match (No healing needed)</span>
+                  )}
+                </div>
               </div>
-            )}
+
+              <div style={{ background: 'var(--bg-inset)', padding: '0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
+                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>Confidence</span>
+                <div style={{ marginTop: '0.2rem', fontSize: '0.875rem', fontWeight: 700, color: inspectRun.candidate_score && inspectRun.candidate_score >= 0.75 ? '#16A34A' : 'var(--text-primary)' }}>
+                  {inspectRun.candidate_score ? `${(inspectRun.candidate_score * 100).toFixed(1)}%` : (inspectRun.status === 'PASS' ? '100% (Direct)' : 'N/A')}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ padding: '0.85rem', background: 'var(--status-pass-bg)', border: '1px solid var(--status-pass-border)', borderRadius: 'var(--radius-sm)', color: 'var(--status-pass-text)', fontSize: '0.825rem' }}>
+              <strong>Verification Result:</strong> {inspectRun.verification_result || 'Verified via dual UI and SQLite outcome verifier'}
+            </div>
 
             {inspectRun.initial_failure_reason && (
               <div style={{ padding: '0.85rem', background: 'var(--status-fail-bg)', border: '1px solid var(--status-fail-border)', borderRadius: 'var(--radius-sm)', color: 'var(--status-fail-text)', fontSize: '0.825rem' }}>

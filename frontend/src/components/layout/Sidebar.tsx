@@ -26,6 +26,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'overview', label: 'Overview', icon: '⚡' },
     { id: 'tests', label: 'Tests', icon: '🧪' },
     { id: 'runs', label: 'Runs', icon: '▶', badge: totalRuns > 0 ? totalRuns : undefined },
+    { id: 'versions', label: 'Version Chain', icon: '🧬', badge: 'Active' },
     { id: 'recovery', label: 'Recovery', icon: '🛡️' },
     { id: 'analytics', label: 'Analytics', icon: '📊' },
     { id: 'healing-memory', label: 'Healing Memory', icon: '🧠' },

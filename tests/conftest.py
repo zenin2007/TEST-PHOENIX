@@ -33,6 +33,7 @@ def test_environment():
     Session fixture ensuring FastAPI backend and Vite frontend are running.
     If not already running, launches them cleanly for the test session.
     """
+    os.environ["TESTPHOENIX_ALLOW_INTERNAL_NETWORKS"] = "1"
     processes = []
 
     # 1. Check / start backend

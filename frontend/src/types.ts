@@ -12,6 +12,7 @@ export type NavigationTab =
   | 'overview'
   | 'tests'
   | 'runs'
+  | 'versions'
   | 'recovery'
   | 'analytics'
   | 'healing-memory'
@@ -65,6 +66,26 @@ export interface TestRun {
   detected_differences?: string;
   reconstructed_workflow?: string;
   execution_duration_ms?: number;
+  is_demo?: boolean;
+  app_version?: string;
+  test_version_label?: string;
+  test_version_id?: number;
+  created_at: string;
+}
+
+export interface TestVersion {
+  id: number;
+  test_id: string;
+  version_number: number;
+  version_label: string;
+  app_version: string;
+  parent_version_id: number | null;
+  is_active_baseline: boolean;
+  workflow_steps_json?: string;
+  healing_summary?: string | null;
+  confidence?: number;
+  verification_result?: string;
+  run_id?: number | null;
   created_at: string;
 }
 

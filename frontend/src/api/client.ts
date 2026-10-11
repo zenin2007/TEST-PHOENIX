@@ -3,6 +3,7 @@ import type {
   TaskFormPayload,
   Order,
   TestRun,
+  TestVersion,
   HealingMemoryRecord,
   EvaluationReport,
   LiveTestRequest,
@@ -67,9 +68,49 @@ export class ApiService {
   }
 
   // Test Runs & Scenarios
-  static async getTestHistory(limit = 100): Promise<TestRun[]> {
-    const res = await fetch(`${this.baseUrl}/api/tests/history?limit=${limit}`);
+  static async getTestHistory(limit = 100, mode = 'real'): Promise<TestRun[]> {
+    const res = await fetch(`${this.baseUrl}/api/tests/history?limit=${limit}&mode=${mode}`);
     if (!res.ok) throw new Error(`Failed to load test history: HTTP ${res.status}`);
+    return res.json();
+  }
+
+  static async clearDemoData(): Promise<{ message: string; cleared_count: number }> {
+    const res = await fetch(`${this.baseUrl}/api/demo/clear`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (!res.ok) throw new Error(`Failed to clear demo data: HTTP ${res.status}`);
+    return res.json();
+  }
+
+  // Continuous Test Versioning
+  static async getTestVersions(testId?: string): Promise<TestVersion[]> {
+    const query = testId ? `?test_id=${encodeURIComponent(testId)}` : '';
+    const res = await fetch(`${this.baseUrl}/api/versions${query}`);
+    if (!res.ok) throw new Error(`Failed to load test versions: HTTP ${res.status}`);
+    return res.json();
+  }
+
+  static async getActiveTestVersion(testId: string): Promise<TestVersion> {
+    const res = await fetch(`${this.baseUrl}/api/versions/active/${encodeURIComponent(testId)}`);
+    if (!res.ok) throw new Error(`Failed to load active version for ${testId}: HTTP ${res.status}`);
+    return res.json();
+  }
+
+  static async executeCheckoutGoldenFlow(params: {
+    version?: string;
+    mutation?: string;
+    failure_case?: string;
+  }): Promise<TestRun & { timeline_steps?: any[]; candidates_evaluated?: any[]; selected_candidate?: any }> {
+    const query = new URLSearchParams();
+    if (params.version) query.set('version', params.version);
+    if (params.mutation) query.set('mutation', params.mutation);
+    if (params.failure_case) query.set('failure_case', params.failure_case);
+    const res = await fetch(`${this.baseUrl}/api/demo/checkout-run?${query.toString()}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (!res.ok) throw new Error(`Demo checkout execution failed: HTTP ${res.status}`);
     return res.json();
   }
 

@@ -46,6 +46,7 @@ class LiveTestRequest(BaseModel):
     website_url: str = Field(..., min_length=4, max_length=2000, description="Website URL to test")
     intent: str = Field(..., min_length=1, max_length=1000, description="Natural-language test intent")
     expected_outcome: str = Field(..., min_length=1, max_length=1000, description="Expected outcome")
+    allow_internal: Optional[bool] = Field(default=None, description="Allow internal/localhost testing if explicitly configured")
 
     @field_validator("website_url")
     @classmethod
@@ -102,5 +103,21 @@ class LiveTestResponse(BaseModel):
     dom_summary: Dict[str, Any]
     accessibility_summary: Dict[str, Any]
     error: Optional[str] = None
+
+class TestVersionResponse(BaseModel):
+    id: int
+    test_id: str
+    version_number: int
+    version_label: str
+    app_version: str
+    parent_version_id: Optional[int] = None
+    is_active_baseline: bool
+    workflow_steps_json: str
+    healing_summary: Optional[str] = None
+    confidence: Optional[float] = None
+    verification_result: Optional[str] = None
+    run_id: Optional[int] = None
+    created_at: str
+
 
 
