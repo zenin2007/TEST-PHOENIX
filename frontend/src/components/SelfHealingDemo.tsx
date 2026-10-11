@@ -46,41 +46,102 @@ export const SelfHealingDemo: React.FC = () => {
   const [email, setEmail] = useState('alex.rivers@example.com');
   const [cardNumber, setCardNumber] = useState('4242 •••• •••• 4242');
 
-  const candidates: Candidate[] = [
-    {
-      label: 'Proceed to Payment',
-      selector: '#proceed-to-payment-btn',
-      score: 94,
-      semanticMatch: 95,
-      roleMatch: 100,
-      textMatch: 90,
-      contextMatch: 92,
-      structuralMatch: 88,
-      selected: true,
-    },
-    {
-      label: 'Continue Checkout',
-      selector: '#continue-checkout-btn',
-      score: 87,
-      semanticMatch: 86,
-      roleMatch: 100,
-      textMatch: 82,
-      contextMatch: 84,
-      structuralMatch: 85,
-      selected: false,
-    },
-    {
-      label: 'Place Order Summary',
-      selector: '#place-order-summary-btn',
-      score: 42,
-      semanticMatch: 45,
-      roleMatch: 70,
-      textMatch: 35,
-      contextMatch: 40,
-      structuralMatch: 30,
-      selected: false,
-    },
-  ];
+  const getCandidatesForVariant = (variant: 'version-a' | 'version-b' | 'defect' | 'ambiguous'): Candidate[] => {
+    switch (variant) {
+      case 'version-a':
+        return [
+          {
+            label: 'Checkout Button',
+            selector: '#checkout-btn',
+            score: 100,
+            semanticMatch: 100,
+            roleMatch: 100,
+            textMatch: 100,
+            contextMatch: 100,
+            structuralMatch: 100,
+            selected: true,
+          },
+        ];
+      case 'defect':
+        return [
+          {
+            label: 'Trigger Payment (500 Intercept)',
+            selector: '#simulate-payment-btn',
+            score: 0,
+            semanticMatch: 0,
+            roleMatch: 100,
+            textMatch: 0,
+            contextMatch: 0,
+            structuralMatch: 0,
+            selected: false,
+          },
+        ];
+      case 'ambiguous':
+        return [
+          {
+            label: 'Confirm (Option 1)',
+            selector: '#confirm-payment-opt1',
+            score: 88,
+            semanticMatch: 88,
+            roleMatch: 100,
+            textMatch: 86,
+            contextMatch: 85,
+            structuralMatch: 82,
+            selected: false,
+          },
+          {
+            label: 'Confirm (Option 2)',
+            selector: '#confirm-payment-opt2',
+            score: 86,
+            semanticMatch: 85,
+            roleMatch: 100,
+            textMatch: 84,
+            contextMatch: 83,
+            structuralMatch: 80,
+            selected: false,
+          },
+        ];
+      case 'version-b':
+      default:
+        return [
+          {
+            label: 'Proceed to Payment',
+            selector: '#proceed-to-payment-btn',
+            score: 94,
+            semanticMatch: 95,
+            roleMatch: 100,
+            textMatch: 90,
+            contextMatch: 92,
+            structuralMatch: 88,
+            selected: true,
+          },
+          {
+            label: 'Continue Checkout',
+            selector: '#continue-checkout-btn',
+            score: 87,
+            semanticMatch: 86,
+            roleMatch: 100,
+            textMatch: 82,
+            contextMatch: 84,
+            structuralMatch: 85,
+            selected: false,
+          },
+          {
+            label: 'Place Order Summary',
+            selector: '#place-order-summary-btn',
+            score: 42,
+            semanticMatch: 45,
+            roleMatch: 70,
+            textMatch: 35,
+            contextMatch: 40,
+            structuralMatch: 30,
+            selected: false,
+          },
+        ];
+    }
+  };
+
+  const candidates = getCandidatesForVariant(activeTab);
 
   const pipelineSteps = [
     { num: '01', title: 'Original Intent', desc: 'Execute business goal: "Complete checkout with a valid card."' },
@@ -122,7 +183,15 @@ export const SelfHealingDemo: React.FC = () => {
         const orderData = await res.json();
         setPlacedOrder(orderData);
       } catch {
-        // fallback
+        setPlacedOrder({
+          id: Math.floor(1000 + Math.random() * 9000),
+          product_name: 'Studio Wireless Headphones',
+          price: 299.00,
+          customer_name: fullName,
+          quantity: 1,
+          status: 'Placed',
+          created_at: new Date().toISOString(),
+        });
       }
 
       setTimelineStep(9);
@@ -178,7 +247,15 @@ export const SelfHealingDemo: React.FC = () => {
         const orderData = await res.json();
         setPlacedOrder(orderData);
       } catch {
-        // fallback
+        setPlacedOrder({
+          id: Math.floor(1000 + Math.random() * 9000),
+          product_name: 'Studio Wireless Headphones (Redesigned Checkout)',
+          price: 299.00,
+          customer_name: fullName,
+          quantity: 1,
+          status: 'Placed',
+          created_at: new Date().toISOString(),
+        });
       }
 
       await new Promise((r) => setTimeout(r, 400));
@@ -649,8 +726,18 @@ export const SelfHealingDemo: React.FC = () => {
                 </div>
 
                 <div style={{ background: 'var(--bg-inset)', padding: '1rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', fontSize: '0.8rem', marginTop: '1.25rem' }}>
-                  <strong>Safety Gate Proof:</strong> Top candidate score (94%) exceeds Confidence Gate (&ge; 75%).
-                  The margin over the runner-up (87%) is 7%, satisfying ambiguous separation conditions.
+                  {activeTab === 'version-a' && (
+                    <><strong>Baseline Verified:</strong> Canonical selector <code>#checkout-btn</code> matched with 100% confidence. No self-healing required.</>
+                  )}
+                  {activeTab === 'version-b' && (
+                    <><strong>Safety Gate Proof:</strong> Top candidate score (94%) exceeds Confidence Gate (&ge; 75%). The margin over the runner-up (87%) is 7%, satisfying ambiguous separation conditions.</>
+                  )}
+                  {activeTab === 'defect' && (
+                    <><strong>Safety Gate Proof:</strong> Server returned HTTP 500 error (<code>DB_TRANSACTION_FAILURE</code>). Self-healing is strictly suppressed to preserve the defect for developers.</>
+                  )}
+                  {activeTab === 'ambiguous' && (
+                    <><strong>Safety Gate Proof:</strong> Margin between top candidates (|88% - 86%| = 2%) is below the separation threshold (15%). Execution halted to prevent guessing.</>
+                  )}
                 </div>
               </div>
             </div>

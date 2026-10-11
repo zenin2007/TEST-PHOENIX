@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card } from '../../ui/Card';
 import { StatusBadge } from '../../ui/Badge';
 import { Button } from '../../ui/Button';
+import { ApiService } from '../../../api/client';
 
 interface EnvironmentsViewProps {
   backendHealthy: boolean;
@@ -16,11 +17,9 @@ export const EnvironmentsView: React.FC<EnvironmentsViewProps> = ({ backendHealt
     setIsChecking(true);
     const start = performance.now();
     try {
-      const res = await fetch('/health');
-      if (res.ok) {
-        setLatencyMs(Math.round(performance.now() - start));
-        setLastChecked(new Date().toLocaleTimeString());
-      }
+      await ApiService.checkHealth();
+      setLatencyMs(Math.round(performance.now() - start));
+      setLastChecked(new Date().toLocaleTimeString());
     } catch {
       setLatencyMs(null);
     } finally {

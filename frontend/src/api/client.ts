@@ -11,7 +11,7 @@ import type {
 
 
 export class ApiService {
-  private static baseUrl = '';
+  private static baseUrl = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
 
   static async checkHealth(): Promise<{ status: string; failure_mode_active: boolean }> {
     const res = await fetch(`${this.baseUrl}/api/health`);
