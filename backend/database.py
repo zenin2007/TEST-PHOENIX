@@ -1,5 +1,6 @@
 import sqlite3
 import os
+import json
 from typing import List, Optional, Dict, Any
 from datetime import datetime, timezone
 
@@ -41,6 +42,31 @@ def init_db() -> None:
                 detected_differences TEXT,
                 reconstructed_workflow TEXT,
                 execution_duration_ms REAL,
+                created_at TEXT NOT NULL
+            )
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS healing_memory (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                original_intent TEXT NOT NULL,
+                original_locator TEXT,
+                recovered_locator TEXT NOT NULL,
+                element_fingerprint TEXT,
+                page_context TEXT,
+                confidence REAL NOT NULL,
+                outcome TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                last_verified_at TEXT NOT NULL
+            )
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS orders (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                product_name TEXT NOT NULL,
+                price REAL NOT NULL,
+                quantity INTEGER NOT NULL DEFAULT 1,
+                customer_name TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'Placed',
                 created_at TEXT NOT NULL
             )
         """)
@@ -101,6 +127,39 @@ def create_task(title: str, description: Optional[str], assignee: str, status: s
     finally:
         conn.close()
 
+def create_order(product_name: str, price: float, customer_name: str, quantity: int = 1, status: str = "Placed") -> Dict[str, Any]:
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        created_at = datetime.now(timezone.utc).isoformat()
+        cursor.execute("""
+            INSERT INTO orders (product_name, price, quantity, customer_name, status, created_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (product_name.strip(), price, quantity, customer_name.strip(), status.strip(), created_at))
+        conn.commit()
+        order_id = cursor.lastrowid
+        return {
+            "id": order_id,
+            "product_name": product_name.strip(),
+            "price": price,
+            "quantity": quantity,
+            "customer_name": customer_name.strip(),
+            "status": status.strip(),
+            "created_at": created_at
+        }
+    finally:
+        conn.close()
+
+def get_all_orders() -> List[Dict[str, Any]]:
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, product_name, price, quantity, customer_name, status, created_at FROM orders ORDER BY id DESC")
+        rows = cursor.fetchall()
+        return [dict(row) for row in rows]
+    finally:
+        conn.close()
+
 def reset_db_data(seed: bool = True) -> None:
     init_db()
     conn = get_connection()
@@ -108,6 +167,8 @@ def reset_db_data(seed: bool = True) -> None:
         cursor = conn.cursor()
         cursor.execute("DELETE FROM tasks")
         cursor.execute("DELETE FROM sqlite_sequence WHERE name='tasks'")
+        cursor.execute("DELETE FROM orders")
+        cursor.execute("DELETE FROM sqlite_sequence WHERE name='orders'")
         if seed:
             now = datetime.now(timezone.utc).isoformat()
             sample_tasks = [
@@ -122,6 +183,111 @@ def reset_db_data(seed: bool = True) -> None:
         conn.commit()
     finally:
         conn.close()
+
+# ----------------- Healing Memory Operations -----------------
+
+def save_healing_memory(
+    original_intent: str,
+    original_locator: Optional[str],
+    recovered_locator: str,
+    element_fingerprint: Optional[str] = None,
+    page_context: Optional[str] = None,
+    confidence: float = 1.0,
+    outcome: str = "SELF-HEALED"
+) -> Dict[str, Any]:
+    """Persists a verified self-healing recovery into SQLite memory."""
+    init_db()
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        now = datetime.now(timezone.utc).isoformat()
+        cursor.execute("""
+            SELECT id FROM healing_memory 
+            WHERE original_intent = ? AND (original_locator = ? OR (? IS NULL AND original_locator IS NULL))
+        """, (original_intent, original_locator, original_locator))
+        existing = cursor.fetchone()
+
+        if existing:
+            cursor.execute("""
+                UPDATE healing_memory
+                SET recovered_locator = ?, element_fingerprint = ?, page_context = ?,
+                    confidence = ?, outcome = ?, last_verified_at = ?
+                WHERE id = ?
+            """, (recovered_locator, element_fingerprint, page_context, confidence, outcome, now, existing["id"]))
+            memory_id = existing["id"]
+        else:
+            cursor.execute("""
+                INSERT INTO healing_memory (
+                    original_intent, original_locator, recovered_locator,
+                    element_fingerprint, page_context, confidence, outcome,
+                    created_at, last_verified_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                original_intent, original_locator, recovered_locator,
+                element_fingerprint, page_context, confidence, outcome,
+                now, now
+            ))
+            memory_id = cursor.lastrowid
+        conn.commit()
+        return {
+            "id": memory_id,
+            "original_intent": original_intent,
+            "original_locator": original_locator,
+            "recovered_locator": recovered_locator,
+            "confidence": confidence,
+            "outcome": outcome,
+            "last_verified_at": now
+        }
+    finally:
+        conn.close()
+
+def get_healing_memory(
+    original_intent: str,
+    original_locator: Optional[str] = None
+) -> Optional[Dict[str, Any]]:
+    """Retrieves learned healing memory for an intent or original locator."""
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        if original_locator:
+            cursor.execute("""
+                SELECT * FROM healing_memory
+                WHERE original_locator = ? OR original_intent = ?
+                ORDER BY confidence DESC, id DESC LIMIT 1
+            """, (original_locator, original_intent))
+        else:
+            cursor.execute("""
+                SELECT * FROM healing_memory
+                WHERE original_intent = ?
+                ORDER BY confidence DESC, id DESC LIMIT 1
+            """, (original_intent,))
+        row = cursor.fetchone()
+        return dict(row) if row else None
+    finally:
+        conn.close()
+
+def get_all_healing_memories() -> List[Dict[str, Any]]:
+    """Returns all learned healing memories from SQLite."""
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM healing_memory ORDER BY id DESC")
+        rows = cursor.fetchall()
+        return [dict(row) for row in rows]
+    finally:
+        conn.close()
+
+def clear_healing_memory() -> None:
+    conn = get_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM healing_memory")
+        cursor.execute("DELETE FROM sqlite_sequence WHERE name='healing_memory'")
+        conn.commit()
+    finally:
+        conn.close()
+
+# ----------------- Test Run Persistence -----------------
 
 def save_test_run(
     scenario: str,
@@ -219,4 +385,3 @@ def get_test_run_by_id(run_id: int) -> Optional[Dict[str, Any]]:
 
 # Auto-initialize database on load
 init_db()
-

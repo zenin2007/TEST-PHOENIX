@@ -2,7 +2,7 @@ import re
 from testphoenix.models import IntentStep
 
 def to_ascii_safe(text: str) -> str:
-    """Strips non-ASCII characters (e.g. emojis) to prevent Windows cp1252 charmap crashes."""
+    """Strips non-ASCII characters to prevent Windows cp1252 charmap crashes."""
     if not text:
         return ""
     return re.sub(r'[^\x00-\x7F]+', ' ', str(text)).strip()
@@ -22,7 +22,7 @@ class TestPhoenixReporter:
         lines.append("   Tagline: 'Rise above every UI change.'")
         lines.append("-" * 80)
         lines.append(f"* Intent:            {to_ascii_safe(step.intent)}")
-        lines.append(f"* Original Selector: {step.original_locator}")
+        lines.append(f"* Original Selector: {step.original_locator or '[Dynamic Intent]'}")
         lines.append(f"* Action:            {step.action.value} (Input: {to_ascii_safe(str(step.input_data))})")
         lines.append(f"* Final Status:      [{step.status.value}]")
         lines.append(f"* Failure Category:  {step.diagnostics.failure_category.value}")
@@ -32,6 +32,9 @@ class TestPhoenixReporter:
 
         if step.diagnostics.network_errors:
             lines.append(f"* Network Errors:    {[to_ascii_safe(e) for e in step.diagnostics.network_errors]}")
+
+        if step.diagnostics.from_healing_memory:
+            lines.append("* Memory Acceleration: Reused validated healing record from SQLite cache")
 
         if step.diagnostics.candidates_evaluated:
             lines.append("\nCandidates Evaluated & Ranked:")
@@ -68,9 +71,24 @@ class TestPhoenixReporter:
                 "explanation": to_ascii_safe(c.score.explanation if c.score else "")
             })
 
+        score_breakdown = None
+        if step.diagnostics.selected_candidate and step.diagnostics.selected_candidate.score:
+            sc = step.diagnostics.selected_candidate.score
+            score_breakdown = {
+                "semantic_score": round(sc.semantic_score * 100, 1),
+                "role_score": round(sc.role_score * 100, 1),
+                "text_score": round(sc.text_score * 100, 1),
+                "context_score": round(sc.context_score * 100, 1),
+                "structural_score": round(sc.structural_score * 100, 1),
+                "total_score": round(sc.total_score * 100, 1),
+                "explanation": to_ascii_safe(sc.explanation)
+            }
+
         return {
             "test_name": to_ascii_safe(test_name),
             "intent": to_ascii_safe(step.intent),
+            "expected_name": to_ascii_safe(step.expected_name or ""),
+            "expected_role": to_ascii_safe(step.expected_role or ""),
             "original_selector": step.original_locator,
             "action": step.action.value,
             "input_data": to_ascii_safe(str(step.input_data)),
@@ -79,7 +97,10 @@ class TestPhoenixReporter:
             "original_error": to_ascii_safe(step.diagnostics.original_error or ""),
             "network_errors": [to_ascii_safe(e) for e in step.diagnostics.network_errors],
             "selected_replacement": step.diagnostics.selected_candidate.selector if step.diagnostics.selected_candidate else None,
-            "score_margin": step.diagnostics.score_margin,
+            "score_margin": round(step.diagnostics.score_margin * 100, 1) if step.diagnostics.score_margin is not None else None,
+            "score_breakdown": score_breakdown,
+            "rationale": to_ascii_safe(step.diagnostics.rationale),
+            "from_healing_memory": step.diagnostics.from_healing_memory,
             "recovery_attempts": step.diagnostics.recovery_attempts,
             "postcondition_verified": step.diagnostics.postcondition_verified,
             "candidates": candidates_data

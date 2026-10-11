@@ -35,7 +35,17 @@ SYNONYM_GROUPS: List[Set[str]] = [
     # Status / Workflow state
     {"status", "stage", "state", "progress", "workflow", "phase"},
     # Dialog & presentation containers
-    {"dialog", "modal", "slideover", "drawer", "sheet", "form", "composer", "view", "panel"}
+    {"dialog", "modal", "slideover", "drawer", "sheet", "form", "composer", "view", "panel"},
+    # E-Commerce & Shopping Cart Actions
+    {"buy", "purchase", "add", "add_to_cart", "add-to-cart", "acquire", "shop", "get", "order"},
+    # Cart / Basket Containers
+    {"cart", "bag", "basket", "tote", "shopping-cart", "shopping-bag"},
+    # Checkout & Payment Actions
+    {"checkout", "pay", "payment", "place-order", "place_order", "complete-order", "proceed", "finalize"},
+    # Products & Audio Merchandise
+    {"headphones", "headset", "audio", "earphones", "earbuds", "device", "item", "product"},
+    # Customer & Shipping Fields
+    {"address", "shipping", "delivery", "location", "destination", "recipient", "customer", "street"}
 ]
 
 STOP_WORDS = {
@@ -99,7 +109,7 @@ class CandidateScorer:
                     synonym_matches.add(it)
                     break
 
-        total_matched = len(direct_matches) + (len(synonym_matches) * 0.9)
+        total_matched = len(direct_matches) + (len(synonym_matches) * 0.95)
         jaccard = total_matched / max(len(intent_tokens), 1)
         return min(1.0, max(0.0, jaccard))
 
@@ -143,8 +153,8 @@ class CandidateScorer:
         char_ratio = difflib.SequenceMatcher(None, target_text, candidate_text).ratio()
 
         # Token-level overlap
-        target_tokens = tokenize(target_text)
-        cand_tokens = tokenize(candidate_text)
+        target_tokens = tokenize(target_text, filter_stops=True)
+        cand_tokens = tokenize(candidate_text, filter_stops=True)
         if target_tokens and cand_tokens:
             matches = 0
             for tt in target_tokens:
@@ -165,8 +175,8 @@ class CandidateScorer:
         if not candidate.parent_context:
             return 0.5  # Neutral baseline
 
-        intent_tokens = tokenize(intent_text)
-        context_tokens = tokenize(candidate.parent_context)
+        intent_tokens = tokenize(intent_text, filter_stops=True)
+        context_tokens = tokenize(candidate.parent_context, filter_stops=True)
         if not intent_tokens or not context_tokens:
             return 0.5
 

@@ -1,22 +1,31 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { Task, DemoMode, TaskFormPayload } from './types';
 import { Navbar } from './components/Navbar';
+import { LandingPage } from './components/LandingPage';
 import { VersionA } from './components/VersionA';
 import { VersionB } from './components/VersionB';
 import { BrokenVersion } from './components/BrokenVersion';
 import { AmbiguousVersion } from './components/AmbiguousVersion';
+import { ShoppingCartA } from './components/ShoppingCartA';
+import { ShoppingCartB } from './components/ShoppingCartB';
 import { TestRunnerView } from './components/TestRunnerView';
+import { SelfHealingDemo } from './components/SelfHealingDemo';
 
 export function App() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [currentMode, setCurrentMode] = useState<DemoMode>(() => {
     const params = new URLSearchParams(window.location.search);
     const modeParam = params.get('mode');
+    if (modeParam === 'overview') return 'overview';
+    if (modeParam === 'self-healing') return 'self-healing';
     if (modeParam === 'version-b') return 'version-b';
     if (modeParam === 'broken') return 'broken';
     if (modeParam === 'ambiguous') return 'ambiguous';
-    if (modeParam === 'test-runner') return 'test-runner';
-    return 'version-a';
+    if (modeParam === 'shopping-a') return 'shopping-a';
+    if (modeParam === 'shopping-b') return 'shopping-b';
+    if (modeParam === 'test-runner' || modeParam === 'dashboard') return 'test-runner';
+    if (modeParam === 'version-a') return 'version-a';
+    return 'overview';
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -137,9 +146,21 @@ export function App() {
       <main className="main-content">
         {successMessage && (
           <div id="success-alert" data-testid="success-message" className="alert-success">
-            <span>✅</span>
+            <span>✓</span>
             <span>{successMessage}</span>
           </div>
+        )}
+
+        {currentMode === 'overview' && (
+          <LandingPage
+            onSelectMode={handleSelectMode}
+            onResetData={handleResetData}
+            backendHealthy={backendHealthy}
+          />
+        )}
+
+        {currentMode === 'self-healing' && (
+          <SelfHealingDemo />
         )}
 
         {currentMode === 'version-a' && (
@@ -158,6 +179,14 @@ export function App() {
           />
         )}
 
+        {currentMode === 'shopping-a' && (
+          <ShoppingCartA />
+        )}
+
+        {currentMode === 'shopping-b' && (
+          <ShoppingCartB />
+        )}
+
         {currentMode === 'broken' && (
           <BrokenVersion
             tasks={tasks}
@@ -172,7 +201,7 @@ export function App() {
           <AmbiguousVersion />
         )}
 
-        {currentMode === 'test-runner' && (
+        {(currentMode === 'test-runner' || currentMode === 'dashboard') && (
           <TestRunnerView />
         )}
       </main>

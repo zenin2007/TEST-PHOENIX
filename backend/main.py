@@ -3,15 +3,21 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
 from contextlib import asynccontextmanager
 
-from backend.database import init_db, get_all_tasks, get_task_by_id, create_task, reset_db_data
-from backend.models import TaskCreate, TaskResponse, FailureModeRequest, ResetDataRequest, TestRunRequest
+from backend.database import (
+    init_db, get_all_tasks, get_task_by_id, create_task, reset_db_data,
+    create_order, get_all_orders, get_all_healing_memories, clear_healing_memory
+)
+from backend.models import (
+    TaskCreate, TaskResponse, FailureModeRequest, ResetDataRequest, TestRunRequest,
+    OrderCreate, OrderResponse
+)
 
 # Controlled test failure state (in-memory, reset on command or app reload)
 _failure_mode_active = False
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Initialize SQLite table on startup
+    # Initialize SQLite tables on startup
     init_db()
     existing = get_all_tasks()
     if not existing:
@@ -19,9 +25,9 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(
-    title="Self-Healing Test System Demo API",
-    description="Backend API for task management demo application",
-    version="1.0.0",
+    title="TestPhoenix Intent-Aware Self-Healing Platform API",
+    description="Backend API and test runner telemetry for TestPhoenix",
+    version="2.0.0",
     lifespan=lifespan
 )
 
@@ -41,11 +47,12 @@ def health_check():
         "failure_mode_active": _failure_mode_active
     }
 
+# ==================== Task Management Endpoints ====================
+
 @app.get("/api/tasks", response_model=List[TaskResponse])
 def list_tasks():
     """Retrieve all tasks from SQLite database."""
-    tasks = get_all_tasks()
-    return tasks
+    return get_all_tasks()
 
 @app.get("/api/tasks/{task_id}", response_model=TaskResponse)
 def get_task(task_id: int):
@@ -73,7 +80,6 @@ def add_task(
     )
 
     if simulate_failure:
-        # Controlled backend failure: do not write to SQLite, return structured 500 error
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail={
@@ -83,16 +89,46 @@ def add_task(
             }
         )
 
-    # Valid task persistence into SQLite
-    created = create_task(
+    return create_task(
         title=task.title,
         description=task.description,
         assignee=task.assignee,
         status=task.status
     )
-    return created
 
-# Test automation support endpoints (strictly for local test harness / demo control)
+# ==================== Second Demo: Orders & E-Commerce Endpoints ====================
+
+@app.get("/api/orders", response_model=List[OrderResponse])
+def list_orders():
+    """Retrieve all orders from SQLite database."""
+    return get_all_orders()
+
+@app.post("/api/orders", response_model=OrderResponse, status_code=status.HTTP_201_CREATED)
+def add_order(order: OrderCreate):
+    """Persist completed order to SQLite database."""
+    return create_order(
+        product_name=order.product_name,
+        price=order.price,
+        customer_name=order.customer_name,
+        quantity=order.quantity,
+        status=order.status
+    )
+
+# ==================== Healing Memory Endpoints ====================
+
+@app.get("/api/healing/memory")
+def get_healing_memory_records():
+    """Retrieve all learned self-healing locator mappings from SQLite."""
+    return get_all_healing_memories()
+
+@app.post("/api/healing/clear")
+def clear_all_healing_memory():
+    """Reset the learned healing memory cache."""
+    clear_healing_memory()
+    return {"message": "Healing memory cache cleared successfully."}
+
+# ==================== Test Harness Support Endpoints ====================
+
 @app.get("/api/test/failure-mode")
 def get_failure_mode():
     return {"failure_mode_active": _failure_mode_active}
@@ -114,13 +150,15 @@ def reset_test_data(payload: Optional[ResetDataRequest] = None):
     seed = payload.seed if payload else True
     reset_db_data(seed=seed)
     tasks = get_all_tasks()
+    orders = get_all_orders()
     return {
         "message": "Demo data reset successfully",
         "failure_mode_active": _failure_mode_active,
-        "tasks_count": len(tasks)
+        "tasks_count": len(tasks),
+        "orders_count": len(orders)
     }
 
-# ==================== TestPhoenix MVP Test Execution Endpoints ====================
+# ==================== Test Execution Endpoints ====================
 
 @app.post("/api/tests/run")
 def trigger_test_run(payload: TestRunRequest):
@@ -158,6 +196,16 @@ def run_ambiguous_test():
     from backend.test_runner import execute_scenario_run
     return execute_scenario_run(scenario_key="ambiguous")
 
+@app.post("/api/tests/shopping-a")
+def run_shopping_a_test():
+    from backend.test_runner import execute_scenario_run
+    return execute_scenario_run(scenario_key="shopping-a")
+
+@app.post("/api/tests/shopping-b")
+def run_shopping_b_test():
+    from backend.test_runner import execute_scenario_run
+    return execute_scenario_run(scenario_key="shopping-b")
+
 @app.get("/api/tests/history")
 @app.get("/api/runs")
 def list_test_runs(limit: int = 50):
@@ -175,7 +223,8 @@ def get_test_run_details(run_id: int):
         raise HTTPException(status_code=404, detail=f"Test run #{run_id} not found")
     return run
 
-# Serve Results Dashboard HTML interface
+# ==================== Results Dashboard ====================
+
 @app.get("/results")
 @app.get("/dashboard")
 @app.get("/")
@@ -196,7 +245,6 @@ def get_latest_evaluation():
     import json
     json_path = os.path.join(os.path.dirname(__file__), "..", "advanced_evaluation_report.json")
     if not os.path.exists(json_path):
-        # Fallback to evaluation_report.json if advanced report not yet generated
         fallback_path = os.path.join(os.path.dirname(__file__), "..", "evaluation_report.json")
         if os.path.exists(fallback_path):
             with open(fallback_path, "r", encoding="utf-8") as f:
@@ -232,4 +280,3 @@ def trigger_evaluation_run():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("backend.main:app", host="127.0.0.1", port=8000, reload=True)
-

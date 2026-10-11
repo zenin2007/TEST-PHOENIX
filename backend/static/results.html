@@ -9,54 +9,67 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      /* Apple Pro Dark + NASA Deep Space Palette */
-      --bg-space: #030712;
-      --bg-card: rgba(15, 23, 42, 0.65);
-      --bg-card-hover: rgba(30, 41, 59, 0.75);
-      --bg-surface: #0B1120;
-      --bg-inset: rgba(3, 7, 18, 0.85);
+      /* =========================================================================
+         Apple-inspired Clean, Premium, Minimalist SaaS Palette
+         ========================================================================= */
+      --bg-page: #F5F5F7;              /* Soft, light-silver off-white structural canvas */
+      --bg-card: #FFFFFF;              /* Bright pure white floating containers */
+      --bg-card-hover: #FFFFFF;
+      --bg-surface: #FFFFFF;
+      --bg-inset: #F5F5F7;             /* Soft light-silver structural sections */
+      --bg-subtle: #FAFAFC;
 
-      --text-primary: #F8FAFC;
-      --text-secondary: #94A3B8;
-      --text-muted: #64748B;
+      /* High-End Typography */
+      --text-primary: #1D1D1F;         /* Deep charcoal gray bold headlines */
+      --text-secondary: #6E6E73;       /* Mid-gray sleek subtitles */
+      --text-muted: #86868B;
+      --text-dim: #A1A1A6;
 
-      --border-subtle: rgba(255, 255, 255, 0.08);
-      --border-medium: rgba(255, 255, 255, 0.15);
-      --border-accent: rgba(56, 189, 248, 0.35);
+      /* Ultra-Fine Crisp Divider Lines */
+      --border-color: #D2D2D7;
+      --border-subtle: rgba(0, 0, 0, 0.08);
+      --border-medium: rgba(0, 0, 0, 0.12);
+      --border-accent: rgba(0, 113, 227, 0.28);
 
-      /* NASA & Apple Electric Accents */
-      --nasa-blue: #0284C7;
-      --nasa-blue-glow: rgba(2, 132, 199, 0.3);
-      --nasa-cyan: #38BDF8;
-      --nasa-red: #FC3D21;
-      --apple-blue: #0071E3;
-      --apple-blue-hover: #0077ED;
+      /* Apple Primary Blue Interactive Accent */
+      --accent-blue: #0071E3;
+      --accent-blue-hover: #0066CC;
+      --accent-blue-active: #0055B3;
+      --accent-blue-glow: rgba(0, 113, 227, 0.16);
 
-      /* Flight Status Nominal / Anomaly Colors */
-      --status-pass: #10B981;
-      --status-pass-bg: rgba(16, 185, 129, 0.12);
-      --status-pass-border: rgba(16, 185, 129, 0.35);
+      /* Apple Semantic Status Colors */
+      --status-pass: #34C759;
+      --status-pass-bg: #EAF8EE;
+      --status-pass-text: #248A3D;
+      --status-pass-border: rgba(52, 199, 89, 0.25);
 
-      --status-healed: #38BDF8;
-      --status-healed-bg: rgba(56, 189, 248, 0.12);
-      --status-healed-border: rgba(56, 189, 248, 0.35);
+      --status-healed: #34C759;
+      --status-healed-bg: #EAF8EE;
+      --status-healed-text: #248A3D;
+      --status-healed-border: rgba(52, 199, 89, 0.25);
 
-      --status-review: #F59E0B;
-      --status-review-bg: rgba(245, 158, 11, 0.12);
-      --status-review-border: rgba(245, 158, 11, 0.35);
+      --status-review: #FF9F0A;
+      --status-review-bg: #FFF7E6;
+      --status-review-text: #B86B00;
+      --status-review-border: rgba(255, 159, 10, 0.25);
 
-      --status-fail: #EF4444;
-      --status-fail-bg: rgba(239, 68, 68, 0.12);
-      --status-fail-border: rgba(239, 68, 68, 0.35);
+      --status-fail: #FF3B30;
+      --status-fail-bg: #FFF2F1;
+      --status-fail-text: #D70015;
+      --status-fail-border: rgba(255, 59, 48, 0.22);
 
+      /* Geometry & Radii */
       --radius-sm: 8px;
       --radius-md: 14px;
       --radius-lg: 20px;
       --radius-pill: 9999px;
 
+      /* Soft, Highly Diffused Floating Drop Shadows */
+      --shadow-subtle: 0 2px 8px rgba(0, 0, 0, 0.03);
+      --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
+      --shadow-floating: 0 20px 48px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.03);
+      --shadow-hover: 0 22px 50px rgba(0, 0, 0, 0.08), 0 4px 14px rgba(0, 102, 204, 0.08);
       --glass-blur: blur(20px);
-      --shadow-cosmic: 0 16px 40px -10px rgba(0, 0, 0, 0.6);
-      --shadow-glow: 0 0 25px rgba(56, 189, 248, 0.18);
     }
 
     * {
@@ -66,17 +79,12 @@
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
-      background-color: var(--bg-space);
-      background-image: 
-        radial-gradient(ellipse 90% 60% at 50% -20%, rgba(2, 132, 199, 0.18), transparent 75%),
-        radial-gradient(ellipse 60% 40% at 90% 50%, rgba(56, 189, 248, 0.08), transparent 60%),
-        radial-gradient(ellipse 50% 30% at 10% 80%, rgba(14, 116, 244, 0.06), transparent 50%);
-      background-attachment: fixed;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", sans-serif;
+      background-color: var(--bg-page);
       color: var(--text-primary);
       line-height: 1.5;
       -webkit-font-smoothing: antialiased;
-      padding: 2.5rem 1.5rem;
+      padding: 3rem 1.75rem;
       min-height: 100vh;
     }
 
@@ -85,19 +93,19 @@
       margin: 0 auto;
     }
 
-    /* Top Aerospace Navigation Bar */
+    /* Apple-Inspired Frosted Floating Header */
     header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 1.25rem 1.75rem;
-      background: var(--bg-card);
+      padding: 1.25rem 2rem;
+      background: rgba(255, 255, 255, 0.88);
       backdrop-filter: var(--glass-blur);
       -webkit-backdrop-filter: var(--glass-blur);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-lg);
       margin-bottom: 2.5rem;
-      box-shadow: var(--shadow-cosmic);
+      box-shadow: var(--shadow-card);
       flex-wrap: wrap;
       gap: 1.25rem;
     }
@@ -111,7 +119,7 @@
     .brand-logo {
       width: 44px;
       height: 44px;
-      background: linear-gradient(135deg, #0071E3, #38BDF8);
+      background: var(--accent-blue);
       color: #FFFFFF;
       border-radius: 12px;
       display: flex;
@@ -119,39 +127,38 @@
       justify-content: center;
       font-size: 1.35rem;
       font-weight: 800;
-      box-shadow: 0 4px 16px rgba(56, 189, 248, 0.35);
+      box-shadow: 0 4px 14px rgba(0, 102, 204, 0.28);
     }
 
     .brand-title {
       font-size: 1.55rem;
       font-weight: 700;
       letter-spacing: -0.03em;
-      color: #FFFFFF;
+      color: var(--text-primary);
       display: flex;
       align-items: center;
       gap: 0.6rem;
     }
 
     .brand-tagline {
-      font-size: 0.8rem;
+      font-size: 0.825rem;
       color: var(--text-secondary);
       font-weight: 400;
-      letter-spacing: 0.02em;
+      letter-spacing: -0.01em;
     }
 
-    /* NASA Telemetry Beacon */
+    /* Refined Status Pill */
     .telemetry-beacon {
       display: inline-flex;
       align-items: center;
       gap: 0.45rem;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      padding: 0.3rem 0.75rem;
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      color: #34D399;
+      font-size: 0.725rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      padding: 0.25rem 0.75rem;
+      background: rgba(52, 199, 89, 0.1);
+      border: 1px solid rgba(52, 199, 89, 0.25);
+      color: #248A3D;
       border-radius: var(--radius-pill);
     }
 
@@ -159,8 +166,8 @@
       width: 7px;
       height: 7px;
       border-radius: 50%;
-      background: #10B981;
-      box-shadow: 0 0 8px #10B981;
+      background: #34C759;
+      box-shadow: 0 0 6px rgba(52, 199, 89, 0.5);
       animation: pulse 1.8s infinite;
     }
 
@@ -176,7 +183,7 @@
       flex-wrap: wrap;
     }
 
-    /* Apple Pro Buttons */
+    /* Polished Apple Capsule Buttons */
     .btn {
       display: inline-flex;
       align-items: center;
@@ -185,7 +192,7 @@
       font-family: inherit;
       font-size: 0.85rem;
       font-weight: 600;
-      padding: 0.65rem 1.25rem;
+      padding: 0.65rem 1.35rem;
       border-radius: var(--radius-pill);
       border: 1px solid transparent;
       cursor: pointer;
@@ -205,29 +212,30 @@
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, #0071E3, #0284C7);
+      background: var(--accent-blue);
       color: #FFFFFF;
-      border: 1px solid rgba(56, 189, 248, 0.4);
-      box-shadow: 0 4px 16px rgba(0, 113, 227, 0.35);
+      border: 1px solid var(--accent-blue);
+      box-shadow: 0 4px 14px rgba(0, 102, 204, 0.25);
     }
 
     .btn-primary:hover:not(:disabled) {
-      background: linear-gradient(135deg, #0077ED, #0369A1);
-      border-color: #38BDF8;
-      box-shadow: 0 6px 20px rgba(56, 189, 248, 0.45);
+      background: var(--accent-blue-hover);
+      border-color: var(--accent-blue-hover);
+      box-shadow: 0 6px 18px rgba(0, 102, 204, 0.35);
+      transform: translateY(-1px);
     }
 
     .btn-secondary {
-      background: rgba(30, 41, 59, 0.5);
+      background: #FFFFFF;
       color: var(--text-primary);
       border: 1px solid var(--border-subtle);
-      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow-subtle);
     }
 
     .btn-secondary:hover:not(:disabled) {
-      background: rgba(51, 65, 85, 0.7);
+      background: #F5F5F7;
       border-color: var(--border-medium);
-      color: #FFFFFF;
+      color: var(--text-primary);
     }
 
     /* Alert Banner */
@@ -240,25 +248,23 @@
       font-weight: 500;
       align-items: center;
       justify-content: space-between;
-      backdrop-filter: blur(16px);
+      box-shadow: var(--shadow-subtle);
       animation: fadeIn 0.3s ease;
     }
 
     .alert-banner.active { display: flex; }
-    .alert-success { background: rgba(16, 185, 129, 0.15); color: #34D399; border: 1px solid rgba(16, 185, 129, 0.35); }
-    .alert-error { background: rgba(239, 68, 68, 0.15); color: #F87171; border: 1px solid rgba(239, 68, 68, 0.35); }
-    .alert-info { background: rgba(56, 189, 248, 0.15); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.35); }
+    .alert-success { background: #EAF9EE; color: #1B7A37; border: 1px solid rgba(52, 199, 89, 0.3); }
+    .alert-error { background: #FEECEB; color: #C92A2A; border: 1px solid rgba(255, 59, 48, 0.3); }
+    .alert-info { background: #EDF5FD; color: #0066CC; border: 1px solid rgba(0, 102, 204, 0.3); }
 
-    /* Action Panel - Mission Control Center */
+    /* Action Panel - Pure White Floating Container */
     .action-panel {
       background: var(--bg-card);
-      backdrop-filter: var(--glass-blur);
-      -webkit-backdrop-filter: var(--glass-blur);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-lg);
       padding: 2.25rem;
       margin-bottom: 2.5rem;
-      box-shadow: var(--shadow-cosmic);
+      box-shadow: var(--shadow-card);
       position: relative;
       overflow: hidden;
     }
@@ -269,18 +275,17 @@
       top: 0;
       left: 0;
       right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, #38BDF8, #0071E3, transparent);
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #0066CC, transparent);
     }
 
     .section-eyebrow {
-      font-family: 'JetBrains Mono', monospace;
       font-size: 0.725rem;
       text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: var(--nasa-cyan);
-      font-weight: 600;
-      margin-bottom: 0.5rem;
+      letter-spacing: 0.1em;
+      color: var(--accent-blue);
+      font-weight: 700;
+      margin-bottom: 0.45rem;
       display: flex;
       align-items: center;
       gap: 0.5rem;
@@ -290,7 +295,7 @@
       font-size: 1.6rem;
       font-weight: 700;
       letter-spacing: -0.025em;
-      color: #FFFFFF;
+      color: var(--text-primary);
       margin-bottom: 1.5rem;
     }
 
@@ -320,7 +325,7 @@
       font-family: inherit;
       font-size: 0.875rem;
       color: var(--text-primary);
-      background: rgba(15, 23, 42, 0.95);
+      background: #FFFFFF;
       border: 1px solid var(--border-medium);
       border-radius: var(--radius-sm);
       padding: 0.75rem 1rem;
@@ -328,11 +333,12 @@
       cursor: pointer;
       width: 100%;
       transition: all 0.2s ease;
+      box-shadow: var(--shadow-subtle);
     }
 
     .cta-select:focus {
-      border-color: var(--nasa-cyan);
-      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.15);
     }
 
     /* Quick Scenario Selector Grid */
@@ -346,20 +352,20 @@
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      padding: 1.15rem;
-      background: var(--bg-inset);
+      padding: 1.25rem;
+      background: #FFFFFF;
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-md);
       cursor: pointer;
       text-align: left;
       font-family: inherit;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: var(--shadow-subtle);
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .scenario-btn:hover:not(:disabled) {
-      border-color: var(--nasa-cyan);
-      background: var(--bg-card-hover);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), var(--shadow-glow);
+      border-color: rgba(0, 102, 204, 0.35);
+      box-shadow: var(--shadow-hover);
       transform: translateY(-2px);
     }
 
@@ -370,9 +376,9 @@
     }
 
     .scenario-btn-title {
-      font-size: 0.925rem;
+      font-size: 0.95rem;
       font-weight: 600;
-      color: #FFFFFF;
+      color: var(--text-primary);
       display: flex;
       align-items: center;
       gap: 0.5rem;
@@ -380,7 +386,7 @@
     }
 
     .scenario-btn-desc {
-      font-size: 0.775rem;
+      font-size: 0.8rem;
       color: var(--text-secondary);
       line-height: 1.45;
     }
@@ -388,13 +394,11 @@
     /* Live Execution Telemetry Card */
     .result-card {
       background: var(--bg-card);
-      backdrop-filter: var(--glass-blur);
-      -webkit-backdrop-filter: var(--glass-blur);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-lg);
       padding: 2.25rem;
       margin-bottom: 2.5rem;
-      box-shadow: var(--shadow-cosmic);
+      box-shadow: var(--shadow-card);
       display: none;
       animation: fadeIn 0.35s ease;
     }
@@ -416,35 +420,32 @@
       font-size: 1.4rem;
       font-weight: 700;
       letter-spacing: -0.02em;
-      color: #FFFFFF;
+      color: var(--text-primary);
     }
 
     .result-meta {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.775rem;
+      font-size: 0.8rem;
       color: var(--text-secondary);
       margin-top: 0.35rem;
     }
 
-    /* Apple & NASA Badges */
+    /* Apple Status Badges */
     .badge {
       display: inline-flex;
       align-items: center;
       gap: 0.35rem;
-      padding: 0.4rem 0.95rem;
+      padding: 0.35rem 0.85rem;
       border-radius: var(--radius-pill);
       font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.02em;
       white-space: nowrap;
-      font-family: 'JetBrains Mono', monospace;
     }
 
-    .badge-PASS { background: var(--status-pass-bg); color: var(--status-pass); border: 1px solid var(--status-pass-border); }
-    .badge-SELF-HEALED { background: var(--status-healed-bg); color: var(--status-healed); border: 1px solid var(--status-healed-border); }
-    .badge-HUMAN-REVIEW-REQUIRED { background: var(--status-review-bg); color: var(--status-review); border: 1px solid var(--status-review-border); }
-    .badge-FAIL { background: var(--status-fail-bg); color: var(--status-fail); border: 1px solid var(--status-fail-border); }
+    .badge-PASS { background: var(--status-pass-bg); color: #1E7E34; border: 1px solid var(--status-pass-border); }
+    .badge-SELF-HEALED { background: var(--status-healed-bg); color: var(--accent-blue); border: 1px solid var(--status-healed-border); }
+    .badge-HUMAN-REVIEW-REQUIRED { background: var(--status-review-bg); color: #B45309; border: 1px solid var(--status-review-border); }
+    .badge-FAIL { background: var(--status-fail-bg); color: #C92A2A; border: 1px solid var(--status-fail-border); }
 
     /* Grid Details */
     .grid-details {
@@ -467,12 +468,11 @@
     }
 
     .detail-label {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.7rem;
+      font-size: 0.725rem;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.06em;
       font-weight: 600;
-      color: var(--text-muted);
+      color: var(--text-secondary);
       margin-bottom: 0.45rem;
     }
 
@@ -484,24 +484,22 @@
     }
 
     .detail-code {
-      font-family: 'JetBrains Mono', monospace;
+      font-family: ui-monospace, "SF Mono", monospace;
       font-size: 0.825rem;
       padding: 0.25rem 0.5rem;
-      background: rgba(30, 41, 59, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: #FFFFFF;
+      border: 1px solid var(--border-subtle);
       border-radius: 6px;
-      color: var(--nasa-cyan);
+      color: var(--accent-blue);
     }
 
     /* History & Evaluation Matrix Section */
     .history-card {
       background: var(--bg-card);
-      backdrop-filter: var(--glass-blur);
-      -webkit-backdrop-filter: var(--glass-blur);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-lg);
       padding: 2.25rem;
-      box-shadow: var(--shadow-cosmic);
+      box-shadow: var(--shadow-card);
       margin-bottom: 2.5rem;
     }
 
@@ -518,7 +516,7 @@
       overflow-x: auto;
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-md);
-      background: var(--bg-inset);
+      background: #FFFFFF;
     }
 
     table {
@@ -529,12 +527,11 @@
     }
 
     th {
-      background: rgba(15, 23, 42, 0.95);
-      padding: 0.9rem 1.15rem;
-      font-family: 'JetBrains Mono', monospace;
+      background: #F5F5F7;
+      padding: 0.85rem 1.15rem;
       font-size: 0.725rem;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.06em;
       color: var(--text-secondary);
       border-bottom: 1px solid var(--border-subtle);
       font-weight: 600;
@@ -551,7 +548,7 @@
     tr:last-child td { border-bottom: none; }
 
     tr:hover td {
-      background-color: rgba(30, 41, 59, 0.4);
+      background-color: #FAFAFC;
     }
 
     /* Modal Sheet */
@@ -559,9 +556,9 @@
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       z-index: 1000;
       align-items: center;
       justify-content: center;
@@ -571,15 +568,15 @@
     .modal-backdrop.open { display: flex; }
 
     .modal-window {
-      background: #0B1120;
-      border: 1px solid var(--border-medium);
+      background: #FFFFFF;
+      border: 1px solid var(--border-subtle);
       border-radius: var(--radius-lg);
       max-width: 820px;
       width: 100%;
       max-height: 85vh;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), var(--shadow-glow);
+      box-shadow: var(--shadow-floating);
       animation: modalSlide 0.25s cubic-bezier(0.16, 1, 0.3, 1);
       overflow: hidden;
     }
@@ -595,7 +592,7 @@
       align-items: center;
       padding: 1.5rem 1.75rem;
       border-bottom: 1px solid var(--border-subtle);
-      background: rgba(15, 23, 42, 0.8);
+      background: #FAFAFC;
     }
 
     .modal-body {
@@ -610,18 +607,18 @@
       gap: 0.75rem;
       padding: 1.25rem 1.75rem;
       border-top: 1px solid var(--border-subtle);
-      background: rgba(15, 23, 42, 0.8);
+      background: #FAFAFC;
     }
 
     .log-terminal {
-      background: #030712;
+      background: #1D1D1F;
       color: #38BDF8;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: ui-monospace, "SF Mono", monospace;
       font-size: 0.775rem;
       line-height: 1.6;
       padding: 1.25rem;
       border-radius: var(--radius-sm);
-      border: 1px solid rgba(56, 189, 248, 0.2);
+      border: 1px solid rgba(0, 0, 0, 0.1);
       overflow-x: auto;
       max-height: 280px;
       margin-top: 0.75rem;
@@ -632,12 +629,12 @@
       border-radius: var(--radius-sm);
       margin-bottom: 0.6rem;
       border-left: 3px solid transparent;
-      background: var(--bg-inset);
+      background: #F5F5F7;
       border: 1px solid var(--border-subtle);
     }
 
     .step-log-item.status-PASS { border-left-color: var(--status-pass); }
-    .step-log-item.status-SELF_HEALED { border-left-color: var(--status-healed); }
+    .step-log-item.status-SELF_HEALED { border-left-color: var(--accent-blue); }
     .step-log-item.status-FAIL { border-left-color: var(--status-fail); }
     .step-log-item.status-HUMAN_REVIEW_REQUIRED { border-left-color: var(--status-review); }
 
@@ -761,6 +758,24 @@
               Two candidate buttons with identical score. Refuses guess; halts for human review.
             </div>
           </button>
+
+          <button id="btn-scenario-shopping-a" class="scenario-btn" onclick="executeTestEndpoint('/api/tests/shopping-a', 'Store A Baseline (E-Commerce)')">
+            <div class="scenario-btn-title">
+              <span style="color: var(--status-pass);">🛒</span> Store A (Baseline)
+            </div>
+            <div class="scenario-btn-desc">
+              Canonical audio e-commerce workflow (#add-to-cart-btn, #checkout-btn). Passes cleanly.
+            </div>
+          </button>
+
+          <button id="btn-scenario-shopping-b" class="scenario-btn" onclick="executeTestEndpoint('/api/tests/shopping-b', 'Store B Self-Healing (E-Commerce)')">
+            <div class="scenario-btn-title">
+              <span style="color: var(--accent-blue);">🛍️</span> Store B (Self-Healing)
+            </div>
+            <div class="scenario-btn-desc">
+              Drastically redesigned store. Dynamically discovers #purchase-audio-item and drawer panel.
+            </div>
+          </button>
         </div>
       </div>
     </section>
@@ -812,7 +827,7 @@
       <div class="history-header">
         <div>
           <div class="section-eyebrow"><span>◆</span> Telemetry Archive</div>
-          <h2 style="font-size: 1.4rem; font-weight: 700; color: #FFFFFF;">
+          <h2 style="font-size: 1.4rem; font-weight: 700; color: var(--text-primary);">
             Test Run History (SQLite)
           </h2>
         </div>
@@ -856,7 +871,7 @@
       <div class="history-header">
         <div>
           <div class="section-eyebrow"><span>◆</span> Empirical Validation Benchmark</div>
-          <h2 style="font-size: 1.4rem; font-weight: 700; color: #FFFFFF;">
+          <h2 style="font-size: 1.4rem; font-weight: 700; color: var(--text-primary);">
             Advanced UI Change Validation Matrix
           </h2>
           <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.35rem;">
@@ -881,12 +896,12 @@
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.85rem; margin-bottom: 1.75rem;">
         <div class="detail-card">
           <div class="detail-label">Total Executions</div>
-          <div id="eval-kpi-total" style="font-size: 1.4rem; font-weight: 700; color: #FFFFFF;">20</div>
+          <div id="eval-kpi-total" style="font-size: 1.4rem; font-weight: 700; color: var(--text-primary);">20</div>
           <div style="font-size: 0.7rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace;">2 Full Passes</div>
         </div>
         <div class="detail-card">
           <div class="detail-label">UI Drift Failures</div>
-          <div id="eval-kpi-ui-failures" style="font-size: 1.4rem; font-weight: 700; color: #FFFFFF;">10</div>
+          <div id="eval-kpi-ui-failures" style="font-size: 1.4rem; font-weight: 700; color: var(--text-primary);">10</div>
           <div style="font-size: 0.7rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace;">Eligible Denom</div>
         </div>
         <div class="detail-card">
@@ -894,10 +909,10 @@
           <div id="eval-kpi-healed" style="font-size: 1.4rem; font-weight: 700; color: var(--status-pass);">10</div>
           <div style="font-size: 0.7rem; color: var(--status-pass); font-family: 'JetBrains Mono', monospace;">Verified Outcome</div>
         </div>
-        <div class="detail-card" style="background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.35);">
-          <div class="detail-label" style="color: #34D399;">Recovery Rate</div>
-          <div id="eval-kpi-rate" style="font-size: 1.4rem; font-weight: 800; color: #10B981;">100.0%</div>
-          <div style="font-size: 0.7rem; color: #34D399; font-family: 'JetBrains Mono', monospace;">Empirically Measured</div>
+        <div class="detail-card" style="background: rgba(52, 199, 89, 0.08); border-color: rgba(52, 199, 89, 0.25);">
+          <div class="detail-label" style="color: #248A3D;">Recovery Rate</div>
+          <div id="eval-kpi-rate" style="font-size: 1.4rem; font-weight: 800; color: #1E7E34;">100.0%</div>
+          <div style="font-size: 0.7rem; color: #248A3D; font-family: 'JetBrains Mono', monospace;">Empirically Measured</div>
         </div>
         <div class="detail-card">
           <div class="detail-label">Human Review</div>
@@ -911,14 +926,14 @@
         </div>
         <div class="detail-card">
           <div class="detail-label">Avg Exec Time</div>
-          <div id="eval-kpi-avg-time" style="font-size: 1.4rem; font-weight: 700; color: #FFFFFF;">2,591 ms</div>
+          <div id="eval-kpi-avg-time" style="font-size: 1.4rem; font-weight: 700; color: var(--text-primary);">2,591 ms</div>
           <div style="font-size: 0.7rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace;">Per Scenario</div>
         </div>
       </div>
 
       <!-- Denominator Explanation Callout -->
       <div style="background: var(--bg-inset); padding: 1rem 1.25rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); margin-bottom: 1.5rem; font-size: 0.825rem; color: var(--text-secondary); line-height: 1.55;">
-        <strong style="color: #FFFFFF;">Denominator & Metrics Definition:</strong> Recovery success rate is defined strictly as
+        <strong style="color: var(--text-primary);">Denominator & Metrics Definition:</strong> Recovery success rate is defined strictly as
         <code class="detail-code">(Successful Recoveries / UI Failures) * 100 = 100.0%</code> (10/10). Test cases representing genuine application server defects (HTTP 500), missing postconditions, and ambiguity safety gates are segregated and correctly marked as <code>FAIL</code> or <code>HUMAN REVIEW REQUIRED</code> rather than falsely masked as recovery failures. Incorrect recovery attempts on defects: <strong>0 (zero false positives)</strong>.
       </div>
 
@@ -954,10 +969,10 @@
     <div class="modal-window">
       <div class="modal-head">
         <div>
-          <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.725rem; text-transform: uppercase; color: var(--nasa-cyan); font-weight: 600;">
+          <div style="font-size: 0.725rem; text-transform: uppercase; color: var(--accent-blue); font-weight: 700; letter-spacing: 0.08em;">
             Diagnostic Flight Telemetry
           </div>
-          <h2 id="modal-title" style="font-size: 1.3rem; font-weight: 700; color: #FFFFFF; margin-top: 0.2rem;">
+          <h2 id="modal-title" style="font-size: 1.3rem; font-weight: 700; color: var(--text-primary); margin-top: 0.2rem;">
             Run Details
           </h2>
         </div>
@@ -1190,20 +1205,55 @@
           const steps = JSON.parse(run.diagnostics_json);
           if (Array.isArray(steps) && steps.length > 0) {
             stepsHtml = steps.map(s => {
-              const diag = s.diagnostics || {};
-              const candidatesCount = (diag.candidates_evaluated || []).length;
-              const statusClass = (s.status || 'PASS').replace(/ /g, '_');
+              const statusStr = (s.final_status || s.status || 'PASS');
+              const statusClass = statusStr.replace(/ /g, '_');
+              const hasHealed = (statusStr === 'SELF-HEALED' || s.selected_replacement);
+              const sb = s.score_breakdown;
+
+              let whyHealedHtml = '';
+              if (hasHealed && s.selected_replacement) {
+                whyHealedHtml = `
+                  <div style="background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: 8px; padding: 1rem; margin-top: 0.75rem; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+                    <div style="font-size: 0.75rem; font-weight: 700; color: var(--accent-blue); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem;">
+                      Why Did It Heal? (Explainable 5-Factor Formula)
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.8rem; margin-bottom: 0.65rem;">
+                      <div><span style="color: var(--text-secondary);">Original Intent:</span> <strong style="color: var(--text-primary);">${escapeHtml(s.intent || '—')}</strong></div>
+                      <div><span style="color: var(--text-secondary);">Original Target:</span> <code>${escapeHtml(s.original_selector || s.expected_name || '—')}</code></div>
+                      <div><span style="color: var(--text-secondary);">Selected Replacement:</span> <code style="color: var(--accent-blue); font-weight: 700;">${escapeHtml(s.selected_replacement)}</code></div>
+                      <div><span style="color: var(--text-secondary);">Safety Gate:</span> <span class="badge badge-PASS" style="font-size: 0.7rem;">PASSED (Score &ge; 75%, Margin &ge; 15%)</span></div>
+                    </div>
+                    ${sb ? `
+                      <div style="background: var(--bg-inset); padding: 0.75rem; border-radius: 6px; font-size: 0.75rem; font-family: ui-monospace, monospace; line-height: 1.6;">
+                        <div style="display: flex; justify-content: space-between;"><span>Semantic Similarity (40%):</span><strong>${sb.semantic_score}%</strong></div>
+                        <div style="display: flex; justify-content: space-between;"><span>Role Compatibility (20%):</span><strong>${sb.role_score}%</strong></div>
+                        <div style="display: flex; justify-content: space-between;"><span>Text Similarity (15%):</span><strong>${sb.text_score}%</strong></div>
+                        <div style="display: flex; justify-content: space-between;"><span>Context Similarity (15%):</span><strong>${sb.context_score}%</strong></div>
+                        <div style="display: flex; justify-content: space-between;"><span>Structural Factor (10%):</span><strong>${sb.structural_score}%</strong></div>
+                        <div style="border-top: 1px solid var(--border-subtle); margin-top: 0.35rem; padding-top: 0.35rem; display: flex; justify-content: space-between; font-weight: 800; color: var(--text-primary);">
+                          <span>Final Confidence:</span><span>${sb.total_score}%</span>
+                        </div>
+                        ${s.score_margin !== undefined && s.score_margin !== null ? `
+                        <div style="display: flex; justify-content: space-between; color: var(--accent-blue); margin-top: 0.2rem;">
+                          <span>Ambiguity Margin over #2 Candidate:</span><span>+${s.score_margin}%</span>
+                        </div>` : ''}
+                      </div>
+                    ` : ''}
+                  </div>
+                `;
+              }
+
               return `
-                <div class="step-log-item status-${statusClass}">
+                <div class="step-log-item status-${statusClass}" style="margin-bottom: 0.85rem;">
                   <div style="display: flex; justify-content: space-between; font-weight: 600; font-size: 0.85rem;">
-                    <span style="color: #FFFFFF;">${escapeHtml(s.name || s.intent || 'Execution Step')}</span>
-                    <span class="badge badge-${(s.status || 'PASS').replace(/ /g, '-')}">${escapeHtml(s.status || 'PASS')}</span>
+                    <span style="color: var(--text-primary); font-weight: 700;">${escapeHtml(s.test_name || s.name || s.intent || 'Execution Step')}</span>
+                    <span class="badge badge-${statusStr.replace(/ /g, '-')}">${escapeHtml(statusStr)}</span>
                   </div>
-                  <div style="font-size: 0.775rem; color: var(--text-secondary); margin-top: 0.25rem; font-family: 'JetBrains Mono', monospace;">
-                    Intent: <em>${escapeHtml(s.intent || '—')}</em> | Action: <code>${s.action || 'CLICK'}</code>
+                  <div style="font-size: 0.775rem; color: var(--text-secondary); margin-top: 0.25rem; font-family: ui-monospace, monospace;">
+                    Intent: <em>${escapeHtml(s.intent || '—')}</em> | Action: <code>${escapeHtml(s.action || 'click')}</code>
                   </div>
-                  ${diag.rationale ? `<div style="font-size: 0.8rem; margin-top: 0.35rem; color: var(--text-primary);"><strong>Diagnostics:</strong> ${escapeHtml(diag.rationale)}</div>` : ''}
-                  ${candidatesCount > 0 ? `<div style="font-size: 0.775rem; color: var(--nasa-cyan); margin-top: 0.25rem; font-family: 'JetBrains Mono', monospace;">Evaluated ${candidatesCount} DOM candidate element(s)</div>` : ''}
+                  ${s.rationale ? `<div style="font-size: 0.8rem; margin-top: 0.35rem; color: var(--text-primary);"><strong>Diagnostics:</strong> ${escapeHtml(s.rationale)}</div>` : ''}
+                  ${whyHealedHtml}
                 </div>
               `;
             }).join('');
@@ -1212,16 +1262,30 @@
       }
 
       const content = `
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
           <span class="badge badge-${(run.status || 'FAIL').replace(/ /g, '-')}">${run.status}</span>
-          <span style="font-size: 0.825rem; color: var(--text-secondary); font-family: 'JetBrains Mono', monospace;">
+          <span style="font-size: 0.825rem; color: var(--text-secondary); font-family: ui-monospace, monospace;">
             ${new Date(run.created_at).toLocaleString()} ${run.execution_duration_ms ? `(${run.execution_duration_ms} ms)` : ''}
           </span>
         </div>
 
+        <!-- Real Engineering Pipeline Representation -->
+        <div style="display: flex; flex-wrap: wrap; gap: 0.35rem; align-items: center; font-size: 0.7rem; margin-bottom: 1.25rem; padding: 0.65rem 0.85rem; background: var(--bg-inset); border-radius: 8px; border: 1px solid var(--border-subtle); font-family: ui-monospace, monospace;">
+          <span style="font-weight: 700; color: var(--text-secondary);">PIPELINE:</span>
+          <span>INTENT</span><span>➔</span>
+          <span>ACTION</span><span>➔</span>
+          <span>CLASSIFIER</span><span>➔</span>
+          <span>DOM/A11Y</span><span>➔</span>
+          <span>5-FACTOR SCORING</span><span>➔</span>
+          <span>SAFETY GATES</span><span>➔</span>
+          <span>RECOVERY</span><span>➔</span>
+          <span>VERIFY</span><span>➔</span>
+          <span class="badge badge-${(run.status || 'PASS').replace(/ /g, '-')}">${escapeHtml(run.status)}</span>
+        </div>
+
         <div class="detail-card" style="margin-bottom: 1.25rem;">
           <div class="detail-label">Original Test Intent</div>
-          <div class="detail-val" style="font-weight: 600; color: #FFFFFF;">
+          <div class="detail-val" style="font-weight: 600; color: var(--text-primary);">
             ${escapeHtml(run.original_intent || 'Intent-driven test execution')}
           </div>
         </div>
@@ -1233,11 +1297,11 @@
           </div>
           <div class="detail-card">
             <div class="detail-label">Replacement Selector</div>
-            <div class="detail-val"><code class="detail-code" style="color: var(--nasa-cyan);">${escapeHtml(run.replacement_selector || 'None')}</code></div>
+            <div class="detail-val"><code class="detail-code" style="color: var(--accent-blue);">${escapeHtml(run.replacement_selector || 'None')}</code></div>
           </div>
           <div class="detail-card">
             <div class="detail-label">Confidence Score</div>
-            <div class="detail-val" style="font-family: 'JetBrains Mono', monospace;">${run.candidate_score ? (run.candidate_score * 100).toFixed(1) + '%' : '100%'}</div>
+            <div class="detail-val" style="font-family: ui-monospace, monospace;">${run.candidate_score ? (run.candidate_score * 100).toFixed(1) + '%' : '100%'}</div>
           </div>
           <div class="detail-card">
             <div class="detail-label">Verification Outcome</div>
