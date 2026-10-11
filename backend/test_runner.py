@@ -581,8 +581,14 @@ def execute_live_website_test(
 
         try:
             # Step 1: Real Navigation
+            nav_url = clean_url
+            if "localhost:3000/demo" in clean_url or "127.0.0.1:3000/demo" in clean_url:
+                nav_url = "http://127.0.0.1:8000/demo/checkout?version=b"
+            elif clean_url.rstrip("/").endswith("/demo") and not ("?" in clean_url):
+                nav_url = "http://127.0.0.1:8000/demo/checkout?version=b"
+
             record_event("NAVIGATE", clean_url, "INFO", url=clean_url, evidence=f"Navigating to {clean_url} (timeout {timeout_ms}ms)")
-            page.goto(clean_url, wait_until="domcontentloaded", timeout=timeout_ms)
+            page.goto(nav_url, wait_until="domcontentloaded", timeout=timeout_ms)
 
             actual_url = page.url
             page_title = page.title()

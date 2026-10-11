@@ -8,6 +8,7 @@ export interface Task {
 }
 
 export type NavigationTab =
+  | 'showcase'
   | 'overview'
   | 'tests'
   | 'runs'
@@ -158,6 +159,7 @@ export interface LiveTestRequest {
   website_url: string;
   intent: string;
   expected_outcome: string;
+  timeout_ms?: number;
 }
 
 export interface ExecutionEvent {

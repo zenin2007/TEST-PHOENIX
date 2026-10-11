@@ -28,6 +28,7 @@ export const AppShell: React.FC<AppShellProps> = ({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const tabLabels: Record<NavigationTab, string> = {
+    showcase: 'Live Showcase Demo',
     overview: 'Platform Overview',
     tests: 'Test Suites & Scenarios',
     runs: 'Test Execution Runs',
@@ -39,6 +40,7 @@ export const AppShell: React.FC<AppShellProps> = ({
   };
 
   const navItems: Array<{ id: NavigationTab; label: string; icon: string }> = [
+    { id: 'showcase', label: 'Showcase', icon: '✨' },
     { id: 'overview', label: 'Overview', icon: '⚡' },
     { id: 'tests', label: 'Tests', icon: '🧪' },
     { id: 'runs', label: 'Runs', icon: '▶' },

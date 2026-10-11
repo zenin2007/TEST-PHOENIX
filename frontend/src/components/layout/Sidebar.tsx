@@ -22,6 +22,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   totalRuns,
 }) => {
   const navItems: Array<{ id: NavigationTab; label: string; icon: string; badge?: string | number }> = [
+    { id: 'showcase', label: 'Live Showcase', icon: '✨', badge: 'Demo' },
     { id: 'overview', label: 'Overview', icon: '⚡' },
     { id: 'tests', label: 'Tests', icon: '🧪' },
     { id: 'runs', label: 'Runs', icon: '▶', badge: totalRuns > 0 ? totalRuns : undefined },

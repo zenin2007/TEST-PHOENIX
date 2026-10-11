@@ -9,6 +9,7 @@ import { AnalyticsView } from './components/features/analytics/AnalyticsView';
 import { HealingMemoryView } from './components/features/healing-memory/HealingMemoryView';
 import { EnvironmentsView } from './components/features/environments/EnvironmentsView';
 import { SettingsView } from './components/features/settings/SettingsView';
+import { ShowcaseView } from './components/features/showcase/ShowcaseView';
 import { SelfHealingDemo } from './components/SelfHealingDemo';
 import { Modal } from './components/ui/Modal';
 import { StatusBadge } from './components/ui/Badge';
@@ -32,7 +33,7 @@ export function App() {
     const params = new URLSearchParams(window.location.search);
     const mode = params.get('mode') as DemoMode | null;
     if (mode) return mode;
-    return 'overview';
+    return 'showcase';
   });
 
   // UI state
@@ -172,6 +173,7 @@ export function App() {
 
   // Check if current mode is an AppShell tab
   const isShellTab = [
+    'showcase',
     'overview',
     'tests',
     'runs',
@@ -190,7 +192,7 @@ export function App() {
     ? 'recovery'
     : isShellTab
     ? (currentMode as NavigationTab)
-    : 'overview');
+    : 'showcase');
 
   return (
     <div className="app-root">
@@ -220,6 +222,13 @@ export function App() {
           backendHealthy={backendHealthy}
           totalRuns={runs.length}
         >
+          {mappedTab === 'showcase' && (
+            <ShowcaseView
+              onOpenAnalytics={() => handleSelectMode('analytics')}
+              onRefreshRuns={fetchRuns}
+            />
+          )}
+
           {mappedTab === 'overview' && (
             <OverviewView
               runs={runs}

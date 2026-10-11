@@ -1,3 +1,9 @@
+import sys
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+if hasattr(sys.stderr, 'reconfigure'):
+    sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+
 from fastapi import FastAPI, HTTPException, Header, status
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
@@ -263,6 +269,7 @@ def serve_results_page():
 
 # ==================== Controlled Demo Checkout Endpoints ====================
 
+@app.get("/demo")
 @app.get("/demo/checkout")
 @app.get("/demo/checkout-a")
 @app.get("/demo/checkout-b")
