@@ -43,9 +43,20 @@ class TestPhoenixEngine:
         elif action == StepAction.SELECT_OPTION:
             loc.select_option(str(input_data or ""), timeout=self.timeout_ms)
         elif action == StepAction.NAVIGATE:
-            page.goto(str(input_data or locator_str))
+            page.goto(str(input_data or locator_str), wait_until="domcontentloaded", timeout=self.timeout_ms)
+        elif action == StepAction.WAIT:
+            try:
+                wait_time = float(input_data or 1.0)
+            except Exception:
+                wait_time = 1.0
+            time.sleep(min(wait_time, 5.0))
+        elif action == StepAction.VERIFY:
+            # Check visibility of locator or text
+            if not loc.is_visible():
+                raise AssertionError(f"Expected verification target '{locator_str}' was not visible on the page.")
         else:
             loc.click(timeout=self.timeout_ms)
+
 
     def _validate_candidate_live(self, page: Page, selector: str) -> bool:
         """Verifies if a candidate locator exists on the live page and is interactable."""
@@ -185,6 +196,7 @@ class TestPhoenixEngine:
                                 )
                             )
                             step.diagnostics.from_healing_memory = True
+                            step.diagnostics.candidates_evaluated = [best_candidate]
                             healed_from_memory = True
                 except Exception:
                     pass

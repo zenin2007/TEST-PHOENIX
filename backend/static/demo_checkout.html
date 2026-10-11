@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TestPhoenix Controlled Demo Storefront</title>
+  <style>
+    :root {
+      --bg: #F5F5F7;
+      --card-bg: #FFFFFF;
+      --primary: #0071E3;
+      --primary-hover: #0077ED;
+      --text: #1D1D1F;
+      --text-muted: #86868B;
+      --border: #D2D2D7;
+      --success-bg: #E3F9E5;
+      --success-text: #1B5E20;
+      --error-bg: #FFEBEA;
+      --error-text: #D32F2F;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 1.5rem;
+    }
+    .container {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+      width: 100%;
+      max-width: 540px;
+      padding: 2.25rem;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.25rem 0.65rem;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+    }
+    .badge-a { background: #E8F0FE; color: #1967D2; }
+    .badge-b { background: #FEF7E0; color: #B06000; }
+    .badge-broken { background: #FCE8E6; color: #C5221F; }
+    .badge-ambiguous { background: #F3E8FD; color: #7627BB; }
+    h1 { font-size: 1.45rem; font-weight: 700; margin-bottom: 0.5rem; }
+    p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; margin-bottom: 1.5rem; }
+    .order-summary {
+      background: #FAFAFA;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      margin-bottom: 1.75rem;
+    }
+    .order-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+    }
+    .order-row.total {
+      border-top: 1px solid var(--border);
+      padding-top: 0.65rem;
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 0;
+    }
+    .btn {
+      width: 100%;
+      padding: 0.85rem 1.25rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #FFF;
+      background: var(--primary);
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.15s ease;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .btn:hover { background: var(--primary-hover); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-payment { background: #1D1D1F; }
+    .btn-payment:hover { background: #333336; }
+    .btn-danger { background: #D32F2F; }
+    .btn-danger:hover { background: #B71C1C; }
+    .confirmation {
+      display: none;
+      margin-top: 1.5rem;
+      padding: 1.25rem;
+      border-radius: 10px;
+      background: var(--success-bg);
+      border: 1px solid #A5D6A7;
+      color: var(--success-text);
+      font-size: 0.95rem;
+      line-height: 1.45;
+    }
+    .error-alert {
+      display: none;
+      margin-top: 1.5rem;
+      padding: 1.25rem;
+      border-radius: 10px;
+      background: var(--error-bg);
+      border: 1px solid #EF9A9A;
+      color: var(--error-text);
+      font-size: 0.95rem;
+      line-height: 1.45;
+    }
+    .ambiguous-group {
+      display: flex;
+      gap: 0.75rem;
+    }
+    .ambiguous-group button { flex: 1; }
+  </style>
+</head>
+<body>
+  <div class="container" id="checkout-container">
+    <div id="version-badge" class="badge badge-a">Version A (Baseline)</div>
+    <h1 id="page-heading">Checkout &amp; Order Review</h1>
+    <p id="page-description">Review your cart merchandise before completing payment and placing order.</p>
+
+    <div class="order-summary" id="order-summary">
+      <div class="order-row">
+        <span>Audio Pro Wireless Headset (Black)</span>
+        <span>$249.00</span>
+      </div>
+      <div class="order-row">
+        <span>Standard Shipping</span>
+        <span>FREE</span>
+      </div>
+      <div class="order-row total">
+        <span>Total Due</span>
+        <span>$249.00</span>
+      </div>
+    </div>
+
+    <!-- Dynamic Button Area based on version param -->
+    <div id="action-area"></div>
+
+    <!-- Outcome Confirmation -->
+    <div id="checkout-confirmation" class="confirmation">
+      <strong>✓ Checkout/payment page is displayed.</strong>
+      <p style="margin-top: 0.35rem; color: #2E7D32; font-size: 0.85rem;">
+        Order #TP-84920 has been placed and confirmed. Payment processed successfully!
+      </p>
+    </div>
+
+    <!-- Backend Error Display -->
+    <div id="error-alert" class="error-alert">
+      <strong>✕ HTTP 500 Internal Server Error</strong>
+      <p style="margin-top: 0.35rem; color: #C62828; font-size: 0.85rem;">
+        Backend transaction rollback: DB_TRANSACTION_FAILURE. Payment service failed.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const version = (params.get('version') || 'a').toLowerCase();
+    const actionArea = document.getElementById('action-area');
+    const badge = document.getElementById('version-badge');
+    const confirmBox = document.getElementById('checkout-confirmation');
+    const errorBox = document.getElementById('error-alert');
+
+    function onCheckoutSuccess() {
+      actionArea.style.display = 'none';
+      confirmBox.style.display = 'block';
+    }
+
+    async function onCheckoutFailure() {
+      // Simulate genuine backend HTTP 500 defect
+      try {
+        const res = await fetch('/api/demo/checkout-submit?force_500=true', { method: 'POST' });
+      } catch (e) {}
+      actionArea.style.display = 'none';
+      errorBox.style.display = 'block';
+    }
+
+    if (version === 'b') {
+      badge.className = 'badge badge-b';
+      badge.innerText = 'Version B (Redesigned Button)';
+      // Version B: Renamed and redesigned button "Proceed to Payment" (#proceed-to-payment-btn)
+      // Note: #checkout-btn is completely removed!
+      actionArea.innerHTML = `
+        <button id="proceed-to-payment-btn" class="btn btn-payment" onclick="onCheckoutSuccess()">
+          Proceed to Payment →
+        </button>
+      `;
+    } else if (version === 'broken') {
+      badge.className = 'badge badge-broken';
+      badge.innerText = 'Version Broken (Simulated HTTP 500)';
+      actionArea.innerHTML = `
+        <button id="checkout-btn" class="btn btn-danger" onclick="onCheckoutFailure()">
+          Checkout (Trigger Defect)
+        </button>
+      `;
+    } else if (version === 'ambiguous') {
+      badge.className = 'badge badge-ambiguous';
+      badge.innerText = 'Version Ambiguous (Competing Candidates)';
+      actionArea.innerHTML = `
+        <div class="ambiguous-group">
+          <button id="btn-pay-1" class="btn btn-payment" onclick="onCheckoutSuccess()">Proceed to Payment</button>
+          <button id="btn-pay-2" class="btn btn-payment" onclick="onCheckoutSuccess()">Proceed to Payment</button>
+        </div>
+      `;
+    } else {
+      // Default: Version A Baseline
+      badge.className = 'badge badge-a';
+      badge.innerText = 'Version A (Baseline)';
+      actionArea.innerHTML = `
+        <button id="checkout-btn" class="btn" onclick="onCheckoutSuccess()">
+          Checkout
+        </button>
+      `;
+    }
+  </script>
+</body>
+</html>

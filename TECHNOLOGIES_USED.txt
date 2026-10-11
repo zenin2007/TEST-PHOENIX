@@ -41,15 +41,16 @@ Strict Rule    : NO FIREBASE (100% local, transparent, privacy-first architectur
   - Accessibility: `prefers-reduced-motion` media queries and keyboard focus states.
 
 • Feature-Based Component Architecture:
-  - Navigation Shell (`AppShell.tsx`, `Sidebar.tsx`)
-  - UI Primitives (`Badge.tsx`, `Button.tsx`, `Card.tsx`, `Modal.tsx`, `EmptyState.tsx`)
+  - Navigation Shell (`AppShell.tsx`, `Sidebar.tsx`, `Navbar.tsx` with mobile drawer)
+  - UI Primitives (`Badge.tsx`, `Button.tsx`, `Card.tsx`, `Modal.tsx`, `EmptyState.tsx`, `Logo.tsx`, `BarChart.tsx`, `LineChart.tsx`)
   - Platform Views:
     * `OverviewView.tsx` (Answers: Health? Recently healed? Needs attention?)
     * `TestsView.tsx` (Multi-domain scenario catalog with 1-click execution)
     * `RunsView.tsx` (Searchable, filterable, paginated test history table)
-    * `SelfHealingDemo.tsx` (Signature checkout recovery & 5-factor scoring)
-    * `AnalyticsView.tsx` (8 interactive backend-driven visualizations)
+    * `SelfHealingDemo.tsx` (3 progressive tabs: Visual Recovery, 5-Factor Scoring, DOM/SQLite Evidence)
+    * `AnalyticsView.tsx` (8 interactive backend-driven visualizations with drill-down filters)
     * `HealingMemoryView.tsx` (SQLite learned locator cache manager)
+    * `EnvironmentsView.tsx` (Runtime architecture, microservices health, and live API ping latency)
     * `SettingsView.tsx` (Safety gate thresholds & database resets)
 
 
@@ -138,11 +139,12 @@ Strict Rule    : NO FIREBASE (100% local, transparent, privacy-first architectur
 ================================================================================
 5. TESTING, VALIDATION & BENCHMARKING
 ================================================================================
-• Pytest 8.x
+• Pytest 8.x / 9.x
   - Python testing framework executing the automated test suite.
-  - 100% test pass rate: 40 out of 40 automated tests passing in ~147s.
+  - 100% test pass rate: 43 out of 43 automated tests passing in ~166s.
 
-• Automated Test Breakdown:
+• Automated Test Breakdown (43 Tests Total):
+  - `tests/test_live_website_testing.py` (3 tests): URL validation, security protocol guards, real browser execution, DOM/A11y inspection, and SQLite run persistence.
   - `tests/test_backend_api.py` (7 tests): SQLite CRUD, error codes, test run telemetry.
   - `tests/test_testphoenix_unit.py` (12 tests): 5-factor scoring formula, synonym weights, safety gates.
   - `tests/test_playwright_baseline.py` (4 tests): Playwright baseline runs on modals and drawers.
@@ -162,6 +164,7 @@ Strict Rule    : NO FIREBASE (100% local, transparent, privacy-first architectur
 
 • Benchmark Exporter:
   - `run_advanced_evaluation.py`: Generates `advanced_evaluation_report.json` and `.csv`.
+
 
 
 ================================================================================

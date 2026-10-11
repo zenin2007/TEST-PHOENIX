@@ -70,8 +70,9 @@ The frontend has been built following the design discipline of modern developer 
   7. *Workflows Requiring Recovery* (Identifies rapidly changing surfaces)
   8. *Execution Volume* (Total runs recorded in SQLite)
 * **Healing Memory (`/?mode=healing-memory`)**: Real-time SQLite `healing_memory` cache inspector with cache clearing.
+* **Environments (`/?mode=environments`)**: Runtime infrastructure monitor checking health, connection endpoints, and live ping latency for FastAPI, Playwright Chromium, SQLite WAL, and Vite dev server.
 * **Settings (`/?mode=settings`)**: Engine parameters (confidence threshold $\ge 0.75$, ambiguity margin $\ge 0.15$), dual verification status, and database seed reset.
-* **Global Action**: `[▶ Run Test]` button opening a quick scenario execution modal from anywhere in the platform.
+* **Global Action & Mobile Navigation**: `[▶ Run Test]` accessible globally, with a responsive slideout navigation drawer and custom Phoenix branding.
 
 ---
 

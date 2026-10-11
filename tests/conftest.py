@@ -50,8 +50,8 @@ def test_environment():
         backend_proc = subprocess.Popen(
             [python_exe, "-m", "uvicorn", "backend.main:app", "--host", BACKEND_HOST, "--port", str(BACKEND_PORT)],
             cwd=workspace_root,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
             text=True
         )
         processes.append(backend_proc)
@@ -70,7 +70,7 @@ def test_environment():
 
     if not frontend_running:
         frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "frontend"))
-        # Use npm.cmd from Program Files or PATH
+        vite_cmd = os.path.join(frontend_dir, "node_modules", ".bin", "vite.cmd")
         npm_cmd = r"C:\Program Files\nodejs\npm.cmd"
         if not os.path.exists(npm_cmd):
             npm_cmd = "npm.cmd"
@@ -78,17 +78,26 @@ def test_environment():
         frontend_env = os.environ.copy()
         frontend_env["PATH"] = r"C:\Program Files\nodejs;" + frontend_env.get("PATH", "")
 
+        if os.path.exists(vite_cmd):
+            launch_args = [vite_cmd, "--host", FRONTEND_HOST, "--port", str(FRONTEND_PORT)]
+        else:
+            launch_args = [npm_cmd, "run", "dev", "--", "--host", FRONTEND_HOST, "--port", str(FRONTEND_PORT)]
+
         frontend_proc = subprocess.Popen(
-            [npm_cmd, "run", "dev", "--", "--host", FRONTEND_HOST, "--port", str(FRONTEND_PORT)],
+            launch_args,
             cwd=frontend_dir,
             env=frontend_env,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            shell=True,
             text=True
         )
         processes.append(frontend_proc)
-        if not wait_for_service(FRONTEND_URL, timeout=25.0):
-            frontend_proc.kill()
+        if not wait_for_service(FRONTEND_URL, timeout=35.0):
+            try:
+                subprocess.run(["taskkill", "/F", "/T", "/PID", str(frontend_proc.pid)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            except Exception:
+                pass
             pytest.fail("Frontend Vite dev server failed to start within timeout")
 
     yield {
@@ -99,13 +108,13 @@ def test_environment():
     # Teardown processes started by pytest
     for proc in processes:
         try:
-            proc.terminate()
-            proc.wait(timeout=3)
+            subprocess.run(["taskkill", "/F", "/T", "/PID", str(proc.pid)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         except Exception:
             try:
                 proc.kill()
             except Exception:
                 pass
+
 
 @pytest.fixture(scope="function")
 def page(test_environment):

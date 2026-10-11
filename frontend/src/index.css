@@ -1270,6 +1270,34 @@ body {
   .nav-tabs {
     display: none;
   }
+
+  /* AppShell Mobile Adaptation */
+  .desktop-sidebar-wrapper {
+    display: none !important;
+  }
+  .mobile-menu-btn {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+  .app-main-content {
+    padding: 1.25rem 1rem 3rem 1rem !important;
+  }
+  .header-brand-title {
+    display: none;
+  }
+  .desktop-header-action {
+    display: none !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .btn-label-responsive {
+    display: none;
+  }
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Reduced Motion Support */

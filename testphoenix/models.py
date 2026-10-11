@@ -34,7 +34,11 @@ class StepAction(str, Enum):
     SELECT_OPTION = "select_option"
     NAVIGATE = "navigate"
     SUBMIT = "submit"
+    SEARCH = "search"
+    WAIT = "wait"
+    VERIFY = "verify"
     CUSTOM = "custom"
+
 
 @dataclass
 class Target:

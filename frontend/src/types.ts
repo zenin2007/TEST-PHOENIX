@@ -14,6 +14,7 @@ export type NavigationTab =
   | 'recovery'
   | 'analytics'
   | 'healing-memory'
+  | 'environments'
   | 'settings';
 
 export type DemoMode = 
@@ -151,3 +152,100 @@ export interface ScenarioDefinition {
   endpoint: string;
   description: string;
 }
+
+export interface LiveTestRequest {
+  test_name: string;
+  website_url: string;
+  intent: string;
+  expected_outcome: string;
+}
+
+export interface ExecutionEvent {
+  timestamp: string;
+  action: string;
+  target: string;
+  status: string;
+  url?: string;
+  evidence?: string;
+  error?: string;
+}
+
+export interface LiveDomSummary {
+  total_interactive_elements: number;
+  buttons_count: number;
+  inputs_count: number;
+  links_count: number;
+  sample_elements: Array<{
+    selector: string;
+    tag_name: string;
+    role: string;
+    accessible_name: string;
+    is_visible: boolean;
+    is_enabled: boolean;
+  }>;
+}
+
+export interface LiveAccessibilitySummary {
+  root_role: string;
+  root_name: string;
+  nodes_count: number;
+  has_accessible_tree: boolean;
+}
+
+export interface CandidateScoreBreakdown {
+  semantic: number;
+  role: number;
+  text: number;
+  context: number;
+  structural: number;
+}
+
+export interface CandidateReport {
+  selector: string;
+  accessible_name?: string;
+  role: string;
+  tag_name: string;
+  is_visible: boolean;
+  is_enabled: boolean;
+  score: number;
+  score_breakdown?: CandidateScoreBreakdown;
+}
+
+export interface ActionReport {
+  intent: string;
+  action_type: string;
+  target_description: string;
+  original_locator?: string;
+  original_locator_worked: boolean;
+  failure_reason?: string;
+  recovered_action?: string;
+  candidates: CandidateReport[];
+  selected_candidate?: string;
+  score?: number;
+  score_breakdown?: CandidateScoreBreakdown;
+  safety_decision: string;
+  execution_result: string;
+  verification_result: string;
+  duration_ms: number;
+}
+
+export interface LiveTestResponse {
+  run_id: string;
+  test_name: string;
+  website_url: string;
+  actual_url: string;
+  page_title: string;
+  intent: string;
+  expected_outcome: string;
+  status: string;
+  execution_duration_ms: number;
+  events: ExecutionEvent[];
+  actions?: ActionReport[];
+  self_healed_count?: number;
+  verification_evidence?: string;
+  screenshot_base64?: string;
+  dom_summary: LiveDomSummary;
+  accessibility_summary: LiveAccessibilitySummary;
+  error?: string;
+}
+

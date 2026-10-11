@@ -4,8 +4,11 @@ import type {
   Order,
   TestRun,
   HealingMemoryRecord,
-  EvaluationReport
+  EvaluationReport,
+  LiveTestRequest,
+  LiveTestResponse,
 } from '../types';
+
 
 export class ApiService {
   private static baseUrl = '';
@@ -91,6 +94,33 @@ export class ApiService {
     }
     return res.json();
   }
+
+  // Live Website Testing (Real Playwright Engine)
+  static async runLiveTest(payload: LiveTestRequest): Promise<LiveTestResponse> {
+    const res = await fetch(`${this.baseUrl}/api/tests/live`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      let detail = `HTTP ${res.status}`;
+      try {
+        const err = await res.json();
+        if (err.detail) {
+          if (typeof err.detail === 'string') {
+            detail = err.detail;
+          } else if (Array.isArray(err.detail) && err.detail[0]?.msg) {
+            detail = err.detail[0].msg;
+          } else if (err.detail.message) {
+            detail = err.detail.message;
+          }
+        }
+      } catch (_) {}
+      throw new Error(detail);
+    }
+    return res.json();
+  }
+
 
   // Healing Memory
   static async getHealingMemory(): Promise<HealingMemoryRecord[]> {

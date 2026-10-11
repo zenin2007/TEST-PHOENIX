@@ -9,8 +9,9 @@ from backend.database import (
 )
 from backend.models import (
     TaskCreate, TaskResponse, FailureModeRequest, ResetDataRequest, TestRunRequest,
-    OrderCreate, OrderResponse
+    OrderCreate, OrderResponse, LiveTestRequest, LiveTestResponse
 )
+
 
 # Controlled test failure state (in-memory, reset on command or app reload)
 _failure_mode_active = False
@@ -206,6 +207,30 @@ def run_shopping_b_test():
     from backend.test_runner import execute_scenario_run
     return execute_scenario_run(scenario_key="shopping-b")
 
+@app.post("/api/tests/live", response_model=LiveTestResponse)
+@app.post("/api/tests/run-live", response_model=LiveTestResponse)
+def run_live_website_test_endpoint(payload: LiveTestRequest):
+    """
+    Executes a real automated browser test against a live website URL using Playwright.
+    Inspects DOM, extracts accessibility properties, captures real screenshots,
+    records execution events, and stores telemetry in SQLite.
+    """
+    from backend.test_runner import execute_live_website_test
+    try:
+        result = execute_live_website_test(
+            website_url=payload.website_url,
+            test_name=payload.test_name,
+            intent=payload.intent,
+            expected_outcome=payload.expected_outcome
+        )
+        return result
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Live website test execution failed: {str(e)}"
+        )
+
+
 @app.get("/api/tests/history")
 @app.get("/api/runs")
 def list_test_runs(limit: int = 50):
@@ -235,6 +260,33 @@ def serve_results_page():
     if os.path.exists(results_path):
         return FileResponse(results_path)
     return {"message": "TestPhoenix API Online. Results page not found."}
+
+# ==================== Controlled Demo Checkout Endpoints ====================
+
+@app.get("/demo/checkout")
+@app.get("/demo/checkout-a")
+@app.get("/demo/checkout-b")
+def serve_demo_checkout_page():
+    from fastapi.responses import FileResponse
+    import os
+    demo_path = os.path.join(os.path.dirname(__file__), "static", "demo_checkout.html")
+    if os.path.exists(demo_path):
+        return FileResponse(demo_path)
+    raise HTTPException(status_code=404, detail="Demo checkout page not found.")
+
+@app.post("/api/demo/checkout-submit")
+def submit_demo_checkout(force_500: bool = False):
+    if force_500:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={
+                "message": "Database transaction failure: simulated internal server error",
+                "error_code": "DB_TRANSACTION_FAILURE",
+                "retryable": False
+            }
+        )
+    return {"status": "ok", "message": "Payment verified and order confirmed", "order_id": 84920}
+
 
 # ==================== Advanced Evaluation & Metrics Endpoints ====================
 

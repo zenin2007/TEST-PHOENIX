@@ -44,13 +44,14 @@ production-grade developer platform:
 
 A. APPLICATION SHELL & INFORMATION ARCHITECTURE
 --------------------------------------------------------------------------------
-- Collapsible Left Navigation Sidebar:
+- Collapsible Left Navigation Sidebar (with responsive Mobile Slideout Drawer):
   * Overview        (System health, recently healed, attention items)
   * Tests           (Catalog of multi-domain suites & scenarios with Run buttons)
   * Runs            (Complete execution history with search, filter & pagination)
   * Recovery        (Signature self-healing view & interactive demonstration)
   * Analytics       (8 interactive, backend-driven performance visualizations)
   * Healing Memory  (SQLite persistent locator cache inspection & management)
+  * Environments    (Runtime infrastructure, node status, and live API ping latency)
   * Settings        (Engine parameters, 5-factor weights, database reset)
 - One Obvious Primary Action:
   * [▶ Run Test]: Accessible globally from both the top bar and sidebar, opening
@@ -157,18 +158,40 @@ G. ENGINE SETTINGS & VERIFICATION GATES (`SettingsView.tsx`)
 - 5-Factor candidate scoring formula weights
 - Database reset trigger (`/api/test/reset`)
 
+H. REAL WEBSITE TESTING FOUNDATION (`LiveTestCreator.tsx`, `backend/test_runner.py`)
+--------------------------------------------------------------------------------
+- Interactive "Create & Run Real Website Test" workflow:
+  * Test Name input
+  * Website URL input with HTTP/HTTPS format validation
+  * Natural-language Test Intent input
+  * Expected Outcome input
+  * Quick presets: example.com, Hacker News, TestPhoenix Local Audit Portal
+- Real Playwright Execution (no simulations or mocks):
+  * Launches isolated local Playwright Chromium instance
+  * Navigates to target website with safe timeouts (15s nav, 10s action)
+  * Waits for page readiness and extracts real URL and title
+  * Real DOM Inspection using `DomInspector.inspect(page)`
+  * Accessibility Tree snapshot and node counts extraction
+  * Full viewport screenshot (1280x800) captured as base64 JPEG
+  * Structured chronological execution events (SESSION_INIT, NAVIGATE, PAGE_READY,
+    INSPECT_DOM, INSPECT_A11Y, CAPTURE_SCREENSHOT, SESSION_CLEANUP)
+  * Guaranteed `try ... finally` context and browser session teardown
+  * Telemetry record persisted into SQLite `test_runs` table
+  * Real execution data, metrics, events, and screenshot preview rendered in UI.
+
 
 ================================================================================
 4. VERIFICATION & AUTOMATED TEST SUITE
 ================================================================================
 Automated Test Suite Status:
-    pytest tests/ -q
-    40 passed in 147.65s (100% Pass Rate)
+    pytest tests/ -v
+    43 passed in 166.33s (100% Pass Rate, 0 Regressions)
 
 Frontend Production Build:
     cmd.exe /c "npm run build"
-    ✓ 37 modules transformed.
-    ✓ built in 435ms with zero TypeScript or packaging errors.
+    ✓ 42 modules transformed.
+    ✓ built in 180ms with zero TypeScript or packaging errors.
+
 
 
 ================================================================================

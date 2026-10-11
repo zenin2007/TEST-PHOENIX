@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import type { DemoMode } from '../types';
+import { Logo } from './ui/Logo';
 
 interface NavbarProps {
   currentMode: DemoMode;
@@ -31,14 +32,9 @@ export const Navbar: React.FC<NavbarProps> = ({
           className="brand"
           onClick={() => handleNav('overview')}
           title="Return to TestPhoenix Overview"
+          style={{ cursor: 'pointer' }}
         >
-          <div className="brand-icon">⚡</div>
-          <div>
-            <span>TestPhoenix</span>
-            <span className="brand-text-sub">
-              Rise Above Every UI Change
-            </span>
-          </div>
+          <Logo size={28} showText={true} subtitle="Rise Above Every UI Change" />
         </div>
 
         {/* Center Navigation Tabs (Apple Segmented Style) */}

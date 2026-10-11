@@ -1,5 +1,6 @@
 import React from 'react';
 import type { NavigationTab } from '../../types';
+import { Logo } from '../ui/Logo';
 
 interface SidebarProps {
   currentTab: NavigationTab;
@@ -27,6 +28,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'recovery', label: 'Recovery', icon: '🛡️' },
     { id: 'analytics', label: 'Analytics', icon: '📊' },
     { id: 'healing-memory', label: 'Healing Memory', icon: '🧠' },
+    { id: 'environments', label: 'Environments', icon: '🌐' },
     { id: 'settings', label: 'Settings', icon: '⚙️' },
   ];
 
@@ -66,24 +68,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '0.65rem',
               cursor: 'pointer',
               userSelect: 'none',
             }}
           >
-            <div className="brand-icon" style={{ width: 30, height: 30, fontSize: '0.9rem' }}>
-              ⚡
-            </div>
-            {!isCollapsed && (
-              <div>
-                <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--text-primary)', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
-                  TestPhoenix
-                </div>
-                <div style={{ fontSize: '0.675rem', color: 'var(--text-secondary)' }}>
-                  Self-Healing Engine
-                </div>
-              </div>
-            )}
+            <Logo size={isCollapsed ? 32 : 28} showText={!isCollapsed} subtitle="Self-Healing Engine" />
           </div>
 
           {!isCollapsed && (

@@ -7,6 +7,7 @@ import { TestsView } from './components/features/tests/TestsView';
 import { RunsView } from './components/features/runs/RunsView';
 import { AnalyticsView } from './components/features/analytics/AnalyticsView';
 import { HealingMemoryView } from './components/features/healing-memory/HealingMemoryView';
+import { EnvironmentsView } from './components/features/environments/EnvironmentsView';
 import { SettingsView } from './components/features/settings/SettingsView';
 import { SelfHealingDemo } from './components/SelfHealingDemo';
 import { Modal } from './components/ui/Modal';
@@ -177,6 +178,7 @@ export function App() {
     'recovery',
     'analytics',
     'healing-memory',
+    'environments',
     'settings',
     'dashboard',
     'self-healing',
@@ -233,8 +235,10 @@ export function App() {
               isRunning={isRunningScenario}
               runningLabel={runningScenarioLabel}
               recentRuns={runs}
+              onRefreshRuns={fetchRuns}
             />
           )}
+
 
           {mappedTab === 'runs' && (
             <RunsView
@@ -259,6 +263,10 @@ export function App() {
 
           {mappedTab === 'healing-memory' && (
             <HealingMemoryView />
+          )}
+
+          {mappedTab === 'environments' && (
+            <EnvironmentsView backendHealthy={backendHealthy} />
           )}
 
           {mappedTab === 'settings' && (
@@ -331,19 +339,33 @@ export function App() {
         title="Execute Playwright Automated Test"
         subtitle="Select a test scenario to launch live intent reconstruction"
         footer={
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
-            <Button variant="secondary" onClick={() => setIsQuickRunOpen(false)}>
-              Cancel
-            </Button>
+          <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
             <Button
-              variant="primary"
-              onClick={() => handleExecuteScenario(selectedQuickScenario, 'Quick Test')}
-              isLoading={isRunningScenario}
+              variant="ghost"
+              onClick={() => {
+                setIsQuickRunOpen(false);
+                handleSelectMode('tests');
+              }}
+              style={{ fontSize: '0.8rem', padding: '0.35rem 0.65rem' }}
             >
-              ▶ Execute Scenario
+              🌐 Open Live Website Testing
             </Button>
+
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <Button variant="secondary" onClick={() => setIsQuickRunOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                onClick={() => handleExecuteScenario(selectedQuickScenario, 'Quick Test')}
+                isLoading={isRunningScenario}
+              >
+                ▶ Execute Scenario
+              </Button>
+            </div>
           </div>
         }
+
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <label className="form-label">Choose Automated Scenario:</label>
