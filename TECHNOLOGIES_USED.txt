@@ -1,0 +1,173 @@
+================================================================================
+                    TESTPHOENIX — TECHNOLOGIES USED
+================================================================================
+Project Name   : TestPhoenix
+Tagline        : "Rise above every UI change."
+Core Domain    : Intent-Aware Self-Healing E2E Test Automation Platform
+Competition    : Smart India Hackathon
+Generated On   : 2026-10-11
+Repository     : https://github.com/zenin2007/TEST-PHOENIX
+Architecture   : React 19 + TypeScript + Vite | FastAPI | SQLite | Playwright
+Strict Rule    : NO FIREBASE (100% local, transparent, privacy-first architecture)
+================================================================================
+
+1. FRONTEND TIER (WEB APPLICATION & DEVELOPER PLATFORM)
+--------------------------------------------------------------------------------
+• React 19
+  - Modern functional component architecture with React hooks:
+    useState, useEffect, useCallback, useMemo.
+  - Component lifecycle management, progressive disclosure modals, and drawers.
+
+• TypeScript 5.9
+  - Strict type safety, explicit interfaces, domain models, and enum unions.
+  - Type-safe centralized API service client (`frontend/src/api/client.ts`).
+  - Zero TypeScript compile errors (`tsc -b` validated).
+
+• Vite 8.3
+  - Next-generation frontend build tool and developer server.
+  - Lightning-fast Hot Module Replacement (HMR).
+  - Production-ready Rollup asset compilation (build time: ~435ms).
+
+• Vanilla CSS3 & Apple / Linear / Vercel Design Discipline
+  - Native CSS Custom Properties (Design Tokens) for harmonious color grading:
+    * 90% Neutral Foundation: #FFFFFF, #F5F5F7, #FAFAFA, #1D1D1F, #6E6E73, #D2D2D7
+    * 10% Purposeful Semantic Accent:
+      - Brand Blue (#0071E3) for primary actions and system processing
+      - Success Green (#34C759) for PASS and verified SELF-HEALED states
+      - Failure Red (#FF3B30) for GENUINE FAILURE and HTTP 500 defects
+      - Review Amber (#FF9F0A) for HUMAN REVIEW REQUIRED ambiguity
+  - CSS Grid and Flexbox for responsive layouts (Desktop, Tablet, Mobile).
+  - Apple frosted glass effect (`backdrop-filter: blur(20px)`).
+  - Accessibility: `prefers-reduced-motion` media queries and keyboard focus states.
+
+• Feature-Based Component Architecture:
+  - Navigation Shell (`AppShell.tsx`, `Sidebar.tsx`)
+  - UI Primitives (`Badge.tsx`, `Button.tsx`, `Card.tsx`, `Modal.tsx`, `EmptyState.tsx`)
+  - Platform Views:
+    * `OverviewView.tsx` (Answers: Health? Recently healed? Needs attention?)
+    * `TestsView.tsx` (Multi-domain scenario catalog with 1-click execution)
+    * `RunsView.tsx` (Searchable, filterable, paginated test history table)
+    * `SelfHealingDemo.tsx` (Signature checkout recovery & 5-factor scoring)
+    * `AnalyticsView.tsx` (8 interactive backend-driven visualizations)
+    * `HealingMemoryView.tsx` (SQLite learned locator cache manager)
+    * `SettingsView.tsx` (Safety gate thresholds & database resets)
+
+
+================================================================================
+2. BACKEND TIER (REST API & TELEMETRY ENGINE)
+================================================================================
+• Python 3.12+
+  - Core programming language powering the backend and self-healing engine.
+
+• FastAPI 0.115+
+  - High-performance, modern web framework for building REST APIs.
+  - Automatic OpenAPI / Swagger interactive documentation (`/docs`).
+  - Asynchronous request handling and CORS middleware.
+  - Structured error handling with HTTP 500 failure injection headers.
+
+• Uvicorn
+  - Lightning-fast ASGI web server implementation for Python.
+
+• Pydantic v2
+  - Data validation, settings management, and request/response serialization.
+  - Models for Tasks, Orders, Test Runs, Evaluation Reports, and Healing Memory.
+
+• HTTPX
+  - High-performance asynchronous and synchronous HTTP client for Python.
+
+
+================================================================================
+3. CORE SELF-HEALING ENGINE (TESTPHOENIX ENGINE)
+================================================================================
+• Microsoft Playwright (Python Synchronous API `sync_playwright`)
+  - Headless Chromium browser automation.
+  - Live page evaluation, synthetic user actions (click, fill, wait), and network monitoring.
+
+• Live DOM & Accessibility Tree Inspector (`dom_inspector.py`)
+  - JavaScript evaluation injected directly into browser execution contexts.
+  - Dynamically extracts interactive elements: `button`, `input`, `textarea`, `select`,
+    `[role="button"]`, `[role="link"]`, etc.
+  - Computes bounding boxes, computed accessibility roles, accessible names, visible text,
+    placeholders, aria labels, nearby labels, form associations, and DOM parent trees.
+
+• 5-Factor Mathematical Scoring Engine (`scoring.py`)
+  - Normalizes scores strictly between 0.000 and 1.000:
+      Score = (0.40 * Semantic Intent)
+            + (0.20 * Accessibility Role)
+            + (0.15 * Visible Text)
+            + (0.15 * Context Clues)
+            + (0.10 * Structural Hierarchy)
+  - Built-in multi-domain synonym cluster dictionaries:
+    * Task Management: `create` ~ `add` ~ `new`, `task` ~ `item` ~ `work item`, `submit` ~ `save`
+    * E-Commerce: `checkout` ~ `proceed to payment` ~ `place order`, `cart` ~ `bag`, `customer` ~ `recipient`
+  - Lexical stop-word filtering prevents ratio dilution.
+
+• Autonomous Safety Gating System:
+  - Confidence Threshold Gate: Candidates scoring < 0.75 are rejected immediately.
+  - Ambiguity Margin Gate: When top candidate score minus runner-up score is < 0.15,
+    engine halts safely and marks test as `HUMAN REVIEW REQUIRED`.
+  - Interactability Gate: Disabled or obscured elements rejected.
+  - Genuine Defect Preservation: HTTP 500 server crashes suppress UI healing, ensuring
+    real bugs are never masked.
+
+• Dual-Verification Engine:
+  - Outcome must be confirmed in both the frontend UI DOM and backend SQLite database
+    before certifying a test step as `SELF-HEALED`.
+
+
+================================================================================
+4. DATABASE & PERSISTENCE LAYER (ZERO FIREBASE)
+================================================================================
+• SQLite 3
+  - Embedded, serverless, zero-configuration relational database engine (`backend/tasks.db`).
+  - ACID-compliant transaction integrity.
+  - 100% local, offline-capable, private, and deterministic.
+
+• Database Tables:
+  1. `tasks`: Development tasks with status, assignee, and timestamps.
+  2. `orders`: E-commerce orders with product, customer name, price, quantity, status.
+  3. `test_runs`: Execution history, durations, selectors, verifications, diagnostics JSON.
+  4. `healing_memory`: Persistent cache of verified locator mappings:
+     `{original_intent, original_locator, recovered_locator, fingerprint, confidence, verified, timestamp}`.
+
+• Zero Firebase Constraint:
+  - NO Firestore, NO Firebase Auth, NO Firebase Realtime DB, NO Firebase Hosting.
+  - Completely self-contained architecture.
+
+
+================================================================================
+5. TESTING, VALIDATION & BENCHMARKING
+================================================================================
+• Pytest 8.x
+  - Python testing framework executing the automated test suite.
+  - 100% test pass rate: 40 out of 40 automated tests passing in ~147s.
+
+• Automated Test Breakdown:
+  - `tests/test_backend_api.py` (7 tests): SQLite CRUD, error codes, test run telemetry.
+  - `tests/test_testphoenix_unit.py` (12 tests): 5-factor scoring formula, synonym weights, safety gates.
+  - `tests/test_playwright_baseline.py` (4 tests): Playwright baseline runs on modals and drawers.
+  - `tests/test_testphoenix_scenarios.py` (4 tests): End-to-end self-healing, defect preservation, ambiguity.
+  - `tests/test_second_demo_shopping.py` (3 tests): Multi-domain e-commerce generalization.
+  - `tests/test_ui_change_matrix.py` (10 tests): Comprehensive 10-case mutation evaluation matrix:
+    * Changed Button ID
+    * Renamed Button Label
+    * Changed HTML Tag (e.g. `<a>` styled as button)
+    * Reordered Form Input Fields
+    * Nested Container Hierarchy
+    * Modal Dialog to Slideout Drawer
+    * CSS Class Mutation
+    * Idempotency & Double-Click Guard
+    * Genuine 500 Server Defect Preservation
+    * Ambiguity Target Challenge
+
+• Benchmark Exporter:
+  - `run_advanced_evaluation.py`: Generates `advanced_evaluation_report.json` and `.csv`.
+
+
+================================================================================
+6. VERSION CONTROL & REPOSITORY
+================================================================================
+• Git & GitHub
+  - Remote Repository: https://github.com/zenin2007/TEST-PHOENIX
+  - Branch: `main`
+================================================================================
