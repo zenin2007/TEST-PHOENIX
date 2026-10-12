@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "services": {
-    "app": {
+    "api": {
       "root": ".",
       "framework": "fastapi"
     },
@@ -12,9 +12,33 @@
   },
   "rewrites": [
     {
+      "source": "/api",
+      "destination": {
+        "service": "api"
+      }
+    },
+    {
       "source": "/api/(.*)",
       "destination": {
-        "service": "app"
+        "service": "api"
+      }
+    },
+    {
+      "source": "/demo/(.*)",
+      "destination": {
+        "service": "api"
+      }
+    },
+    {
+      "source": "/docs",
+      "destination": {
+        "service": "api"
+      }
+    },
+    {
+      "source": "/openapi.json",
+      "destination": {
+        "service": "api"
       }
     },
     {
