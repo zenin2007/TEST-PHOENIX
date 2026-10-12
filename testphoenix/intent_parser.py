@@ -1,6 +1,9 @@
 import re
-from typing import List, Optional, Callable
-from playwright.sync_api import Page
+from typing import List, Optional, Callable, Any
+try:
+    from playwright.sync_api import Page
+except (ImportError, ModuleNotFoundError, Exception):
+    Page = Any
 
 from testphoenix.models import IntentStep, StepAction, Target, StepStatus
 

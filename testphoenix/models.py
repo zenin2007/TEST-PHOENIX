@@ -1,7 +1,10 @@
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Optional, List, Dict, Any, Callable
-from playwright.sync_api import Page
+try:
+    from playwright.sync_api import Page
+except (ImportError, ModuleNotFoundError, Exception):
+    Page = Any
 
 class StepStatus(str, Enum):
     PENDING = "PENDING"

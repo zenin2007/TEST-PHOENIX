@@ -1,5 +1,8 @@
 from typing import List, Dict, Any, Optional
-from playwright.sync_api import Page
+try:
+    from playwright.sync_api import Page
+except (ImportError, ModuleNotFoundError, Exception):
+    Page = Any
 from testphoenix.models import CandidateElement
 
 INSPECT_DOM_JS = """

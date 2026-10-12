@@ -7,9 +7,12 @@ import socket
 import ipaddress
 import re
 from urllib.parse import urlparse
+from typing import Optional, List, Dict, Any, Tuple, Union, Set
 from datetime import datetime, timezone
-from typing import Dict, Any, Optional, List, Tuple
-from playwright.sync_api import sync_playwright
+try:
+    from playwright.sync_api import sync_playwright
+except (ImportError, ModuleNotFoundError, Exception):
+    sync_playwright = None
 
 from testphoenix.models import IntentStep, StepAction, StepStatus, FailureCategory
 from testphoenix.engine import TestPhoenixEngine
@@ -43,6 +46,10 @@ def is_browser_binary_available() -> bool:
     if _BROWSER_BINARY_CHECKED is not None:
         return _BROWSER_BINARY_CHECKED
 
+    if sync_playwright is None:
+        _BROWSER_BINARY_CHECKED = False
+        return False
+
     serverless_keys = [
         "VERCEL", "VERCEL_ENV", "VERCEL_URL", "VERCEL_REGION",
         "AWS_LAMBDA_FUNCTION_NAME", "LAMBDA_TASK_ROOT", "AWS_EXECUTION_ENV",
@@ -53,7 +60,6 @@ def is_browser_binary_available() -> bool:
         return False
 
     try:
-        from playwright.sync_api import sync_playwright
         with sync_playwright() as p:
             b = p.chromium.launch(
                 headless=True,

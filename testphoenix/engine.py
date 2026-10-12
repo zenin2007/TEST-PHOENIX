@@ -1,6 +1,11 @@
 import time
-from typing import Optional, Callable, List
-from playwright.sync_api import Page, Locator, TimeoutError as PlaywrightTimeoutError
+from typing import Optional, Callable, List, Any
+try:
+    from playwright.sync_api import Page, Locator, TimeoutError as PlaywrightTimeoutError
+except (ImportError, ModuleNotFoundError, Exception):
+    Page = Any
+    Locator = Any
+    PlaywrightTimeoutError = Exception
 
 from testphoenix.models import (
     IntentStep, StepStatus, StepAction, FailureCategory, CandidateElement,

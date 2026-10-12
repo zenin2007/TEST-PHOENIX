@@ -8,9 +8,9 @@
     "incorrect_recovery_attempts": 0,
     "human_review_cases": 2,
     "genuine_failures_correctly_classified": 6,
-    "average_execution_time_ms": 2876.76,
+    "average_execution_time_ms": 3012.73,
     "recovery_success_rate_percent": 100.0,
-    "total_suite_execution_time_seconds": 58.25,
+    "total_suite_execution_time_seconds": 61.33,
     "metric_definitions": {
       "total_scenarios_executed": "Total individual test executions performed across all benchmark iterations.",
       "original_test_failures_caused_by_ui_changes": "Cases where the original locator broke due to UI layout/identifier changes (changed IDs, renamed buttons, rearranged fields, accessible labels, layout redesign).",
@@ -32,7 +32,7 @@
       "reconstructed_steps": "#btn-launch-task-creator",
       "verification_evidence": "PASSED: Modal displayed (#m visible)",
       "final_status": "SELF-HEALED",
-      "execution_duration_ms": 1889.27,
+      "execution_duration_ms": 1909.71,
       "is_ui_change": true,
       "is_genuine_failure": false,
       "is_ambiguous": false
@@ -47,7 +47,7 @@
       "reconstructed_steps": "#new-work-item-btn",
       "verification_evidence": "PASSED: Composer drawer #workitem-slideover visible",
       "final_status": "SELF-HEALED",
-      "execution_duration_ms": 2207.32,
+      "execution_duration_ms": 2307.87,
       "is_ui_change": true,
       "is_genuine_failure": false,
       "is_ambiguous": false
@@ -62,7 +62,7 @@
       "reconstructed_steps": "#rearranged-title -> #rearranged-assignee",
       "verification_evidence": "PASSED: Both rearranged fields filled correctly based on field semantics",
       "final_status": "SELF-HEALED",
-      "execution_duration_ms": 3797.95,
+      "execution_duration_ms": 3850.79,
       "is_ui_change": true,
       "is_genuine_failure": false,
       "is_ambiguous": false
@@ -77,7 +77,7 @@
       "reconstructed_steps": "#btn-icon-trigger",
       "verification_evidence": "PASSED: Dialog visible (#d verified)",
       "final_status": "SELF-HEALED",
-      "execution_duration_ms": 1896.44,
+      "execution_duration_ms": 1917.96,
       "is_ui_change": true,
       "is_genuine_failure": false,
       "is_ambiguous": false
@@ -90,9 +90,9 @@
       "original_locator_result": "Failed: All 4 original locators failed due to full layout redesign",
       "recovery_decision": "SELF_HEALED_VERIFIED",
       "reconstructed_steps": "#new-work-item-btn -> #workitem-title-input -> #workitem-owner-input -> #submit-workitem-btn",
-      "verification_evidence": "VERIFIED: Expected outcome 'Item 'Eval WorkItem 74207f' persisted and visible' confirmed in both UI and SQLite backend.",
+      "verification_evidence": "VERIFIED: Expected outcome 'Item 'Eval WorkItem 24b748' persisted and visible' confirmed in both UI and SQLite backend.",
       "final_status": "SELF-HEALED",
-      "execution_duration_ms": 7971.56,
+      "execution_duration_ms": 8241.88,
       "is_ui_change": true,
       "is_genuine_failure": false,
       "is_ambiguous": false
@@ -107,7 +107,7 @@
       "reconstructed_steps": "None (speculative click rejected)",
       "verification_evidence": "PASSED: TestPhoenix refused speculative interaction on disabled element",
       "final_status": "FAIL",
-      "execution_duration_ms": 1532.39,
+      "execution_duration_ms": 1548.45,
       "is_ui_change": false,
       "is_genuine_failure": true,
       "is_ambiguous": false
@@ -122,7 +122,7 @@
       "reconstructed_steps": "Halted (ambiguous candidates detected)",
       "verification_evidence": "PASSED: Ambiguity gate engaged safely (Ambiguous candidates detected. Best: '#btn-create-task-strea...)",
       "final_status": "HUMAN REVIEW REQUIRED",
-      "execution_duration_ms": 1647.94,
+      "execution_duration_ms": 1714.09,
       "is_ui_change": false,
       "is_genuine_failure": false,
       "is_ambiguous": true
@@ -137,7 +137,7 @@
       "reconstructed_steps": "None (Self-healing skipped for backend application errors)",
       "verification_evidence": "PASSED: HTTP 500 captured (HTTP 500 error alert: \u2715\nBackend Error Encountered (HTTP 500)\n\nTask creation failed: HTTP 422\n\n\u2715); DB unmutated",
       "final_status": "FAIL",
-      "execution_duration_ms": 3937.27,
+      "execution_duration_ms": 4146.87,
       "is_ui_change": false,
       "is_genuine_failure": true,
       "is_ambiguous": false
@@ -152,7 +152,7 @@
       "reconstructed_steps": "#btn-dummy-save",
       "verification_evidence": "PASSED: Recovery rejected; status remained FAIL as required",
       "final_status": "FAIL",
-      "execution_duration_ms": 4502.54,
+      "execution_duration_ms": 4616.42,
       "is_ui_change": false,
       "is_genuine_failure": true,
       "is_ambiguous": false
@@ -167,7 +167,7 @@
       "reconstructed_steps": "Submit creation payload: [Skipped - already verified]",
       "verification_evidence": "PASSED: Guard prevented duplicate execution",
       "final_status": "PASS",
-      "execution_duration_ms": 0.1,
+      "execution_duration_ms": 0.07,
       "is_ui_change": false,
       "is_genuine_failure": false,
       "is_ambiguous": false
@@ -182,7 +182,7 @@
       "reconstructed_steps": "#btn-launch-task-creator",
       "verification_evidence": "PASSED: Modal displayed (#m visible)",
       "final_status": "SELF-HEALED",
-      "execution_duration_ms": 1886.93,
+      "execution_duration_ms": 1918.26,
       "is_ui_change": true,
       "is_genuine_failure": false,
       "is_ambiguous": false
@@ -197,7 +197,7 @@
       "reconstructed_steps": "#new-work-item-btn",
       "verification_evidence": "PASSED: Composer drawer #workitem-slideover visible",
       "final_status": "SELF-HEALED",
-      "execution_duration_ms": 1995.91,
+      "execution_duration_ms": 2460.45,
       "is_ui_change": true,
       "is_genuine_failure": false,
       "is_ambiguous": false
@@ -212,7 +212,7 @@
       "reconstructed_steps": "#rearranged-title -> #rearranged-assignee",
       "verification_evidence": "PASSED: Both rearranged fields filled correctly based on field semantics",
       "final_status": "SELF-HEALED",
-      "execution_duration_ms": 3688.8,
+      "execution_duration_ms": 3899.11,
       "is_ui_change": true,
       "is_genuine_failure": false,
       "is_ambiguous": false
@@ -227,7 +227,7 @@
       "reconstructed_steps": "#btn-icon-trigger",
       "verification_evidence": "PASSED: Dialog visible (#d verified)",
       "final_status": "SELF-HEALED",
-      "execution_duration_ms": 1879.57,
+      "execution_duration_ms": 1917.22,
       "is_ui_change": true,
       "is_genuine_failure": false,
       "is_ambiguous": false
@@ -240,9 +240,9 @@
       "original_locator_result": "Failed: All 4 original locators failed due to full layout redesign",
       "recovery_decision": "SELF_HEALED_VERIFIED",
       "reconstructed_steps": "#new-work-item-btn -> #workitem-title-input -> #workitem-owner-input -> #submit-workitem-btn",
-      "verification_evidence": "VERIFIED: Expected outcome 'Item 'Eval WorkItem 86def5' persisted and visible' confirmed in both UI and SQLite backend.",
+      "verification_evidence": "VERIFIED: Expected outcome 'Item 'Eval WorkItem 76b836' persisted and visible' confirmed in both UI and SQLite backend.",
       "final_status": "SELF-HEALED",
-      "execution_duration_ms": 7570.49,
+      "execution_duration_ms": 8063.64,
       "is_ui_change": true,
       "is_genuine_failure": false,
       "is_ambiguous": false
@@ -257,7 +257,7 @@
       "reconstructed_steps": "None (speculative click rejected)",
       "verification_evidence": "PASSED: TestPhoenix refused speculative interaction on disabled element",
       "final_status": "FAIL",
-      "execution_duration_ms": 1516.39,
+      "execution_duration_ms": 1542.3,
       "is_ui_change": false,
       "is_genuine_failure": true,
       "is_ambiguous": false
@@ -272,7 +272,7 @@
       "reconstructed_steps": "Halted (ambiguous candidates detected)",
       "verification_evidence": "PASSED: Ambiguity gate engaged safely (Ambiguous candidates detected. Best: '#btn-create-task-strea...)",
       "final_status": "HUMAN REVIEW REQUIRED",
-      "execution_duration_ms": 1590.42,
+      "execution_duration_ms": 1704.88,
       "is_ui_change": false,
       "is_genuine_failure": false,
       "is_ambiguous": true
@@ -287,7 +287,7 @@
       "reconstructed_steps": "None (Self-healing skipped for backend application errors)",
       "verification_evidence": "PASSED: HTTP 500 captured (HTTP 500 error alert: \u2715\nBackend Error Encountered (HTTP 500)\n\nTask creation failed: HTTP 422\n\n\u2715); DB unmutated",
       "final_status": "FAIL",
-      "execution_duration_ms": 3517.93,
+      "execution_duration_ms": 3939.97,
       "is_ui_change": false,
       "is_genuine_failure": true,
       "is_ambiguous": false
@@ -302,7 +302,7 @@
       "reconstructed_steps": "#btn-dummy-save",
       "verification_evidence": "PASSED: Recovery rejected; status remained FAIL as required",
       "final_status": "FAIL",
-      "execution_duration_ms": 4505.67,
+      "execution_duration_ms": 4554.58,
       "is_ui_change": false,
       "is_genuine_failure": true,
       "is_ambiguous": false
@@ -317,7 +317,7 @@
       "reconstructed_steps": "Submit creation payload: [Skipped - already verified]",
       "verification_evidence": "PASSED: Guard prevented duplicate execution",
       "final_status": "PASS",
-      "execution_duration_ms": 0.26,
+      "execution_duration_ms": 0.09,
       "is_ui_change": false,
       "is_genuine_failure": false,
       "is_ambiguous": false

@@ -14,7 +14,10 @@ import time
 import uuid
 import httpx
 from typing import Dict, Any, List
-from playwright.sync_api import sync_playwright
+try:
+    from playwright.sync_api import sync_playwright
+except (ImportError, ModuleNotFoundError, Exception):
+    sync_playwright = None
 
 from testphoenix.models import IntentStep, StepAction, StepStatus, FailureCategory, IntentWorkflow
 from testphoenix.engine import TestPhoenixEngine
