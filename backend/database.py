@@ -4,11 +4,28 @@ import json
 from typing import List, Optional, Dict, Any
 from datetime import datetime, timezone
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "tasks.db")
+# Detect serverless environment (Vercel, AWS Lambda) where only /tmp is writable
+if os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME") or os.environ.get("NOW_REGION"):
+    DB_PATH = "/tmp/tasks.db"
+else:
+    DB_PATH = os.path.join(os.path.dirname(__file__), "tasks.db")
+
+_in_init_db = False
 
 def get_connection() -> sqlite3.Connection:
+    global _in_init_db
+    db_dir = os.path.dirname(os.path.abspath(DB_PATH))
+    if db_dir:
+        os.makedirs(db_dir, exist_ok=True)
+    need_init = not os.path.exists(DB_PATH) and not _in_init_db
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
+    if need_init:
+        _in_init_db = True
+        try:
+            init_db()
+        finally:
+            _in_init_db = False
     return conn
 
 def init_db() -> None:
@@ -132,6 +149,19 @@ def init_db() -> None:
                OR scenario LIKE '%Benchmark%')
               AND is_demo = 0
         """)
+
+        cursor.execute("SELECT COUNT(*) FROM tasks")
+        task_count = cursor.fetchone()[0]
+        if task_count == 0:
+            now_iso = datetime.now(timezone.utc).isoformat()
+            cursor.executemany("""
+                INSERT INTO tasks (title, description, assignee, status, created_at)
+                VALUES (?, ?, ?, ?, ?)
+            """, [
+                ("Configure CI/CD Pipeline", "Set up GitHub Actions workflow for automated test regression", "Lead Engineer", "Completed", now_iso),
+                ("Deploy Self-Healing Test Engine", "Enable continuous locator healing across UI version rollouts", "QA Lead", "In Progress", now_iso),
+                ("Verify SQLite Telemetry", "Ensure persistence and audit trail across test runs", "Staff Architect", "Todo", now_iso)
+            ])
 
         conn.commit()
     finally:

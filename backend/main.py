@@ -215,32 +215,50 @@ def trigger_test_run(payload: TestRunRequest):
 @app.post("/api/tests/normal")
 def run_normal_test():
     from backend.test_runner import execute_scenario_run
-    return execute_scenario_run(scenario_key="normal")
+    try:
+        return execute_scenario_run(scenario_key="normal")
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 @app.post("/api/tests/self-healing")
 def run_self_healing_test():
     from backend.test_runner import execute_scenario_run
-    return execute_scenario_run(scenario_key="self-healing")
+    try:
+        return execute_scenario_run(scenario_key="self-healing")
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 @app.post("/api/tests/broken-backend")
 def run_broken_backend_test():
     from backend.test_runner import execute_scenario_run
-    return execute_scenario_run(scenario_key="broken-backend")
+    try:
+        return execute_scenario_run(scenario_key="broken-backend")
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 @app.post("/api/tests/ambiguous")
 def run_ambiguous_test():
     from backend.test_runner import execute_scenario_run
-    return execute_scenario_run(scenario_key="ambiguous")
+    try:
+        return execute_scenario_run(scenario_key="ambiguous")
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 @app.post("/api/tests/shopping-a")
 def run_shopping_a_test():
     from backend.test_runner import execute_scenario_run
-    return execute_scenario_run(scenario_key="shopping-a")
+    try:
+        return execute_scenario_run(scenario_key="shopping-a")
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 @app.post("/api/tests/shopping-b")
 def run_shopping_b_test():
     from backend.test_runner import execute_scenario_run
-    return execute_scenario_run(scenario_key="shopping-b")
+    try:
+        return execute_scenario_run(scenario_key="shopping-b")
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 @app.post("/api/tests/live", response_model=LiveTestResponse)
 @app.post("/api/tests/run-live", response_model=LiveTestResponse)
