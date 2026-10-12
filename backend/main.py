@@ -1,4 +1,14 @@
+import os
 import sys
+
+# Ensure repository root and backend directory are in sys.path for Vercel/serverless environments
+_current_dir = os.path.dirname(os.path.abspath(__file__))
+_root_dir = os.path.dirname(_current_dir)
+if _root_dir not in sys.path:
+    sys.path.insert(0, _root_dir)
+if _current_dir not in sys.path:
+    sys.path.insert(0, _current_dir)
+
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 if hasattr(sys.stderr, 'reconfigure'):
@@ -9,14 +19,24 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
 from contextlib import asynccontextmanager
 
-from backend.database import (
-    init_db, get_all_tasks, get_task_by_id, create_task, reset_db_data,
-    create_order, get_all_orders, get_all_healing_memories, clear_healing_memory
-)
-from backend.models import (
-    TaskCreate, TaskResponse, FailureModeRequest, ResetDataRequest, TestRunRequest,
-    OrderCreate, OrderResponse, LiveTestRequest, LiveTestResponse
-)
+try:
+    from backend.database import (
+        init_db, get_all_tasks, get_task_by_id, create_task, reset_db_data,
+        create_order, get_all_orders, get_all_healing_memories, clear_healing_memory
+    )
+    from backend.models import (
+        TaskCreate, TaskResponse, FailureModeRequest, ResetDataRequest, TestRunRequest,
+        OrderCreate, OrderResponse, LiveTestRequest, LiveTestResponse
+    )
+except ImportError:
+    from database import (
+        init_db, get_all_tasks, get_task_by_id, create_task, reset_db_data,
+        create_order, get_all_orders, get_all_healing_memories, clear_healing_memory
+    )
+    from models import (
+        TaskCreate, TaskResponse, FailureModeRequest, ResetDataRequest, TestRunRequest,
+        OrderCreate, OrderResponse, LiveTestRequest, LiveTestResponse
+    )
 
 
 # Controlled test failure state (in-memory, reset on command or app reload)
@@ -44,6 +64,8 @@ app = FastAPI(
     openapi_url=None if disable_docs else "/openapi.json",
     lifespan=lifespan
 )
+
+__all__ = ["app"]
 
 # Enable CORS for frontend Vite dev server
 app.add_middleware(
