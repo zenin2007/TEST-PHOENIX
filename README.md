@@ -217,15 +217,7 @@ cmd.exe /c "npm run dev"
 ```
 
 ### 3. Open in Your Browser
-* **Platform Overview**: [http://localhost:5173/?mode=overview](http://localhost:5173/?mode=overview)
-* **Test Suites Catalog**: [http://localhost:5173/?mode=tests](http://localhost:5173/?mode=tests)
-* **Execution Runs**: [http://localhost:5173/?mode=runs](http://localhost:5173/?mode=runs)
-* **Signature Recovery**: [http://localhost:5173/?mode=recovery](http://localhost:5173/?mode=recovery)
-* **Analytics Dashboard**: [http://localhost:5173/?mode=analytics](http://localhost:5173/?mode=analytics)
-* **Healing Memory**: [http://localhost:5173/?mode=healing-memory](http://localhost:5173/?mode=healing-memory)
-* **Engine Settings**: [http://localhost:5173/?mode=settings](http://localhost:5173/?mode=settings)
-* **Standalone Audit Portal**: [http://127.0.0.1:8000/results](http://127.0.0.1:8000/results)
-* **Swagger API Docs**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+https://test-phoenix-k38q.vercel.app/
 
 ### 4. Run the Automated Test Suite
 ```powershell
