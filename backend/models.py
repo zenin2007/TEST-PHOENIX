@@ -70,8 +70,8 @@ class ExecutionEvent(BaseModel):
 
 class ActionReport(BaseModel):
     intent: str
-    action_type: str
-    target_description: str
+    action_type: str = "CLICK"
+    target_description: str = "Interactive element"
     original_locator: Optional[str] = None
     original_locator_worked: bool = True
     failure_reason: Optional[str] = None

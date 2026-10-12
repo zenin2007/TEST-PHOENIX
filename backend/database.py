@@ -4,22 +4,84 @@ import json
 from typing import List, Optional, Dict, Any
 from datetime import datetime, timezone
 
-# Detect serverless environment (Vercel, AWS Lambda) where only /tmp is writable
-if os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME") or os.environ.get("NOW_REGION"):
-    DB_PATH = "/tmp/tasks.db"
-else:
-    DB_PATH = os.path.join(os.path.dirname(__file__), "tasks.db")
+def _resolve_db_path() -> str:
+    """
+    Determines the safest writable SQLite database path.
+    Serverless platforms (Vercel, AWS Lambda, Cloud Run) mount source code as read-only,
+    meaning only /tmp (or system temp directory) is writable for SQLite database operations.
+    """
+    # 1. Explicit override via environment variable
+    custom_path = os.environ.get("TESTPHOENIX_DB_PATH")
+    if custom_path:
+        return custom_path
 
+    # 2. Serverless environment detection (exhaustive list of indicators)
+    serverless_env_vars = [
+        "VERCEL",
+        "VERCEL_ENV",
+        "VERCEL_URL",
+        "VERCEL_REGION",
+        "AWS_LAMBDA_FUNCTION_NAME",
+        "LAMBDA_TASK_ROOT",
+        "AWS_EXECUTION_ENV",
+        "NOW_REGION",
+        "_HANDLER",
+        "VERCEL_GIT_COMMIT_SHA",
+        "K_SERVICE",
+        "FUNCTION_NAME",
+    ]
+    if any(os.environ.get(k) for k in serverless_env_vars):
+        return "/tmp/tasks.db"
+
+    # 3. Dynamic filesystem writability probe
+    backend_dir = os.path.dirname(os.path.abspath(__file__))
+    candidate = os.path.join(backend_dir, "tasks.db")
+    try:
+        probe_path = os.path.join(backend_dir, f".write_probe_{os.getpid()}")
+        with open(probe_path, "w") as f:
+            f.write("probe")
+        if os.path.exists(probe_path):
+            os.remove(probe_path)
+        return candidate
+    except (OSError, PermissionError):
+        import tempfile
+        return os.path.join(tempfile.gettempdir(), "tasks.db")
+
+DB_PATH = _resolve_db_path()
 _in_init_db = False
 
 def get_connection() -> sqlite3.Connection:
-    global _in_init_db
-    db_dir = os.path.dirname(os.path.abspath(DB_PATH))
-    if db_dir:
-        os.makedirs(db_dir, exist_ok=True)
+    global DB_PATH, _in_init_db
+    try:
+        db_dir = os.path.dirname(os.path.abspath(DB_PATH))
+        if db_dir:
+            os.makedirs(db_dir, exist_ok=True)
+    except (OSError, PermissionError):
+        import tempfile
+        DB_PATH = os.path.join(tempfile.gettempdir(), "tasks.db")
+
+    # If using a temp directory and the database does not exist yet, copy initial bundled DB if present
+    if (DB_PATH.startswith("/tmp") or "tmp" in DB_PATH) and not os.path.exists(DB_PATH):
+        bundled = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tasks.db")
+        if os.path.exists(bundled):
+            try:
+                import shutil
+                shutil.copyfile(bundled, DB_PATH)
+            except Exception:
+                pass
+
     need_init = not os.path.exists(DB_PATH) and not _in_init_db
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
+
+    try:
+        conn = sqlite3.connect(DB_PATH, timeout=10.0)
+        conn.row_factory = sqlite3.Row
+    except sqlite3.OperationalError:
+        import tempfile
+        DB_PATH = os.path.join(tempfile.gettempdir(), "tasks.db")
+        need_init = not os.path.exists(DB_PATH) and not _in_init_db
+        conn = sqlite3.connect(DB_PATH, timeout=10.0)
+        conn.row_factory = sqlite3.Row
+
     if need_init:
         _in_init_db = True
         try:
@@ -28,7 +90,7 @@ def get_connection() -> sqlite3.Connection:
             _in_init_db = False
     return conn
 
-def init_db() -> None:
+def _run_init_db() -> None:
     conn = get_connection()
     try:
         cursor = conn.cursor()
@@ -166,6 +228,19 @@ def init_db() -> None:
         conn.commit()
     finally:
         conn.close()
+
+def init_db() -> None:
+    global DB_PATH
+    try:
+        _run_init_db()
+    except sqlite3.OperationalError as e:
+        err_str = str(e).lower()
+        if "readonly" in err_str or "unable to open" in err_str or "permission" in err_str:
+            import tempfile
+            DB_PATH = os.path.join(tempfile.gettempdir(), "tasks.db")
+            _run_init_db()
+        else:
+            raise
 
 def get_all_tasks() -> List[Dict[str, Any]]:
     conn = get_connection()

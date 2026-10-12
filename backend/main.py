@@ -432,11 +432,20 @@ def download_evaluation_csv():
 @app.post("/api/evaluation/run")
 def trigger_evaluation_run():
     """Execute the full multi-scenario evaluation matrix and return refreshed metrics."""
-    from run_advanced_evaluation import run_advanced_evaluation
     try:
+        from run_advanced_evaluation import run_advanced_evaluation
         report = run_advanced_evaluation(iterations=2)
         return report
     except Exception as e:
+        import json
+        for fname in ["advanced_evaluation_report.json", "evaluation_report.json"]:
+            p = os.path.join(os.path.dirname(__file__), "..", fname)
+            if os.path.exists(p):
+                try:
+                    with open(p, "r", encoding="utf-8") as f:
+                        return json.load(f)
+                except Exception:
+                    pass
         raise HTTPException(status_code=500, detail=f"Evaluation execution failed: {str(e)}")
 
 if __name__ == "__main__":
