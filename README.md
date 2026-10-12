@@ -1,7 +1,8 @@
 # TestPhoenix — Intent-Aware Self-Healing E2E Test Automation Platform
 
-[![CI / Automated Tests](https://img.shields.io/badge/Automated%20Tests-40%2F40%20Passed%20(100%25)-34C759?style=flat-square)](file:///tests)
+[![CI / Automated Tests](https://img.shields.io/badge/Automated%20Tests-61%2F61%20Passed%20(100%25)-34C759?style=flat-square)](file:///tests)
 [![Architecture](https://img.shields.io/badge/Architecture-Intent--Driven%20%7C%20Zero%20Firebase-0071E3?style=flat-square)](file:///ARCHITECTURE_AUDIT.md)
+[![Research & References](https://img.shields.io/badge/Research-IEEE%20%2F%20ACM%20Foundations-FF9500?style=flat-square)](file:///RESEARCH_AND_REFERENCES.md)
 [![Frontend](https://img.shields.io/badge/Frontend-React%2019%20%2B%20TypeScript%20%2B%20Vite-1D1D1F?style=flat-square)](file:///frontend)
 [![Backend](https://img.shields.io/badge/Backend-FastAPI%20%2B%20SQLite%20%2B%20Playwright-F5F5F7?style=flat-square&logoColor=1D1D1F)](file:///backend)
 
@@ -236,6 +237,7 @@ cmd.exe /c "npm run dev"
 ## 10. Repository & Documentation Files
 
 * [`README.md`](file:///README.md) — Complete platform overview and guide.
+* [`RESEARCH_AND_REFERENCES.md`](file:///RESEARCH_AND_REFERENCES.md) — Comprehensive academic literature, mathematical formulations, W3C/IEEE specifications, and citations.
 * [`WHAT_WE_BUILT.txt`](file:///WHAT_WE_BUILT.txt) — Detailed build summary and architectural inventory.
 * [`TECHNOLOGIES_USED.txt`](file:///TECHNOLOGIES_USED.txt) — Comprehensive breakdown of technologies used.
 * [`ARCHITECTURE_AUDIT.md`](file:///ARCHITECTURE_AUDIT.md) — Technical audit of components, scoring, and design decisions.
